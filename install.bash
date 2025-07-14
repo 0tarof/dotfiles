@@ -122,6 +122,27 @@ main() {
         echo ""
     fi
     
+    # Bin scripts
+    if [[ -d "$SCRIPT_DIR/bin" ]]; then
+        log_info "Installing bin scripts..."
+        
+        # Create ~/bin directory if it doesn't exist
+        if [[ ! -d "$HOME/bin" ]]; then
+            mkdir -p "$HOME/bin"
+            log_info "Created ~/bin directory"
+        fi
+        
+        # Create symlinks for all executables in bin
+        for file in "$SCRIPT_DIR/bin"/*; do
+            if [[ -f "$file" ]] && [[ -x "$file" ]]; then
+                local filename="$(basename "$file")"
+                create_symlink "$file" "$HOME/bin/$filename"
+            fi
+        done
+        echo ""
+    fi
+    
+    
     # Add more dotfile installations here as needed
     # Example:
     # if [[ -f "$SCRIPT_DIR/.vimrc" ]]; then
@@ -129,6 +150,17 @@ main() {
     #     create_symlink "$SCRIPT_DIR/.vimrc" "$HOME/.vimrc"
     #     echo ""
     # fi
+    
+    # Install Homebrew packages if brew-install is available
+    if command -v brew &> /dev/null && [[ -x "$HOME/bin/brew-install" ]]; then
+        log_info "Installing Homebrew packages from Brewfile..."
+        if "$HOME/bin/brew-install"; then
+            log_success "Homebrew packages installed successfully"
+        else
+            log_warning "Some Homebrew packages may have failed to install"
+        fi
+        echo ""
+    fi
     
     echo "=== Installation Complete ==="
     

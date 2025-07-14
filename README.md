@@ -32,11 +32,21 @@ git clone https://github.com/COMPANY/dotfiles.git overlay
 この設定は自動的に読み込まれ、基本設定を上書きします。
 `overlay/`ディレクトリは.gitignoreに含まれているため、個人リポジトリにはpushされません。
 
+## Homebrew管理
+
+Brewfileでパッケージを管理。インストール時に自動でパッケージもインストールされます。
+
+- `brew-dump` - インストール済みパッケージをBrewfileに保存
+- `brew-install` - Brewfileからパッケージをインストール  
+- `brew-check` - Brewfileとの差分確認
+- `brew-cleanup` - Brewfileにないパッケージを削除
+
 ## 構成
 
 - `.gitconfig` - Git設定（基本設定）
 - `install.bash` - インストールスクリプト
 - `overlay/` - 環境固有の設定（gitignore対象）
+- `Brewfile` - Homebrewパッケージリスト
 
 ## 設定の優先順位
 

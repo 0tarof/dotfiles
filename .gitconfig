@@ -31,10 +31,12 @@
 	co = checkout
 	br = branch
 	ci = commit
+	sw = switch
 	d = diff
 	dc = diff --cached
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	lga = log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	pp = "!f() { git-delete-merged-branch $1; git fetch --prune; }; f"
 
 # Include local/environment-specific configurations
 [include]

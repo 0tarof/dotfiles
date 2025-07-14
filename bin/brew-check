@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Check if all dependencies in Brewfile are installed
+brew bundle check
