@@ -1,0 +1,12 @@
+# Zsh history file
+.zsh_history
+.histfile
+
+# Zsh completion dump files
+.zcompdump*
+
+# Zsh session files
+.zsh_sessions/
+
+# macOS metadata
+.DS_Store
