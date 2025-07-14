@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Cleanup packages not in Brewfile
+brew bundle cleanup --force

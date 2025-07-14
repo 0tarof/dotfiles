@@ -14,4 +14,8 @@ ${ASDF_DATA_DIR:-$HOME/.asdf}/shims(N-/)
 /Library/Apple/usr/bin
 )
 
-export PATH
+# Homebrew Bundle
+HOMEBREW_BUNDLE_FILE="$HOME/.dotfiles/Brewfile"
+
+# Export environment variables
+export PATH HOMEBREW_BUNDLE_FILE
