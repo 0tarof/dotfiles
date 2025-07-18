@@ -93,10 +93,25 @@ setup_zdotdir() {
     fi
 }
 
+# Initialize git submodules
+init_submodules() {
+    log_info "Initializing git submodules..."
+    if git submodule update --init --recursive; then
+        log_success "Git submodules initialized successfully"
+    else
+        log_error "Failed to initialize git submodules"
+        return 1
+    fi
+}
+
 # Main installation function
 main() {
     echo "=== Dotfiles Installation ==="
     echo "Script directory: $SCRIPT_DIR"
+    echo ""
+    
+    # Initialize git submodules
+    init_submodules
     echo ""
     
     # Setup ZDOTDIR

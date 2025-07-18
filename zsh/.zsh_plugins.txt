@@ -1,0 +1,14 @@
+# Powerlevel10k
+romkatv/powerlevel10k
+
+# 基本的な補完機能
+zsh-users/zsh-completions
+
+# シンタックスハイライト（最後に読み込む必要がある）
+zsh-users/zsh-syntax-highlighting
+
+# 履歴ベースの自動補完
+zsh-users/zsh-autosuggestions
+
+# 履歴検索の改善
+zsh-users/zsh-history-substring-search
