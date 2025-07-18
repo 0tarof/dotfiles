@@ -4,6 +4,7 @@
 
 # Zsh completion dump files
 .zcompdump*
+.zcompcache/
 
 # Zsh session files
 .zsh_sessions/
