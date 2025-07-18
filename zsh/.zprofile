@@ -2,6 +2,7 @@ typeset -U path PATH
 path=(
 $HOME/bin(N-/)
 ${ASDF_DATA_DIR:-$HOME/.asdf}/shims(N-/)
+"$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
 /opt/homebrew/opt/mysql-client@8.0/bin(N-/)
 /opt/homebrew/bin(N-/)
 /opt/homebrew/sbin(N-/)

@@ -137,6 +137,14 @@ main() {
         echo ""
     fi
     
+    # Git configuration directory
+    if [[ -d "$SCRIPT_DIR/git" ]]; then
+        log_info "Installing Git configuration directory..."
+        mkdir -p "$HOME/.config"
+        create_symlink "$SCRIPT_DIR/git" "$HOME/.config/git"
+        echo ""
+    fi
+    
     # Bin scripts
     if [[ -d "$SCRIPT_DIR/bin" ]]; then
         log_info "Installing bin scripts..."
@@ -156,7 +164,6 @@ main() {
         done
         echo ""
     fi
-    
     
     # Add more dotfile installations here as needed
     # Example:
