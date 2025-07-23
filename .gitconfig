@@ -36,7 +36,7 @@
 	dc = diff --cached
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	lga = log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
-	pp = "!f() { git fetch --prune; git pull origin $(git rev-parse --abbrev-ref HEAD) 2>/dev/null || git pull; git-delete-merged-branch $1; }; f"
+	pp = "!f() { git fetch --prune; git pull; git-delete-merged-branch $1; }; f"
 
 # Include local/environment-specific configurations
 [include]
