@@ -12,7 +12,6 @@ git checkout "$branch" >/dev/null 2>&1
 merged_branches=$(git branch --merged | egrep -v '^\*|^\+|develop|main|master' || true)
 
 if [[ -z "$merged_branches" ]]; then
-    echo "No merged branches to delete"
     exit 0
 fi
 
