@@ -246,5 +246,8 @@ terraform.rc
 *secrets*
 !*secrets*.example
 
+# asdf
+.tool-versions
+
 # Claude Code
 **/.claude/settings.local.json
