@@ -1,6 +1,5 @@
 typeset -U path PATH
 path=(
-$HOME/bin(N-/)
 "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
 /opt/homebrew/opt/mysql-client@8.0/bin(N-/)
 /opt/homebrew/bin(N-/)
@@ -14,7 +13,13 @@ $HOME/bin(N-/)
 /Library/Apple/usr/bin
 )
 
-eval "$(mise activate zsh)"
+eval "$(mise activate zsh --shims)"
+
+# miseが追加したパスを一旦PATHから削除し、$HOME/binの後に再配置
+path=(
+    $HOME/bin(N-/)
+    $path
+)
 
 # Homebrew Bundle
 HOMEBREW_BUNDLE_FILE="$HOME/.dotfiles/Brewfile"

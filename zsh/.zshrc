@@ -78,3 +78,11 @@ bindkey '^r' peco-history-selection
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+
+# Ensure $HOME/bin comes before mise shims in PATH
+# This is done after all plugins are loaded
+typeset -U path PATH
+path=(
+    $HOME/bin(N-/)
+    ${path:#$HOME/bin}  # All other paths except $HOME/bin
+)
