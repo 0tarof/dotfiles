@@ -12,3 +12,6 @@ zsh-users/zsh-autosuggestions
 
 # 履歴検索の改善
 zsh-users/zsh-history-substring-search
+
+# mise
+wintermi/zsh-mise

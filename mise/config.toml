@@ -1,0 +1,22 @@
+[settings]
+experimental = true
+disable_backends = ["asdf", "vfox"]
+
+[settings.pipx]
+uvx = true
+
+[tools]
+go = "latest"
+java = "latest"
+maven = "latest"
+aws = "latest"
+
+# [Node.js]
+node = "latest"
+"npm:aws-cdk" = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
+
+# [Python]
+python = "latest"
+uv = "latest"
+"pipx:snowflake-cli" = "latest"

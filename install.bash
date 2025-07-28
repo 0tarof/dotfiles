@@ -145,6 +145,14 @@ main() {
         echo ""
     fi
     
+    # Mise configuration
+    if [[ -d "$SCRIPT_DIR/mise" ]]; then
+        log_info "Installing mise configuration..."
+        mkdir -p "$HOME/.config"
+        create_symlink "$SCRIPT_DIR/mise" "$HOME/.config/mise"
+        echo ""
+    fi
+    
     # Bin scripts
     if [[ -d "$SCRIPT_DIR/bin" ]]; then
         log_info "Installing bin scripts..."
