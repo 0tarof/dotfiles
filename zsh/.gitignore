@@ -11,3 +11,6 @@
 
 # macOS metadata
 .DS_Store
+
+# Generated plugin files
+.zsh_plugins.zsh
