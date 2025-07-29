@@ -244,6 +244,9 @@ terraform.rc
 *secrets*
 !*secrets*.example
 
+# direnv
+.envrc
+
 # asdf
 .tool-versions
 
