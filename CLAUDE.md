@@ -39,8 +39,11 @@ bin/git-delete-merged-branch
 
 ### Directory Structure
 - `bin/`: Utility scripts
+- `lib/`: Common functions for installation scripts
 - `zsh/`: Zsh configs (uses Antidote plugin manager)
 - `overlay/`: Environment-specific configs (gitignored, e.g., work PC)
+  - `overlay/zsh/`: Environment-specific Zsh configurations
+  - `overlay/bin/`: Environment-specific scripts
 - Root: Git config and Brewfile
 
 ### Design Principles
@@ -51,9 +54,12 @@ bin/git-delete-merged-branch
 
 ### Key Files
 - `install.bash`: Main setup script
+- `lib/functions.bash`: Shared functions for installation scripts
 - `Brewfile`: Base Homebrew package list
 - `overlay/Brewfile`: Environment-specific packages (if exists)
-- `zsh/.zshrc`: Main Zsh config
+- `overlay/install.bash`: Environment-specific setup script
+- `zsh/.zshrc`: Main Zsh config (loads overlay/.zshrc if exists)
+- `zsh/.zprofile`: Main Zsh profile (loads overlay/.zprofile if exists)
 
 ## Development Notes
 
@@ -61,3 +67,7 @@ bin/git-delete-merged-branch
 2. Run `bin/brew-dump` after Brewfile changes to sync
 3. Always place environment-specific configs in `overlay/`
 4. Add proper error handling (`set -euo pipefail`) to scripts
+5. Zsh overlay configs:
+   - Create `overlay/zsh/.zshrc` for environment-specific shell config
+   - Create `overlay/zsh/.zprofile` for environment-specific PATH/env setup
+   - These files are automatically loaded by the main zsh configs

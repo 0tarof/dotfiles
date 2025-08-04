@@ -250,5 +250,8 @@ terraform.rc
 # asdf
 .tool-versions
 
+# mise
+mise.toml
+
 # Claude Code
 **/.claude/settings.local.json

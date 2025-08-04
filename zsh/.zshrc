@@ -86,3 +86,6 @@ path=(
     $HOME/bin(N-/)
     ${path:#$HOME/bin}  # All other paths except $HOME/bin
 )
+
+# Load overlay configuration if exists
+[[ -f ~/.config/zsh/overlay/.zshrc ]] && source ~/.config/zsh/overlay/.zshrc

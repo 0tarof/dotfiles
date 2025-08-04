@@ -21,8 +21,15 @@ path=(
     $path
 )
 
+if command -v gh &>/dev/null; then
+  export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)"
+fi
+
 # Homebrew Bundle
 HOMEBREW_BUNDLE_FILE="$HOME/.dotfiles/Brewfile"
 
 # Export environment variables
 export PATH HOMEBREW_BUNDLE_FILE
+
+# Load overlay configuration if exists
+[[ -f ~/.config/zsh/overlay/.zprofile ]] && source ~/.config/zsh/overlay/.zprofile
