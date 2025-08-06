@@ -206,6 +206,7 @@ pids
 # OS generated files
 ehthumbs.db
 Icon?
+!icons/
 
 # Backup files
 *.bak
@@ -255,3 +256,4 @@ mise.toml
 
 # Claude Code
 **/.claude/settings.local.json
+.mcp.json
