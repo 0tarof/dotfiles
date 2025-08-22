@@ -14,3 +14,5 @@
 
 # Generated plugin files
 .zsh_plugins.zsh
+
+overlay
