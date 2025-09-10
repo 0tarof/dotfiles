@@ -15,9 +15,10 @@ aws = "latest"
 node = "latest"
 "npm:aws-cdk" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
+"npm:pnpm" = "latest"
+"npm:@openai/codex" = "latest"
 
 # [Python]
 python = "latest"
 uv = "latest"
 "pipx:snowflake-cli" = "latest"
-"npm:pnpm" = "latest"
