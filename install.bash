@@ -90,13 +90,13 @@ main() {
     # Bin scripts
     if [[ -d "$SCRIPT_DIR/bin" ]]; then
         log_info "Installing bin scripts..."
-        
+
         # Create ~/bin directory if it doesn't exist
         if [[ ! -d "$HOME/bin" ]]; then
             mkdir -p "$HOME/bin"
             log_info "Created ~/bin directory"
         fi
-        
+
         # Create symlinks for all executables in bin
         for file in "$SCRIPT_DIR/bin"/*; do
             if [[ -f "$file" ]] && [[ -x "$file" ]]; then
@@ -104,6 +104,23 @@ main() {
                 create_symlink "$file" "$HOME/bin/$filename"
             fi
         done
+        echo ""
+    fi
+
+    # Claude Code configuration
+    if [[ -d "$SCRIPT_DIR/claude" ]]; then
+        log_info "Installing Claude Code configuration..."
+        mkdir -p "$HOME/.claude"
+
+        # Symlink settings.json
+        if [[ -f "$SCRIPT_DIR/claude/settings.json" ]]; then
+            create_symlink "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
+        fi
+
+        # Symlink commands directory
+        if [[ -d "$SCRIPT_DIR/claude/commands" ]]; then
+            create_symlink "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
+        fi
         echo ""
     fi
     
