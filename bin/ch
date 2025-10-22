@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: ch [options] [file ...]
+
+Skip header lines from input in a memory-efficient streaming manner.
+
+Options:
+  -n, --lines N   Number of header lines to skip (default: 1)
+  -h, --help      Show this help message
+
+If no files are provided, ch reads from standard input.
+You can also specify the number of lines as the first positional argument:
+  ch 3 data.csv
+EOF
+}
+
+skip=1
+declare -a files=()
+
+while (($#)); do
+  case "$1" in
+    -n|--lines)
+      if (($# < 2)); then
+        echo "ch: missing value for $1" >&2
+        usage >&2
+        exit 1
+      fi
+      skip="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      files+=("$@")
+      break
+      ;;
+    *)
+      if [[ "$1" =~ ^[0-9]+$ && "$skip" == "1" && ${#files[@]} -eq 0 ]]; then
+        skip="$1"
+        shift
+      else
+        files+=("$1")
+        shift
+      fi
+      ;;
+  esac
+done
+
+if ! [[ "$skip" =~ ^[0-9]+$ ]]; then
+  echo "ch: number of lines must be a non-negative integer" >&2
+  exit 1
+fi
+
+if ((${#files[@]})); then
+  awk -v skip="$skip" 'NR > skip' "${files[@]}"
+else
+  awk -v skip="$skip" 'NR > skip'
+fi

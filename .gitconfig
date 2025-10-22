@@ -38,6 +38,7 @@
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	lga = log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	pp = "!f() { git fetch --prune; git pull; git-delete-merged-branch $1; }; f"
+	wta = "!f() { branch=\"$1\"; shift || true; if [ -z \"$branch\" ]; then echo 'usage: git wta <branch> [extra git worktree add args]' >&2; return 1; fi; repo=$(git rev-parse --show-toplevel) || return 1; mkdir -p \"$repo/worktrees\" || return 1; sanitized=$(printf '%s' \"$branch\" | tr '/' '-'); target=\"$repo/worktrees/$sanitized\"; if git show-ref --verify --quiet \"refs/heads/$branch\"; then git worktree add \"$target\" \"$branch\" \"$@\"; else remote_ref=$(git for-each-ref --format='%(refname:short)' \"refs/remotes/*/$branch\" | head -n1); if [ -n \"$remote_ref\" ]; then git worktree add --track -b \"$branch\" \"$target\" \"$remote_ref\" \"$@\"; else git worktree add -b \"$branch\" \"$target\" \"$@\"; fi; fi; }; f"
 
 # Include local/environment-specific configurations
 [include]

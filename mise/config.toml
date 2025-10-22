@@ -12,7 +12,7 @@ maven = "latest"
 aws = "latest"
 
 # [Node.js]
-node = "latest"
+node = "lts"
 "npm:aws-cdk" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:pnpm" = "latest"
