@@ -2,18 +2,91 @@
 
 set -euo pipefail
 
-branch="${1:-$(git rev-parse --abbrev-ref HEAD)}"
-git checkout "$branch" >/dev/null 2>&1
+target_branch="${1:-$(git rev-parse --abbrev-ref HEAD)}"
+git checkout "$target_branch" >/dev/null 2>&1
 
-# Get merged branches, excluding:
-# - Current branch (*)
-# - Worktree branches (+)
-# - Protected branches (develop, main, master)
-merged_branches=$(git branch --merged | egrep -v '^\*|^\+|develop|main|master' || true)
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+protected_pattern='^(develop|main|master)$'
 
-if [[ -z "$merged_branches" ]]; then
-    exit 0
+mapfile -t merged_branches < <(
+  git for-each-ref --format='%(refname:short)' --merged HEAD refs/heads |
+    grep -Ev "$protected_pattern" |
+    grep -v "^$current_branch$" || true
+)
+
+if ((${#merged_branches[@]} == 0)); then
+  exit 0
 fi
 
-# Delete branches
-echo "$merged_branches" | xargs git branch -d
+declare -A worktree_map=()
+worktree_path=""
+worktree_branch=""
+
+flush_worktree() {
+  if [[ -z "$worktree_path" || -z "$worktree_branch" ]]; then
+    worktree_path=""
+    worktree_branch=""
+    return
+  fi
+
+  local branch_name=${worktree_branch#refs/heads/}
+  if [[ "$branch_name" == "$worktree_branch" ]]; then
+    # Detached HEAD or non-local branch; ignore.
+    worktree_path=""
+    worktree_branch=""
+    return
+  fi
+
+  if [[ -n "${worktree_map[$branch_name]:-}" ]]; then
+    worktree_map["$branch_name"]+=$'\n'"$worktree_path"
+  else
+    worktree_map["$branch_name"]="$worktree_path"
+  fi
+
+  worktree_path=""
+  worktree_branch=""
+}
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+  if [[ -z "$line" ]]; then
+    flush_worktree
+    continue
+  fi
+
+  case "$line" in
+    worktree\ *)
+      flush_worktree
+      worktree_path=${line#worktree }
+      ;;
+    branch\ *)
+      worktree_branch=${line#branch }
+      ;;
+  esac
+done < <(git worktree list --porcelain)
+flush_worktree
+
+repo_root=$(git rev-parse --show-toplevel)
+deleted_any=0
+
+for branch in "${merged_branches[@]}"; do
+  worktree_paths="${worktree_map[$branch]:-}"
+  if [[ -n "$worktree_paths" ]]; then
+    while IFS= read -r wt_path; do
+      [[ -z "$wt_path" ]] && continue
+      if [[ "$wt_path" == "$repo_root" ]]; then
+        continue
+      fi
+      if ! git worktree remove "$wt_path"; then
+        echo "git-delete-merged-branch: failed to remove worktree $wt_path for branch $branch; skipping" >&2
+        continue 2
+      fi
+    done <<< "$worktree_paths"
+  fi
+
+  git branch -d "$branch"
+  deleted_any=1
+done
+
+if [[ "$deleted_any" == 1 ]]; then
+  git worktree prune >/dev/null 2>&1 || true
+fi
