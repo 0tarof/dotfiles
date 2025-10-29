@@ -15,7 +15,7 @@ Follow these steps:
 
 3. Execute the following Bash command with the file content:
    ```bash
-   codex exec -m "gpt-5" "Please review the following Go code file with focus on:
+   codex exec -m "gpt-5-codex" "Please review the following Go code file with focus on:
    1. Code quality and Go best practices
    2. Performance optimization opportunities (memory, CPU, latency)
    3. Potential bugs or edge cases

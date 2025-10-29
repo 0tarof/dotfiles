@@ -12,7 +12,7 @@ Follow these steps:
 
 3. Execute the following Bash command with the diff content:
    ```bash
-   codex exec -m "gpt-5" "Please review the following code changes with focus on:
+   codex exec -m "gpt-5-codex" "Please review the following code changes with focus on:
    1. Code quality and Go best practices
    2. Performance (memory efficiency, latency, throughput)
    3. Potential issues or bugs

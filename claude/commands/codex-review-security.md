@@ -12,7 +12,7 @@ Follow these steps:
 
 3. Execute the following Bash command with the diff content:
    ```bash
-   codex exec -m "gpt-5" "Please conduct a thorough SECURITY REVIEW of the following code changes. Focus on:
+   codex exec -m "gpt-5-codex" "Please conduct a thorough SECURITY REVIEW of the following code changes. Focus on:
 
    🔐 **Critical Security Areas:**
    1. **SQL Injection**: Check for raw SQL queries, ensure XORM query builder usage
