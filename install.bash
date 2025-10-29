@@ -112,11 +112,6 @@ main() {
         log_info "Installing Claude Code configuration..."
         mkdir -p "$HOME/.claude"
 
-        # Symlink settings.json
-        if [[ -f "$SCRIPT_DIR/claude/settings.json" ]]; then
-            create_symlink "$SCRIPT_DIR/claude/settings.json" "$HOME/.claude/settings.json"
-        fi
-
         # Symlink commands directory
         if [[ -d "$SCRIPT_DIR/claude/commands" ]]; then
             create_symlink "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
