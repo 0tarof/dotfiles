@@ -116,6 +116,11 @@ main() {
         if [[ -d "$SCRIPT_DIR/claude/commands" ]]; then
             create_symlink "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
         fi
+
+        # Symlink skills directory
+        if [[ -d "$SCRIPT_DIR/claude/skills" ]]; then
+            create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills"
+        fi
         echo ""
     fi
     
