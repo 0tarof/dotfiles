@@ -19,6 +19,6 @@ node = "lts"
 "npm:@openai/codex" = "latest"
 
 # [Python]
-python = "latest"
+python = "3.13"
 uv = "latest"
 "pipx:snowflake-cli" = "latest"

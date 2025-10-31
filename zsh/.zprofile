@@ -13,7 +13,7 @@ path=(
 /Library/Apple/usr/bin
 )
 
-eval "$(mise activate zsh --shims)"
+# miseは.zshenvで初期化済み
 
 # miseが追加したパスを一旦PATHから削除し、$HOME/binの後に再配置
 path=(
