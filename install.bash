@@ -123,6 +123,18 @@ main() {
         fi
         echo ""
     fi
+
+    # Cursor configuration
+    if [[ -d "$SCRIPT_DIR/cursor" ]]; then
+        log_info "Installing Cursor configuration..."
+        mkdir -p "$HOME/.cursor"
+
+        # Symlink commands directory
+        if [[ -d "$SCRIPT_DIR/cursor/commands" ]]; then
+            create_symlink "$SCRIPT_DIR/cursor/commands" "$HOME/.cursor/commands"
+        fi
+        echo ""
+    fi
     
     # Add more dotfile installations here as needed
     # Example:
