@@ -258,3 +258,6 @@ mise.toml
 
 # Worktrees
 /worktrees/
+
+.perman-aws-vault
+

@@ -43,3 +43,5 @@
 # Include local/environment-specific configurations
 [include]
 	path = ~/.dotfiles/overlay/.gitconfig
+[pager]
+	diff = diffnav
