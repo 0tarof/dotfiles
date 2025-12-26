@@ -70,6 +70,14 @@ main() {
         fi
         echo ""
     fi
+
+    # Tmux configuration
+    if [[ -d "$SCRIPT_DIR/tmux" ]]; then
+        log_info "Installing Tmux configuration..."
+        mkdir -p "$HOME/.config"
+        create_symlink "$SCRIPT_DIR/tmux" "$HOME/.config/tmux"
+        echo ""
+    fi
     
     # Git configuration directory
     if [[ -d "$SCRIPT_DIR/git" ]]; then
