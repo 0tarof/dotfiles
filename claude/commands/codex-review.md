@@ -1,16 +1,16 @@
 ---
-description: Review branch changes using OpenAI Codex (GPT-5)
+description: OpenAI Codex (GPT-5) を使用してブランチの変更をレビュー
 ---
 
-Review the code changes in the current branch against the parent branch using OpenAI Codex CLI with GPT-5.
+現在のブランチのコード変更を親ブランチと比較して、OpenAI Codex CLI (GPT-5) を使用してレビューします。
 
-Follow these steps:
+以下の手順に従ってください：
 
-1. Determine the parent branch (usually `develop`). Use git commands to identify it, or default to `develop`.
+1. 親ブランチを特定します（通常は `develop`）。git コマンドを使用して特定するか、デフォルトで `develop` を使用します。
 
-2. Get the diff between the parent branch and current branch using: `git diff <parent>...HEAD`
+2. 親ブランチと現在のブランチの差分を取得します：`git diff <parent>...HEAD`
 
-3. Execute the following Bash command with the diff content:
+3. 差分内容を含めて以下の Bash コマンドを実行します：
    ```bash
    codex exec -m "gpt-5-codex" "Please review the following code changes with focus on:
    1. Code quality and Go best practices
@@ -26,8 +26,8 @@ Follow these steps:
    [INSERT DIFF HERE]"
    ```
 
-4. Display the Codex review results to me in Japanese.
+4. Codex のレビュー結果を日本語で表示します。
 
-5. Summarize the key findings if needed in Japanese.
+5. 必要に応じて、主要な発見事項を日本語で要約します。
 
-Note: If the diff is empty, inform me that there are no changes to review.
+注意: 差分が空の場合は、レビューする変更がないことを通知してください。

@@ -1,16 +1,16 @@
 ---
-description: Security-focused review of branch changes using OpenAI Codex (GPT-5)
+description: OpenAI Codex (GPT-5) を使用したブランチ変更のセキュリティレビュー
 ---
 
-Conduct a security-focused review of code changes in the current branch using OpenAI Codex CLI with GPT-5.
+現在のブランチのコード変更に対して、OpenAI Codex CLI (GPT-5) を使用してセキュリティに焦点を当てたレビューを実施します。
 
-Follow these steps:
+以下の手順に従ってください：
 
-1. Determine the parent branch (usually `develop`). Use git commands to identify it, or default to `develop`.
+1. 親ブランチを特定します（通常は `develop`）。git コマンドを使用して特定するか、デフォルトで `develop` を使用します。
 
-2. Get the diff between the parent branch and current branch using: `git diff <parent>...HEAD`
+2. 親ブランチと現在のブランチの差分を取得します：`git diff <parent>...HEAD`
 
-3. Execute the following Bash command with the diff content:
+3. 差分内容を含めて以下の Bash コマンドを実行します：
    ```bash
    codex exec -m "gpt-5-codex" "Please conduct a thorough SECURITY REVIEW of the following code changes. Focus on:
 
@@ -43,8 +43,8 @@ Follow these steps:
    [INSERT DIFF HERE]"
    ```
 
-4. Display the security review results to me in Japanese with severity levels highlighted.
+4. セキュリティレビューの結果を、重要度レベルを強調しながら日本語で表示します。
 
-5. Summarize critical and high severity findings in Japanese.
+5. CRITICAL および HIGH 重要度の発見事項を日本語で要約します。
 
-Note: Always address CRITICAL and HIGH severity findings before merging.
+注意: マージ前に必ず CRITICAL および HIGH 重要度の問題に対処してください。

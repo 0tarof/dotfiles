@@ -1,19 +1,19 @@
 ---
-description: Review a specific file using OpenAI Codex (GPT-5)
+description: OpenAI Codex (GPT-5) を使用して特定のファイルをレビュー
 argument-hint: <file-path>
 ---
 
-Review the specified file using OpenAI Codex CLI with GPT-5.
+指定されたファイルを OpenAI Codex CLI (GPT-5) を使用してレビューします。
 
-File to review: $ARGUMENTS
+レビュー対象ファイル: $ARGUMENTS
 
-Follow these steps:
+以下の手順に従ってください：
 
-1. If no file path was provided in $ARGUMENTS, ask me which file to review.
+1. $ARGUMENTS にファイルパスが指定されていない場合は、レビューするファイルを尋ねます。
 
-2. Read the content of the specified file.
+2. 指定されたファイルの内容を読み取ります。
 
-3. Execute the following Bash command with the file content:
+3. ファイル内容を含めて以下の Bash コマンドを実行します：
    ```bash
    codex exec -m "gpt-5-codex" "Please review the following Go code file with focus on:
    1. Code quality and Go best practices
@@ -31,8 +31,8 @@ Follow these steps:
    [INSERT FILE CONTENT HERE]"
    ```
 
-4. Display the Codex review results to me in Japanese.
+4. Codex のレビュー結果を日本語で表示します。
 
-5. Summarize the key findings and actionable recommendations in Japanese.
+5. 主要な発見事項と実行可能な推奨事項を日本語で要約します。
 
-Note: If the file doesn't exist, inform me.
+注意: ファイルが存在しない場合は、その旨を通知してください。
