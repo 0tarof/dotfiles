@@ -1,0 +1,30 @@
+# Ghostty Configuration
+# https://ghostty.org/docs/config
+
+# Theme
+theme = Builtin Solarized Light
+
+# Font
+# font-family = "JetBrains Mono"
+# font-size = 14
+font-thicken = true
+font-thicken-strength = 1
+font-feature = -dlig
+
+# Window
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+# window-decoration = true
+
+# Shell
+# shell-integration = true
+# shell-integration-features = cursor,sudo,title
+
+# Cursor
+# cursor-style = block
+# cursor-style-blink = false
+
+# Misc
+# confirm-close-surface = false
+# quit-after-last-window-closed = true

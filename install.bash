@@ -86,7 +86,15 @@ main() {
         create_symlink "$SCRIPT_DIR/mise" "$HOME/.config/mise"
         echo ""
     fi
-    
+
+    # Ghostty configuration
+    if [[ -d "$SCRIPT_DIR/ghostty" ]]; then
+        log_info "Installing Ghostty configuration..."
+        mkdir -p "$HOME/.config"
+        create_symlink "$SCRIPT_DIR/ghostty" "$HOME/.config/ghostty"
+        echo ""
+    fi
+
     # Bin scripts
     if [[ -d "$SCRIPT_DIR/bin" ]]; then
         log_info "Installing bin scripts..."
