@@ -9,19 +9,33 @@ export BACKUP_DIR
 # Source common functions
 source "$SCRIPT_DIR/lib/functions.bash"
 
-# Setup ZDOTDIR in /etc/zshenv
+# Setup ZDOTDIR in appropriate zshenv file
 setup_zdotdir() {
     local zshenv_content='export ZDOTDIR="$HOME"/.config/zsh'
+    local zshenv_file=""
     
-    if [[ -f /etc/zshenv ]] && grep -q "ZDOTDIR" /etc/zshenv; then
-        log_info "ZDOTDIR is already configured in /etc/zshenv"
+    # Check for zshenv in order of preference
+    if [[ -d /etc/zsh ]]; then
+        # Debian/Ubuntu/Arch style
+        zshenv_file="/etc/zsh/zshenv"
+    elif [[ -f /etc/zshenv ]]; then
+        # macOS/RHEL/Amazon Linux/Fedora style (file already exists)
+        zshenv_file="/etc/zshenv"
     else
-        log_info "Setting up ZDOTDIR in /etc/zshenv (requires sudo)..."
-        if echo "$zshenv_content" | sudo tee -a /etc/zshenv > /dev/null; then
-            log_success "ZDOTDIR configured in /etc/zshenv"
+        # Fallback: create /etc/zshenv if neither exists
+        zshenv_file="/etc/zshenv"
+        log_warning "No existing zshenv found, will create $zshenv_file"
+    fi
+    
+    if [[ -f "$zshenv_file" ]] && grep -q "ZDOTDIR" "$zshenv_file"; then
+        log_info "ZDOTDIR is already configured in $zshenv_file"
+    else
+        log_info "Setting up ZDOTDIR in $zshenv_file (requires sudo)..."
+        if echo "$zshenv_content" | sudo tee -a "$zshenv_file" > /dev/null; then
+            log_success "ZDOTDIR configured in $zshenv_file"
         else
             log_error "Failed to configure ZDOTDIR (sudo required)"
-            log_warning "Please manually add to /etc/zshenv: $zshenv_content"
+            log_warning "Please manually add to $zshenv_file: $zshenv_content"
             return 1
         fi
     fi
