@@ -29,6 +29,9 @@ brew "terraform"
 brew "tmux"
 brew "tree"
 brew "vim"
+brew "neovim"
+brew "ripgrep"  # Telescope用
+brew "fd"       # Telescope用（高速なfind）
 brew "wget"
 brew "yt-dlp"
 brew "zsh"
