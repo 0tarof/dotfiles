@@ -101,7 +101,7 @@ main() {
 
     # Claude Code configuration
     if [[ -d "$SCRIPT_DIR/claude" ]]; then
-        install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills"
+        install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills" "settings.json"
         echo ""
     fi
 

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Read(//Users/a14993/**)",
+      "mcp__chrome-devtools__*",
+      "WebSearch",
+      "Bash(echo:*)"
+    ],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(rm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(yarn add:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(pnpm uninstall:*)",
+      "Bash(yarn remove:*)",
+      "Read(id_rsa)",
+      "Read(id_ed25519)",
+      "Write(.env*)"
+    ],
+    "defaultMode": "plan"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  },
+  "language": "日本語",
+  "alwaysThinkingEnabled": true
+}

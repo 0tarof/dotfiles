@@ -125,13 +125,14 @@ install_bin_scripts() {
     fi
 }
 
-# Install multiple subdirectories from a parent directory
-# Usage: install_subdirectories <source_parent> <target_parent> <subdirs...>
+# Install multiple subdirectories or files from a parent directory
+# Usage: install_subdirectories <source_parent> <target_parent> <items...>
+# Items can be directories or files
 install_subdirectories() {
     local source_parent="$1"
     local target_parent="$2"
     shift 2
-    local subdirs=("$@")
+    local items=("$@")
 
     if [[ ! -d "$source_parent" ]]; then
         log_warning "Source parent directory does not exist: $source_parent"
@@ -143,15 +144,20 @@ install_subdirectories() {
     mkdir -p "$target_parent"
 
     local installed_count=0
-    for subdir in "${subdirs[@]}"; do
-        if [[ -d "$source_parent/$subdir" ]]; then
-            if create_symlink "$source_parent/$subdir" "$target_parent/$subdir"; then
+    for item in "${items[@]}"; do
+        local source_item="$source_parent/$item"
+        local target_item="$target_parent/$item"
+
+        if [[ -d "$source_item" ]] || [[ -f "$source_item" ]]; then
+            if create_symlink "$source_item" "$target_item"; then
                 ((installed_count++))
             fi
+        else
+            log_warning "Item does not exist: $source_item"
         fi
     done
 
     if [[ $installed_count -gt 0 ]]; then
-        log_success "Installed $installed_count ${parent_name} subdirectory(ies)"
+        log_success "Installed $installed_count ${parent_name} item(s)"
     fi
 }
