@@ -71,22 +71,10 @@ deleted_any=0
 for branch in "${merged_branches[@]}"; do
   worktree_paths="${worktree_map[$branch]:-}"
   if [[ -n "$worktree_paths" ]]; then
-    while IFS= read -r wt_path; do
-      [[ -z "$wt_path" ]] && continue
-      if [[ "$wt_path" == "$repo_root" ]]; then
-        continue
-      fi
-      if ! git worktree remove "$wt_path"; then
-        echo "git-delete-merged-branch: failed to remove worktree $wt_path for branch $branch; skipping" >&2
-        continue 2
-      fi
-    done <<< "$worktree_paths"
+    echo "git-delete-merged-branch: skipping branch $branch (has worktree)" >&2
+    continue
   fi
 
   git branch -d "$branch"
   deleted_any=1
 done
-
-if [[ "$deleted_any" == 1 ]]; then
-  git worktree prune >/dev/null 2>&1 || true
-fi
