@@ -74,13 +74,12 @@ main() {
         "git"
         "mise"
         "ghostty"
+        "nvim"
     )
 
     for config_dir in "${config_dirs[@]}"; do
-        if [[ -d "$SCRIPT_DIR/$config_dir" ]]; then
-            install_config_dir "$SCRIPT_DIR/$config_dir" "$config_dir"
-            echo ""
-        fi
+        install_config_dir "$SCRIPT_DIR/$config_dir" "$config_dir"
+        echo ""
     done
 
     # Git configuration file (special case with additional logging)
@@ -94,22 +93,16 @@ main() {
     fi
 
     # Bin scripts
-    if [[ -d "$SCRIPT_DIR/bin" ]]; then
-        install_bin_scripts "$SCRIPT_DIR/bin"
-        echo ""
-    fi
+    install_bin_scripts "$SCRIPT_DIR/bin"
+    echo ""
 
     # Claude Code configuration
-    if [[ -d "$SCRIPT_DIR/claude" ]]; then
-        install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills" "settings.json"
-        echo ""
-    fi
+    install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills" "settings.json"
+    echo ""
 
     # Cursor configuration
-    if [[ -d "$SCRIPT_DIR/cursor" ]]; then
-        install_subdirectories "$SCRIPT_DIR/cursor" "$HOME/.cursor" "commands"
-        echo ""
-    fi
+    install_subdirectories "$SCRIPT_DIR/cursor" "$HOME/.cursor" "commands"
+    echo ""
     
     # Add more dotfile installations here as needed
     # Example:
