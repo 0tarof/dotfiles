@@ -67,15 +67,23 @@ main() {
     setup_zdotdir
     echo ""
     
-    # Zsh configuration
-    if [[ -d "$SCRIPT_DIR/zsh" ]]; then
-        log_info "Installing Zsh configuration..."
-        mkdir -p "$HOME/.config"
-        create_symlink "$SCRIPT_DIR/zsh" "$HOME/.config/zsh"
-        echo ""
-    fi
-    
-    # Git configuration
+    # Configuration directories to install to ~/.config
+    local -a config_dirs=(
+        "zsh"
+        "tmux"
+        "git"
+        "mise"
+        "ghostty"
+    )
+
+    for config_dir in "${config_dirs[@]}"; do
+        if [[ -d "$SCRIPT_DIR/$config_dir" ]]; then
+            install_config_dir "$SCRIPT_DIR/$config_dir" "$config_dir"
+            echo ""
+        fi
+    done
+
+    # Git configuration file (special case with additional logging)
     if [[ -f "$SCRIPT_DIR/.gitconfig" ]]; then
         log_info "Installing Git configuration..."
         if create_symlink "$SCRIPT_DIR/.gitconfig" "$HOME/.gitconfig"; then
@@ -85,84 +93,21 @@ main() {
         echo ""
     fi
 
-    # Tmux configuration
-    if [[ -d "$SCRIPT_DIR/tmux" ]]; then
-        log_info "Installing Tmux configuration..."
-        mkdir -p "$HOME/.config"
-        create_symlink "$SCRIPT_DIR/tmux" "$HOME/.config/tmux"
-        echo ""
-    fi
-    
-    # Git configuration directory
-    if [[ -d "$SCRIPT_DIR/git" ]]; then
-        log_info "Installing Git configuration directory..."
-        mkdir -p "$HOME/.config"
-        create_symlink "$SCRIPT_DIR/git" "$HOME/.config/git"
-        echo ""
-    fi
-    
-    # Mise configuration
-    if [[ -d "$SCRIPT_DIR/mise" ]]; then
-        log_info "Installing mise configuration..."
-        mkdir -p "$HOME/.config"
-        create_symlink "$SCRIPT_DIR/mise" "$HOME/.config/mise"
-        echo ""
-    fi
-
-    # Ghostty configuration
-    if [[ -d "$SCRIPT_DIR/ghostty" ]]; then
-        log_info "Installing Ghostty configuration..."
-        mkdir -p "$HOME/.config"
-        create_symlink "$SCRIPT_DIR/ghostty" "$HOME/.config/ghostty"
-        echo ""
-    fi
-
     # Bin scripts
     if [[ -d "$SCRIPT_DIR/bin" ]]; then
-        log_info "Installing bin scripts..."
-
-        # Create ~/bin directory if it doesn't exist
-        if [[ ! -d "$HOME/bin" ]]; then
-            mkdir -p "$HOME/bin"
-            log_info "Created ~/bin directory"
-        fi
-
-        # Create symlinks for all executables in bin
-        for file in "$SCRIPT_DIR/bin"/*; do
-            if [[ -f "$file" ]] && [[ -x "$file" ]]; then
-                local filename="$(basename "$file")"
-                create_symlink "$file" "$HOME/bin/$filename"
-            fi
-        done
+        install_bin_scripts "$SCRIPT_DIR/bin"
         echo ""
     fi
 
     # Claude Code configuration
     if [[ -d "$SCRIPT_DIR/claude" ]]; then
-        log_info "Installing Claude Code configuration..."
-        mkdir -p "$HOME/.claude"
-
-        # Symlink commands directory
-        if [[ -d "$SCRIPT_DIR/claude/commands" ]]; then
-            create_symlink "$SCRIPT_DIR/claude/commands" "$HOME/.claude/commands"
-        fi
-
-        # Symlink skills directory
-        if [[ -d "$SCRIPT_DIR/claude/skills" ]]; then
-            create_symlink "$SCRIPT_DIR/claude/skills" "$HOME/.claude/skills"
-        fi
+        install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills"
         echo ""
     fi
 
     # Cursor configuration
     if [[ -d "$SCRIPT_DIR/cursor" ]]; then
-        log_info "Installing Cursor configuration..."
-        mkdir -p "$HOME/.cursor"
-
-        # Symlink commands directory
-        if [[ -d "$SCRIPT_DIR/cursor/commands" ]]; then
-            create_symlink "$SCRIPT_DIR/cursor/commands" "$HOME/.cursor/commands"
-        fi
+        install_subdirectories "$SCRIPT_DIR/cursor" "$HOME/.cursor" "commands"
         echo ""
     fi
     
