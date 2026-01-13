@@ -17,6 +17,7 @@ node = "lts"
 "npm:@anthropic-ai/claude-code" = "latest"
 "npm:pnpm" = "latest"
 "npm:@openai/codex" = "latest"
+"npm:agent-browser" = "latest"
 
 # [Python]
 python = "3.13"
