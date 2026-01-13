@@ -18,6 +18,7 @@
       "Bash(npm uninstall:*)",
       "Bash(pnpm uninstall:*)",
       "Bash(yarn remove:*)",
+      "Bash(git add -A:*)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
       "Write(.env*)"
