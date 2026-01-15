@@ -1,5 +1,4 @@
 [settings]
-experimental = true
 disable_backends = ["asdf", "vfox"]
 
 [settings.pipx]
@@ -13,9 +12,9 @@ aws = "latest"
 
 # [Node.js]
 node = "lts"
+pnpm = "latest"
 "npm:aws-cdk" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
-"npm:pnpm" = "latest"
 "npm:@openai/codex" = "latest"
 "npm:agent-browser" = "latest"
 
@@ -23,3 +22,9 @@ node = "lts"
 python = "3.13"
 uv = "latest"
 "pipx:snowflake-cli" = "latest"
+
+# [Rust]
+rust = "latest"
+"cargo:zellij" = "latest"
+"cargo:keifu" = "latest"
+"cargo:filetree" = "latest"

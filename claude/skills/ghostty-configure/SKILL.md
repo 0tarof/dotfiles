@@ -1,5 +1,5 @@
 ---
-name: ghostty-master
+name: ghostty-configure
 description: Ghosttyターミナルエミュレータの設定・カスタマイズを支援。テーマ、フォント、キーバインド、ウィンドウ設定など。「Ghostty」「ゴースティ」「ターミナル設定」などの依頼で起動。
 allowed-tools:
   - Read
@@ -11,7 +11,7 @@ model: claude-haiku-4-5-20251001
 user-invocable: true
 ---
 
-# Ghostty Master スキル
+# Ghostty Configure スキル
 
 このスキルは、Ghosttyターミナルエミュレータの設定・カスタマイズを支援します。
 
@@ -168,6 +168,35 @@ ghostty +show-config --default | grep theme
 
 設定オプションの完全なリストは公式ドキュメントを参照：
 https://ghostty.org/docs/config
+
+## 設定ファイルの探索
+
+**IMPORTANT**: スキル起動時には、必ず以下の手順で設定ファイルの場所を特定してください。
+
+### 探索手順
+
+1. 以下の候補パスを**すべて**確認（OSに関わらず全ての場所をチェック）：
+   ```bash
+   # macOS標準の場所
+   test -f "$HOME/Library/Application Support/com.mitchellh.ghostty/config" && echo "Found: $HOME/Library/Application Support/com.mitchellh.ghostty/config"
+
+   # XDG準拠（環境変数が設定されている場合）
+   test -n "$XDG_CONFIG_HOME" && test -f "$XDG_CONFIG_HOME/ghostty/config" && echo "Found: $XDG_CONFIG_HOME/ghostty/config"
+
+   # XDG準拠（デフォルト）- macOSでも使用される場合がある
+   test -f "$HOME/.config/ghostty/config" && echo "Found: $HOME/.config/ghostty/config"
+   ```
+
+2. 見つかった設定ファイルの場所をユーザーに報告
+
+3. 複数の場所にファイルが存在する場合：
+   - 両方の場所を報告
+   - Ghosttyは後から読み込まれたファイルを優先することを説明
+   - どちらを編集するかユーザーに確認
+
+4. ファイルが見つからない場合：
+   - デフォルトの場所（macOSなら macOS の場所、Linuxなら `~/.config/ghostty/config`）を提案
+   - 新規作成するか確認
 
 ## ワークフロー例
 
