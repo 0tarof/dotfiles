@@ -16,6 +16,16 @@ git diff    # 変更内容の差分を確認
 git log -5 --oneline  # コミットメッセージのスタイルを把握
 ```
 
+**注意**: detached HEAD状態（ブランチにいない状態）の場合、新しいブランチを作成する必要があります。ブランチ作成にはサンドボックスの**all権限**が必要なため、ユーザーに確認の上、all権限でブランチを作成してください。
+
+```bash
+# detached HEADかどうか確認
+git symbolic-ref --short HEAD 2>/dev/null || echo "detached HEAD"
+
+# ブランチ作成（all権限が必要）
+git checkout -b <branch-name>
+```
+
 ### 2. 事前準備とチェック
 
 コミット前に必要なチェックを実行します：
