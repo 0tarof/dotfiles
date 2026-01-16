@@ -17,3 +17,6 @@ Thumbs.db
 
 # Neovim
 nvim/.netrwhist
+
+# Claude skills - Snowflake schema (contains sensitive database structure)
+claude/skills/snowflake-query/schema.json
