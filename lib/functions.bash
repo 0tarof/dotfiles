@@ -115,7 +115,7 @@ install_bin_scripts() {
         if [[ -f "$file" ]] && [[ -x "$file" ]]; then
             local filename="$(basename "$file")"
             if create_symlink "$file" "$HOME/bin/$filename"; then
-                ((installed_count++))
+                ((installed_count++)) || true
             fi
         fi
     done
@@ -150,7 +150,7 @@ install_subdirectories() {
 
         if [[ -d "$source_item" ]] || [[ -f "$source_item" ]]; then
             if create_symlink "$source_item" "$target_item"; then
-                ((installed_count++))
+                ((installed_count++)) || true
             fi
         else
             log_warning "Item does not exist: $source_item"
