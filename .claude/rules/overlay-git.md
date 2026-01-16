@@ -27,6 +27,13 @@ paths:
    git push
    ```
 
+3. 作業完了後、親ディレクトリに戻る：
+   ```bash
+   cd ..
+   # または
+   cd /Users/a14993/projects/github.com/0tarof/dotfiles
+   ```
+
 ## なぜこれが重要か
 
 - `overlay/`には環境固有の設定（例：業務用PCの設定）が含まれる
