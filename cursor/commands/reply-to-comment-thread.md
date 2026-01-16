@@ -82,6 +82,7 @@ query GetReviewThread($owner: String!, $repo: String!, $pr: Int!) {
       reviewThreads(first: 100) {
         nodes {
           id
+          isResolved
           comments(first: 1) {
             nodes {
               body
@@ -96,6 +97,65 @@ query GetReviewThread($owner: String!, $repo: String!, $pr: Int!) {
 }
 ' -f owner='{owner}' -f repo='{repo}' -F pr={pr_number}
 ```
+
+### 4. スレッドをResolveする（GraphQL）
+
+レビューコメントスレッドをResolveする場合は、GraphQL APIの `resolveReviewThread` mutationを使用します：
+
+```bash
+gh api graphql -f query='
+mutation ResolveReviewThread($threadId: ID!) {
+  resolveReviewThread(input: {
+    threadId: $threadId
+  }) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}
+' -f threadId='{thread_node_id}'
+```
+
+**例：**
+```bash
+gh api graphql -f query='
+mutation ResolveReviewThread($threadId: ID!) {
+  resolveReviewThread(input: {
+    threadId: $threadId
+  }) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}
+' -f threadId='PRRT_kwDOL1234567890abcdef'
+```
+
+#### Unresolveする場合
+
+スレッドを再度Unresolveにする場合は、`unresolveReviewThread` mutationを使用します：
+
+```bash
+gh api graphql -f query='
+mutation UnresolveReviewThread($threadId: ID!) {
+  unresolveReviewThread(input: {
+    threadId: $threadId
+  }) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}
+' -f threadId='{thread_node_id}'
+```
+
+**注意**:
+- スレッドをResolve/Unresolveするには、スレッドのnode ID（`PRRT_`で始まるID）が必要です
+- コメントのnode IDではなく、スレッド自体のIDを使用してください
+- スレッドIDは上記の「スレッドIDの取得」クエリで取得できます
 
 ## 実行例
 
