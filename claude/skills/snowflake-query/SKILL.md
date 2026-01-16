@@ -121,19 +121,25 @@ snow sql --query "DESCRIBE TABLE table_name;" --format CSV
 
 #### 基本的なクエリ構造
 
+**重要**: クエリ実行時にデータベースやスキーマが指定されていない場合、Snowflakeはエラーを返します。完全修飾名（`database.schema.table`）を使用してテーブルを指定する必要があります。
+
 ```sql
--- 全カラム取得
-SELECT * FROM table_name WHERE condition ORDER BY column LIMIT 1000;
+-- 完全修飾名を使用した全カラム取得
+SELECT * FROM database_name.schema_name.table_name WHERE condition ORDER BY column LIMIT 1000;
 
 -- 特定カラム取得
-SELECT col1, col2, col3 FROM table_name WHERE condition;
+SELECT col1, col2, col3 FROM database_name.schema_name.table_name WHERE condition;
 
 -- 集計クエリ
 SELECT col1, COUNT(*), SUM(col2), AVG(col3)
-FROM table_name
+FROM database_name.schema_name.table_name
 GROUP BY col1
 ORDER BY COUNT(*) DESC;
 ```
+
+**クエリ生成時の注意事項**:
+- データベース名とスキーマ名が不明な場合は、ユーザーに必ず確認する
+- `schema.json`に`schema`フィールドがある場合はそれを使用
 
 #### WHERE句の生成ガイドライン
 
@@ -175,11 +181,17 @@ ORDER BY COUNT(*) DESC;
 生成したSQLクエリを`snow sql`コマンドで実行します：
 
 ```bash
-# デフォルト接続の場合
-snow sql --query "SELECT * FROM table_name LIMIT 1000;" --format CSV
+# 完全修飾名を使用したクエリ実行（推奨）
+snow sql --query "SELECT * FROM database_name.schema_name.table_name LIMIT 1000;" --format CSV
+
+# データベースとスキーマをオプションで指定する場合
+snow sql --query "SELECT * FROM table_name LIMIT 1000;" \
+  --format CSV \
+  --database my_database \
+  --schema my_schema
 
 # 接続名を指定する場合
-snow sql --query "SELECT * FROM table_name;" --format CSV --connection connection_name
+snow sql --query "SELECT * FROM database_name.schema_name.table_name;" --format CSV --connection connection_name
 
 # エラーハンドリング付き実行
 if ! result=$(snow sql --query "$query" --format CSV 2>&1); then
@@ -191,6 +203,9 @@ fi
 
 **実行時の注意点**:
 - `--format CSV`オプションでCSV形式で出力を取得
+- **データベースとスキーマの指定は必須**: 以下のいずれかの方法で指定する
+  - クエリ内で完全修飾名（`database.schema.table`）を使用（推奨）
+  - `--database`と`--schema`オプションを指定
 - エラー出力（stderr）も取得してユーザーに日本語で説明
 - 長時間実行されるクエリの場合は、ユーザーに実行中であることを通知
 
@@ -221,17 +236,21 @@ value4,value5,value6
 
 1. **日本語でコミュニケーション**: すべてのメッセージ、質問、エラー説明は日本語で行う
 
-2. **クエリ確認**: 複雑なクエリや削除的な操作が含まれる可能性がある場合は、実行前にクエリをユーザーに表示して確認を取る
+2. **データベースとスキーマの指定は必須**: Snowflakeではデータベースとスキーマが指定されていないとクエリエラーになる
+   - クエリ内で完全修飾名（`database.schema.table`）を使用するのが最も確実
+   - データベース名やスキーマ名が不明な場合は、ユーザーに必ず確認する
 
-3. **LIMIT設定の徹底**: ユーザーが行数制限を指定していない場合は、安全性のため必ず`LIMIT 1000`を設定する
+3. **クエリ確認**: 複雑なクエリや削除的な操作が含まれる可能性がある場合は、実行前にクエリをユーザーに表示して確認を取る
 
-4. **エラー時の対応**: エラーが発生した場合は、原因を日本語で詳しく説明し、解決方法を提案する
+4. **LIMIT設定の徹底**: ユーザーが行数制限を指定していない場合は、安全性のため必ず`LIMIT 1000`を設定する
 
-5. **不明な点の確認**: テーブル名が曖昧、カラム名が不明、条件が複雑など、不明な点がある場合は実行前に必ずユーザーに確認する
+5. **エラー時の対応**: エラーが発生した場合は、原因を日本語で詳しく説明し、解決方法を提案する
 
-6. **スキーマ情報の活用**: WHERE句やJOIN句を正確に生成するため、必要に応じてスキーマ情報を取得する
+6. **不明な点の確認**: テーブル名が曖昧、カラム名が不明、条件が複雑など、不明な点がある場合は実行前に必ずユーザーに確認する
 
-7. **Snowflake固有の知識**:
+7. **スキーマ情報の活用**: WHERE句やJOIN句を正確に生成するため、必要に応じてスキーマ情報を取得する
+
+8. **Snowflake固有の知識**:
    - Snowflakeはデフォルトで識別子を大文字に変換する
    - 日時データは`TO_TIMESTAMP`や`TO_DATE`関数で適切に変換
    - VARIANT型（JSON）は`:`演算子でアクセス
@@ -242,6 +261,7 @@ value4,value5,value6
 
 | エラーケース | エラーメッセージ例 | 対応方法 |
 |------------|------------------|---------|
+| データベース/スキーマ未指定 | `Object does not exist` または `Cannot perform SELECT` | データベースとスキーマを明示的に指定する必要があることを説明し、完全修飾名（`database.schema.table`）を使用するか、`--database`と`--schema`オプションを追加することを提案 |
 | テーブルが存在しない | `SQL compilation error: object does not exist` | `SHOW TABLES`で利用可能なテーブル一覧を表示し、ユーザーに正しいテーブル名を確認 |
 | カラムが存在しない | `SQL compilation error: Invalid identifier` | `DESCRIBE TABLE`で有効なカラン一覧を表示し、クエリを修正 |
 | 接続失敗 | `Connection refused` または `Could not connect` | Snowflake CLIの接続設定（`~/.snowflake/config.toml`または環境変数）を確認するようユーザーに案内 |
@@ -380,28 +400,6 @@ if ! result=$(snow sql --query "$query" --format CSV 2>&1); then
     exit 1
 fi
 ```
-
-### 接続設定について
-
-接続情報は`~/.snowflake/config.toml`ファイルに定義されます：
-
-```toml
-[connections.default]
-account = "myaccount"
-user = "myuser"
-password = "mypassword"
-database = "mydb"
-schema = "public"
-warehouse = "compute_wh"
-role = "myrole"
-
-[connections.prod_warehouse]
-account = "prodaccount"
-user = "produser"
-# ...その他の設定
-```
-
-指定がない場合は、`[connections.default]`の設定が使用されます。
 
 ## 使用例
 
