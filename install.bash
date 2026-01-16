@@ -97,7 +97,7 @@ main() {
     echo ""
 
     # Claude Code configuration
-    install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills" "settings.json"
+    install_subdirectories "$SCRIPT_DIR/claude" "$HOME/.claude" "commands" "skills" "rules" "settings.json"
     echo ""
 
     # Cursor configuration
