@@ -1,0 +1,51 @@
+name: Update Nix Installer Checksum
+
+on:
+  pull_request:
+    paths:
+      - 'bootstrap.sh'
+
+permissions:
+  contents: write
+
+jobs:
+  update-checksum:
+    runs-on: ubuntu-latest
+    # Only run on Renovate PRs
+    if: startsWith(github.head_ref, 'renovate/')
+    
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract version and update checksum
+        run: |
+          # Extract current version from bootstrap.sh
+          VERSION=$(grep 'NIX_INSTALLER_VERSION=' bootstrap.sh | head -1 | sed 's/.*"\(v[0-9.]*\)".*/\1/')
+          echo "Detected version: $VERSION"
+          
+          # Download installer and calculate checksum
+          curl -sSfL "https://install.determinate.systems/nix/tag/${VERSION}" -o installer
+          NEW_SHA256=$(shasum -a 256 installer | cut -d' ' -f1)
+          rm installer
+          
+          echo "New checksum: $NEW_SHA256"
+          
+          # Update checksum in bootstrap.sh
+          sed -i "s/^readonly NIX_INSTALLER_SHA256=\".*\"/readonly NIX_INSTALLER_SHA256=\"${NEW_SHA256}\"/" bootstrap.sh
+      
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if ! git diff --quiet; then
+            git add bootstrap.sh
+            git commit -m "chore: update nix-installer checksum"
+            git push
+            echo "Checksum updated and committed"
+          else
+            echo "No changes needed"
+          fi

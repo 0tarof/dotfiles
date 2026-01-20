@@ -1,0 +1,33 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+
+  // Nix flake.lock の更新
+  "nix": {
+    "enabled": true
+  },
+
+  // カスタムマネージャー
+  "customManagers": [
+    {
+      // bootstrap.sh 内の Nix installer バージョン
+      "customType": "regex",
+      "fileMatch": ["^bootstrap\\.sh$"],
+      "matchStrings": [
+        "# renovate: datasource=github-releases depName=(?<depName>\\S+)\\nreadonly NIX_INSTALLER_VERSION=\"(?<currentValue>v[0-9.]+)\""
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+
+  // GitHub Actions のピン留め（SHA + バージョンコメント）
+  "packageRules": [
+    {
+      // GitHub Actions: コミットハッシュでピン留めされたものを更新
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    }
+  ]
+}
