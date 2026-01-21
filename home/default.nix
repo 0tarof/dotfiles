@@ -95,11 +95,21 @@ in
 
       echo "Rebuilding: $hostname ($system, user: $username)"
       
-      sudo HOME="$HOME" \
-          NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
-          NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
-          NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
-          nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$hostname" --impure
+      # Use darwin-rebuild directly if available (faster than nix run)
+      if command -v darwin-rebuild &> /dev/null; then
+          sudo HOME="$HOME" \
+              NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
+              NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
+              NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
+              darwin-rebuild switch --flake "$DOTFILES_DIR#$hostname" --impure
+      else
+          # Fallback to nix run (first time or if darwin-rebuild not in PATH)
+          sudo HOME="$HOME" \
+              NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
+              NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
+              NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
+              nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$hostname" --impure
+      fi
     '';
   };
 
@@ -107,16 +117,102 @@ in
   home.sessionPath = [ "$HOME/bin" ];
 
   # ==========================================================================
-  # Dotfiles - symlink existing configurations
+  # Dotfiles - declarative symlinks managed by Home Manager
   # ==========================================================================
-  # For now, we keep using the existing symlink-based setup from install.bash
-  # In Phase 3, we can migrate to home.file for declarative management
-  #
-  # Example (Phase 3):
-  # home.file.".config/zsh" = {
-  #   source = ../../zsh;
-  #   recursive = true;
-  # };
+  
+  # Config directories -> ~/.config/*
+  home.file.".config/zsh" = {
+    source = ../zsh;
+    recursive = true;
+  };
+  
+  home.file.".config/tmux" = {
+    source = ../tmux;
+    recursive = true;
+  };
+  
+  home.file.".config/git" = {
+    source = ../git;
+    recursive = true;
+  };
+  
+  home.file.".config/mise" = {
+    source = ../mise;
+    recursive = true;
+  };
+  
+  home.file.".config/ghostty" = {
+    source = ../ghostty;
+    recursive = true;
+  };
+  
+  home.file.".config/nvim" = {
+    source = ../nvim;
+    recursive = true;
+  };
+  
+  # Git config in home directory
+  home.file.".gitconfig".source = ../.gitconfig;
+  
+  # Claude Code configuration
+  home.file.".claude/commands" = {
+    source = ../claude/commands;
+    recursive = true;
+  };
+  
+  home.file.".claude/skills" = {
+    source = ../claude/skills;
+    recursive = true;
+  };
+  
+  home.file.".claude/rules" = {
+    source = ../claude/rules;
+    recursive = true;
+  };
+  
+  home.file.".claude/settings.json".source = ../claude/settings.json;
+  
+  # Cursor configuration
+  home.file.".cursor/commands" = {
+    source = ../cursor/commands;
+    recursive = true;
+  };
+  
+  # Bin scripts (except nix-rebuild which is defined inline above)
+  home.file."bin/brew-check" = {
+    source = ../bin/brew-check;
+    executable = true;
+  };
+  
+  home.file."bin/brew-cleanup" = {
+    source = ../bin/brew-cleanup;
+    executable = true;
+  };
+  
+  home.file."bin/brew-dump" = {
+    source = ../bin/brew-dump;
+    executable = true;
+  };
+  
+  home.file."bin/brew-install" = {
+    source = ../bin/brew-install;
+    executable = true;
+  };
+  
+  home.file."bin/ch" = {
+    source = ../bin/ch;
+    executable = true;
+  };
+  
+  home.file."bin/git-delete-merged-branch" = {
+    source = ../bin/git-delete-merged-branch;
+    executable = true;
+  };
+  
+  home.file."bin/gws" = {
+    source = ../bin/gws;
+    executable = true;
+  };
 
   # ==========================================================================
   # Overlay imports (company-specific settings)

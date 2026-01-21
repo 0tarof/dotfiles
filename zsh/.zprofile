@@ -13,48 +13,35 @@ fi
 
 typeset -U path PATH
 
-# Nix paths (set by nix-darwin, must be preserved)
-__nix_paths=(
-  /etc/profiles/per-user/$USER/bin
-  /run/current-system/sw/bin
-  /nix/var/nix/profiles/default/bin
-)
-
+# Prepend important paths while preserving existing PATH (including mise paths from .zshenv)
+# Order: $HOME/bin > Nix paths > Homebrew paths > existing paths (mise, system, etc.)
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # macOS specific paths
+  # macOS specific paths to prepend
   path=(
-  $HOME/bin(N-/)
-  ${__nix_paths[@]}
-  "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
-  $HOMEBREW_PREFIX/opt/mysql-client@8.0/bin(N-/)
-  $HOMEBREW_PREFIX/bin(N-/)
-  $HOMEBREW_PREFIX/sbin(N-/)
-  /usr/local/bin(N-/)
-  /usr/local/sbin(N-/)
-  /usr/bin
-  /usr/sbin
-  /bin
-  /sbin
-  /Library/Apple/usr/bin
+    $HOME/bin(N-/)
+    /etc/profiles/per-user/$USER/bin(N-/)
+    /run/current-system/sw/bin(N-/)
+    /nix/var/nix/profiles/default/bin(N-/)
+    "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
+    $HOMEBREW_PREFIX/opt/mysql-client@8.0/bin(N-/)
+    $HOMEBREW_PREFIX/bin(N-/)
+    $HOMEBREW_PREFIX/sbin(N-/)
+    $path  # Preserve existing paths (mise, etc.)
   )
 else
-  # Linux paths
+  # Linux paths to prepend
   path=(
-  $HOME/bin(N-/)
-  ${__nix_paths[@]}
-  $HOMEBREW_PREFIX/bin(N-/)
-  $HOMEBREW_PREFIX/sbin(N-/)
-  /usr/local/bin(N-/)
-  /usr/local/sbin(N-/)
-  /usr/bin
-  /usr/sbin
-  /bin
-  /sbin
+    $HOME/bin(N-/)
+    /etc/profiles/per-user/$USER/bin(N-/)
+    /run/current-system/sw/bin(N-/)
+    /nix/var/nix/profiles/default/bin(N-/)
+    $HOMEBREW_PREFIX/bin(N-/)
+    $HOMEBREW_PREFIX/sbin(N-/)
+    $path  # Preserve existing paths (mise, etc.)
   )
 fi
-unset __nix_paths
 
-# miseは.zshenvで初期化済み、パスは上記で設定済み
+# miseは.zshenvで初期化済み、上記で$pathを保持しているのでmiseパスも維持される
 
 if command -v gh &>/dev/null; then
   export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)"
