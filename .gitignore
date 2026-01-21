@@ -1,5 +1,6 @@
 # Environment-specific configurations
 overlay/
+.local/
 
 # Backup directories
 .dotfiles_backup/
