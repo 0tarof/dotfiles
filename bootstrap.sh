@@ -289,6 +289,32 @@ run_darwin_rebuild() {
 }
 
 # =============================================================================
+# Set Login Shell
+# =============================================================================
+set_login_shell() {
+    local target_shell="/run/current-system/sw/bin/zsh"
+    
+    # Check if target shell exists
+    if [[ ! -x "$target_shell" ]]; then
+        log_info "Nix zsh not found at $target_shell, skipping login shell setup"
+        return 0
+    fi
+    
+    # Get current login shell
+    local current_shell
+    current_shell=$(dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}')
+    
+    if [[ "$current_shell" == "$target_shell" ]]; then
+        log_info "Login shell already set to $target_shell"
+        return 0
+    fi
+    
+    log_info "Setting login shell to $target_shell..."
+    chsh -s "$target_shell"
+    log_success "Login shell updated (will take effect in new terminal)"
+}
+
+# =============================================================================
 # Main
 # =============================================================================
 main() {
@@ -325,6 +351,10 @@ main() {
     
     # Run darwin-rebuild
     run_darwin_rebuild
+    echo ""
+    
+    # Set login shell to Nix's zsh
+    set_login_shell
     
     echo ""
     echo "=== Bootstrap Complete ==="

@@ -8,10 +8,74 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # System packages (minimal for now)
-  environment.systemPackages = with pkgs; [
-    # Basic tools - more will be added in Phase 2
-  ];
+  # ==========================================================================
+  # Homebrew - managed by nix-darwin
+  # ==========================================================================
+  homebrew = {
+    enable = true;
+    
+    # Install Homebrew if not present
+    onActivation = {
+      autoUpdate = false;  # Don't auto-update on activation
+      cleanup = "zap";     # Remove packages not in this list
+      upgrade = false;     # Don't auto-upgrade
+    };
+
+    # Taps
+    taps = [
+      "dlvhdr/formulae"
+      "homebrew/autoupdate"
+    ];
+
+    # Brews - packages not in Nixpkgs or macOS-specific
+    brews = [
+      "asdf"              # Keep for compatibility
+      "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
+      "html2markdown"     # Not in nixpkgs
+      "mise"              # Runtime version manager
+      "mysql-client@8.0"  # Versioned package
+      "pinentry-mac"      # macOS-specific
+      "qemu"              # Large, keep in Homebrew
+      "dlvhdr/formulae/diffnav"
+    ];
+
+    # Casks - GUI applications
+    casks = [
+      "adobe-creative-cloud"
+      "affinity"
+      "android-studio"
+      "canva"
+      "chatgpt"
+      "claude"
+      "cursor"
+      "deepl"
+      "discord"
+      "discord@ptb"
+      "docker-desktop"
+      "dropbox"
+      "font-meslo-for-powerlevel10k"
+      "font-migu-1p"
+      "font-noto-sans-cjk"
+      "font-source-han-code-jp"
+      "font-source-han-sans-vf"
+      "gcloud-cli"
+      "ghostty"
+      "iterm2"
+      "jetbrains-toolbox"
+      "karabiner-elements"
+      "microsoft-auto-update"
+      "microsoft-office"
+      "notion"
+      "obs"
+      "omnidisksweeper"
+      "postman"
+      "sequel-ace"
+      "session-manager-plugin"
+      "snowflake-snowsql"
+      "visual-studio-code"
+      "vlc"
+    ];
+  };
 
   # ==========================================================================
   # Zsh configuration - ZDOTDIR setup
@@ -42,6 +106,8 @@
   system = {
     # Used for backwards compatibility
     stateVersion = 6;
+    # Required for homebrew and other user-specific options
+    primaryUser = username;
   };
 
   # The platform the configuration will be used on
@@ -51,7 +117,11 @@
   users.users.${username} = {
     name = username;
     home = "/Users/${username}";
+    shell = pkgs.zsh;  # Use Nix's zsh as default shell
   };
+
+  # Add Nix's zsh to /etc/shells
+  environment.shells = [ pkgs.zsh ];
 
   # Enable sudo with Touch ID
   security.pam.services.sudo_local.touchIdAuth = true;

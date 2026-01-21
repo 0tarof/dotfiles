@@ -12,9 +12,19 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 typeset -U path PATH
+
+# Nix paths (set by nix-darwin, must be preserved)
+__nix_paths=(
+  /etc/profiles/per-user/$USER/bin
+  /run/current-system/sw/bin
+  /nix/var/nix/profiles/default/bin
+)
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS specific paths
   path=(
+  $HOME/bin(N-/)
+  ${__nix_paths[@]}
   "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
   $HOMEBREW_PREFIX/opt/mysql-client@8.0/bin(N-/)
   $HOMEBREW_PREFIX/bin(N-/)
@@ -30,6 +40,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   # Linux paths
   path=(
+  $HOME/bin(N-/)
+  ${__nix_paths[@]}
   $HOMEBREW_PREFIX/bin(N-/)
   $HOMEBREW_PREFIX/sbin(N-/)
   /usr/local/bin(N-/)
@@ -40,14 +52,9 @@ else
   /sbin
   )
 fi
+unset __nix_paths
 
-# miseは.zshenvで初期化済み
-
-# miseが追加したパスを一旦PATHから削除し、$HOME/binの後に再配置
-path=(
-    $HOME/bin(N-/)
-    $path
-)
+# miseは.zshenvで初期化済み、パスは上記で設定済み
 
 if command -v gh &>/dev/null; then
   export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)"
