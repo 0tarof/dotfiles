@@ -471,26 +471,6 @@ in
   };
   
   # Bin scripts (except nix-rebuild which is defined inline above)
-  home.file."bin/brew-check" = {
-    source = ../bin/brew-check;
-    executable = true;
-  };
-  
-  home.file."bin/brew-cleanup" = {
-    source = ../bin/brew-cleanup;
-    executable = true;
-  };
-  
-  home.file."bin/brew-dump" = {
-    source = ../bin/brew-dump;
-    executable = true;
-  };
-  
-  home.file."bin/brew-install" = {
-    source = ../bin/brew-install;
-    executable = true;
-  };
-  
   home.file."bin/ch" = {
     source = ../bin/ch;
     executable = true;

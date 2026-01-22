@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-# Install packages from Brewfile
-brew bundle install

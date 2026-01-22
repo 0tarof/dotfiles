@@ -24,7 +24,6 @@
     # Taps
     taps = [
       "dlvhdr/formulae"
-      "homebrew/autoupdate"
     ];
 
     # Brews - packages not in Nixpkgs or macOS-specific
