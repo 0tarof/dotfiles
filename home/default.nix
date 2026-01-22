@@ -303,7 +303,18 @@ in
         if command -v claude &> /dev/null; then
           # Already installed - just update
           $VERBOSE_ECHO "Claude Code already installed, checking for updates..."
-          claude update 2>/dev/null || true
+          if [[ -n "''${VERBOSE_ECHO:-}" ]]; then
+            claude_update_err="$(mktemp)"
+            claude_update_status=0
+            claude update 2>"$claude_update_err" || claude_update_status=$?
+            if [[ "$claude_update_status" -ne 0 ]]; then
+              $VERBOSE_ECHO "Claude update failed with exit code $claude_update_status. Error output:"
+              cat "$claude_update_err" >&2
+            fi
+            rm -f "$claude_update_err"
+          else
+            claude update 2>/dev/null || true
+          fi
         else
           # Not installed - verify install.sh checksum before running
           $VERBOSE_ECHO "Installing Claude Code..."
