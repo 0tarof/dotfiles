@@ -12,18 +12,15 @@ aws = "latest"
 
 # [Node.js]
 node = "lts"
-pnpm = "latest"
 "npm:aws-cdk" = "latest"
 "npm:@openai/codex" = "latest"
 "npm:agent-browser" = "latest"
 
 # [Python]
 python = "3.13"
-uv = "latest"
 "pipx:snowflake-cli" = "latest"
 
 # [Rust]
 rust = "latest"
-"cargo:zellij" = "latest"
 "cargo:keifu" = "latest"
 "cargo:filetree" = "latest"

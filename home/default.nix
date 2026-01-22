@@ -264,7 +264,10 @@ in
 
     # Development tools
     # mise  # Keep in Homebrew for now (runtime version manager)
-    # qemu  # Large, keep in Homebrew if needed
+    qemu
+    zellij
+    uv
+    pnpm
   ];
 
   # ==========================================================================

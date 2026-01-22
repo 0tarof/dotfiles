@@ -29,13 +29,11 @@
 
     # Brews - packages not in Nixpkgs or macOS-specific
     brews = [
-      "asdf"              # Keep for compatibility
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "html2markdown"     # Not in nixpkgs
       "mise"              # Runtime version manager
       "mysql-client@8.0"  # Versioned package
       "pinentry-mac"      # macOS-specific
-      "qemu"              # Large, keep in Homebrew
       "dlvhdr/formulae/diffnav"
     ];
 
