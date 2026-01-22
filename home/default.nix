@@ -330,6 +330,7 @@ in
             echo "  curl -fsSL https://claude.ai/install.sh | bash"
             echo "============================================================"
             rm -f "$installer"
+            exit 1
           else
             # Run install.sh with all required dependencies in PATH (pure Nix, no system deps)
             PATH="${installerDeps}/bin:$PATH" ${pkgs.bash}/bin/bash "$installer"
