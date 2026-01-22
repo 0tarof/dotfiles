@@ -12,7 +12,6 @@ aws = "latest"
 
 # [Node.js]
 node = "lts"
-"npm:aws-cdk" = "latest"
 "npm:@openai/codex" = "latest"
 "npm:agent-browser" = "latest"
 

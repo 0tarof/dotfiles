@@ -250,6 +250,8 @@ in
     # aws-sam-cli  # May need Homebrew for macOS
     terraform
     k9s
+    nodePackages.aws-cdk
+    # snowflake-cli  # Build fails in nixpkgs, keep in mise
 
     # Media
     ffmpeg
