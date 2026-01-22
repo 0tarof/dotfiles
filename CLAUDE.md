@@ -4,29 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Personal dotfiles repository for managing macOS development environment configurations.
+Personal dotfiles repository for managing macOS/Linux development environment configurations using Nix, nix-darwin, and Home Manager.
 
 ## Commands
 
 ### Setup
 ```bash
-# Initial installation (creates symlinks and installs packages)
-./install.bash
-```
+# Initial installation (installs Nix, nix-darwin, Home Manager)
+./bootstrap.sh
 
-### Homebrew Management
-```bash
-# Save installed packages to Brewfile
-bin/brew-dump
-
-# Install packages from Brewfile
-bin/brew-install
-
-# Check differences between Brewfile and installed packages
-bin/brew-check
-
-# Remove unnecessary packages
-bin/brew-cleanup
+# Rebuild configuration after changes
+nix-rebuild
 ```
 
 ### Git Operations
@@ -39,35 +27,41 @@ bin/git-delete-merged-branch
 
 ### Directory Structure
 - `bin/`: Utility scripts
-- `lib/`: Common functions for installation scripts
-- `zsh/`: Zsh configs (uses Antidote plugin manager)
+- `zsh/`: Zsh theme file (.p10k.zsh)
+- `home/`: Home Manager configuration
+- `hosts/`: Host-specific configurations (darwin, linux)
 - `overlay/`: Environment-specific configs (gitignored, e.g., work PC)
+  - `overlay/nix/home.nix`: Environment-specific Home Manager config
   - `overlay/zsh/`: Environment-specific Zsh configurations
   - `overlay/bin/`: Environment-specific scripts
-- Root: Git config and Brewfile
+- `flake.nix`: Nix flake configuration
 
 ### Design Principles
-1. **Environment Separation**: Base and environment-specific configs separated via `overlay/`
-2. **Declarative Management**: Homebrew packages managed via `Brewfile`
-3. **Safety**: Backs up existing files during installation
+1. **Declarative Management**: All packages and configs managed via Nix
+2. **Environment Separation**: Base and environment-specific configs separated via `overlay/`
+3. **Reproducibility**: Nix ensures consistent environments across machines
 4. **Error Handling**: All scripts use `set -euo pipefail`
 
 ### Key Files
-- `install.bash`: Main setup script
-- `lib/functions.bash`: Shared functions for installation scripts
-- `Brewfile`: Base Homebrew package list
-- `overlay/Brewfile`: Environment-specific packages (if exists)
-- `overlay/install.bash`: Environment-specific setup script
-- `zsh/.zshrc`: Main Zsh config (loads overlay/.zshrc if exists)
-- `zsh/.zprofile`: Main Zsh profile (loads overlay/.zprofile if exists)
+- `bootstrap.sh`: Initial Nix setup script
+- `flake.nix`: Nix flake defining system configurations
+- `home/default.nix`: Home Manager user configuration
+- `hosts/darwin/default.nix`: macOS-specific system configuration (including Homebrew)
+- `overlay/nix/home.nix`: Environment-specific Home Manager config (if exists)
+
+### Nix Configuration
+- **nix-darwin**: Manages macOS system settings and Homebrew
+- **Home Manager**: Manages user packages and dotfiles
+- **programs.zsh**: Declarative Zsh configuration with Antidote plugin manager
 
 ## Development Notes
 
 1. Place new scripts in `bin/` with execute permissions
-2. Run `bin/brew-dump` after Brewfile changes to sync
+2. Add packages to `home/default.nix` under `home.packages`
 3. Always place environment-specific configs in `overlay/`
 4. Add proper error handling (`set -euo pipefail`) to scripts
-5. Zsh overlay configs:
+5. Run `nix-rebuild` after configuration changes
+6. Zsh overlay configs:
    - Create `overlay/zsh/.zshrc` for environment-specific shell config
    - Create `overlay/zsh/.zprofile` for environment-specific PATH/env setup
    - These files are automatically loaded by the main zsh configs
