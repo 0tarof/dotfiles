@@ -2,9 +2,8 @@
 
 set -euo pipefail
 
-# Resolve the actual script location (follow symlinks)
-SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+# DOTFILES_DIR is hardcoded since the script runs from Nix store symlink
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/projects/github.com/0tarof/dotfiles}"
 BREWFILE="${DOTFILES_DIR}/Brewfile"
 OVERLAY_BREWFILE="${DOTFILES_DIR}/overlay/Brewfile"
 TEMP_FILE="${BREWFILE}.tmp"
@@ -19,7 +18,7 @@ extract_header() {
 # overlay/Brewfileからパッケージリストを抽出
 extract_overlay_packages() {
     if [ -f "$OVERLAY_BREWFILE" ]; then
-        # tap, brew, cask, vsocdeなどのエントリを抽出
+        # tap, brew, cask, vscodeなどのエントリを抽出
         grep -E '^(tap|brew|cask|vscode|mas) ' "$OVERLAY_BREWFILE" 2>/dev/null || true
     fi
 }
@@ -34,7 +33,8 @@ brew bundle dump --force --file="$TEMP_FILE"
         echo "$header"
         echo ""
     fi
-    cat "$TEMP_FILE"
+    # vscode と go エントリを除外（Settings Sync / mise で管理）
+    grep -v -E '^(vscode|go) ' "$TEMP_FILE"
 } > "$BREWFILE.new"
 
 # overlay/Brewfileの内容を除外
