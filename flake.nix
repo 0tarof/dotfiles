@@ -51,6 +51,11 @@
     username = getEnvOr "NIX_USERNAME" defaultConfig.username;
     hostname = getEnvOr "NIX_HOSTNAME" defaultConfig.hostname;
 
+    # Dotfiles directory path (used for mkOutOfStoreSymlink)
+    # builtins.toString ./. で flake.nix のあるディレクトリの絶対パスを取得
+    # --impure フラグが必要（既に環境変数読み込みで使用中）
+    dotfilesDir = builtins.toString ./.;
+
     # Helper to optionally import overlay modules
     optionalOverlay = path: 
       if builtins.pathExists path
@@ -73,7 +78,7 @@
             useGlobalPkgs = true;
             useUserPackages = true;
             users.${username} = import ./home;
-            extraSpecialArgs = { inherit inputs username; };
+            extraSpecialArgs = { inherit inputs username dotfilesDir; };
           };
         }
       ]

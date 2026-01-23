@@ -1,7 +1,7 @@
 # ==========================================================================
 # Dotfiles - declarative symlinks managed by Home Manager
 # ==========================================================================
-{ config, lib, ... }:
+{ config, lib, dotfilesDir, ... }:
 
 let
   # Zsh overlay path
@@ -70,7 +70,7 @@ in
     recursive = true;
   };
   
-  home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/projects/github.com/0tarof/dotfiles/claude/settings.json";
+  home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/claude/settings.json";
   
   # ==========================================================================
   # Cursor configuration
