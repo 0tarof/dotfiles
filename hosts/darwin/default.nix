@@ -75,26 +75,17 @@
   };
 
   # ==========================================================================
-  # Zsh configuration - ZDOTDIR setup
+  # Zsh configuration
   # ==========================================================================
-  programs.zsh = {
-    enable = true;
-    # This writes to /etc/zshenv
-    interactiveShellInit = ''
-      export ZDOTDIR="$HOME/.config/zsh"
-    '';
-  };
+  programs.zsh.enable = true;
 
-  # Create /etc/zshenv with ZDOTDIR
+  # Nix daemon initialization in /etc/zshenv
   environment.etc."zshenv".text = ''
     # Nix
     if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
       . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
     fi
     # End Nix
-
-    # ZDOTDIR - managed by nix-darwin
-    export ZDOTDIR="$HOME/.config/zsh"
   '';
 
   # ==========================================================================

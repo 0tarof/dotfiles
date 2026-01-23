@@ -9,15 +9,21 @@ let
   hasZshOverlay = builtins.pathExists zshOverlayPath;
 in
 {
-  # Config directories -> ~/.config/*
-  # Note: zsh is managed by programs.zsh, only p10k theme file is symlinked
+  # ==========================================================================
+  # Zsh configuration files
+  # ==========================================================================
+  # p10k theme file (zsh is managed by programs.zsh)
   home.file.".config/zsh/.p10k.zsh".source = ../zsh/.p10k.zsh;
   
   # Overlay directory for company-specific zsh configs (if exists)
   home.file.".config/zsh/overlay" = lib.mkIf hasZshOverlay {
     source = zshOverlayPath;
+    recursive = true;
   };
-  
+
+  # ==========================================================================
+  # Config directories -> ~/.config/*
+  # ==========================================================================
   home.file.".config/tmux" = {
     source = ../tmux;
     recursive = true;
@@ -46,7 +52,9 @@ in
   # Git config in home directory
   home.file.".gitconfig".source = ../.gitconfig;
   
+  # ==========================================================================
   # Claude Code configuration
+  # ==========================================================================
   home.file.".claude/commands" = {
     source = ../claude/commands;
     recursive = true;
@@ -64,13 +72,17 @@ in
   
   home.file.".claude/settings.json".source = ../claude/settings.json;
   
+  # ==========================================================================
   # Cursor configuration
+  # ==========================================================================
   home.file.".cursor/commands" = {
     source = ../cursor/commands;
     recursive = true;
   };
   
+  # ==========================================================================
   # Bin scripts (except nix-rebuild which is defined in scripts.nix)
+  # ==========================================================================
   home.file."bin/ch" = {
     source = ../bin/ch;
     executable = true;

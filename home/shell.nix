@@ -1,7 +1,7 @@
 # ==========================================================================
 # Shell configuration - Zsh and Direnv
 # ==========================================================================
-{ config, lib, ... }:
+{ lib, ... }:
 
 {
   # ==========================================================================
@@ -17,13 +17,13 @@
   # ==========================================================================
   programs.zsh = {
     enable = true;
-    dotDir = "${config.xdg.configHome}/zsh";
+    # dotDir is not set - use default ~/.zshrc, ~/.zshenv, etc.
     
     # History settings
     history = {
       size = 65536;
       save = 65536;
-      path = "$HOME/.config/zsh/.zsh_history";
+      path = "$HOME/.zsh_history";
       extended = true;
       ignoreDups = true;
       ignoreSpace = true;
