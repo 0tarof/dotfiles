@@ -359,6 +359,19 @@ in
   # ==========================================================================
   # Custom scripts in ~/bin
   # ==========================================================================
+  # --------------------------------------------------------------------------
+  # nix-rebuild: darwin-rebuild のラッパースクリプト
+  # --------------------------------------------------------------------------
+  # .local/nix/config.nix を読み込み、環境変数として flake.nix に渡す。
+  # 
+  # この設計が必要な理由：
+  # - .local/ は gitignore 対象（マシン固有設定）
+  # - Nix flake は gitignore されたファイルに相対パスでアクセスできない
+  # - --impure でも `import ./.local/...` は失敗する
+  # - 環境変数 + builtins.getEnv が唯一の方法
+  #
+  # 詳細は flake.nix のコメントを参照。
+  # --------------------------------------------------------------------------
   home.file."bin/nix-rebuild" = {
     executable = true;
     text = ''
@@ -368,36 +381,28 @@ in
       DOTFILES_DIR="$HOME/projects/github.com/0tarof/dotfiles"
       CONFIG_FILE="$DOTFILES_DIR/.local/nix/config.nix"
 
-      # Load config
-      if [[ -f "$CONFIG_FILE" ]]; then
-          system=$(grep 'system\s*=' "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/')
-          username=$(grep 'username\s*=' "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/')
-          hostname=$(grep 'hostname\s*=' "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/')
-      else
+      get_config() {
+          grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/'
+      }
+
+      if [[ ! -f "$CONFIG_FILE" ]]; then
           echo "Error: Config not found. Run bootstrap.sh first."
           exit 1
       fi
 
-      export NIX_DARWIN_SYSTEM="$system"
-      export NIX_DARWIN_USERNAME="$username"
-      export NIX_DARWIN_HOSTNAME="$hostname"
+      NIX_SYSTEM=$(get_config "system")
+      NIX_USERNAME=$(get_config "username")
+      NIX_HOSTNAME=$(get_config "hostname")
 
-      echo "Rebuilding: $hostname ($system, user: $username)"
+      echo "Rebuilding: $NIX_HOSTNAME"
       
-      # Use darwin-rebuild directly if available (faster than nix run)
+      # --impure required: overlay/ is gitignored + builtins.getEnv usage
       if command -v darwin-rebuild &> /dev/null; then
-          sudo HOME="$HOME" \
-              NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
-              NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
-              NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
-              darwin-rebuild switch --flake "$DOTFILES_DIR#$hostname" --impure
+          sudo NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+              darwin-rebuild switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
       else
-          # Fallback to nix run (first time or if darwin-rebuild not in PATH)
-          sudo HOME="$HOME" \
-              NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
-              NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
-              NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
-              nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$hostname" --impure
+          sudo NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+              nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
       fi
     '';
   };

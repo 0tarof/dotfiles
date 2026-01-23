@@ -27,6 +27,10 @@ log_error() {
     echo -e "\033[0;31m[ERROR]\033[0m $*"
 }
 
+log_warning() {
+    echo -e "\033[0;33m[WARNING]\033[0m $*"
+}
+
 # =============================================================================
 # GitHub Token Setup (for API rate limit)
 # =============================================================================
@@ -218,7 +222,14 @@ get_config_value() {
     echo ""
 }
 
-export_nix_config() {
+# =============================================================================
+# 設定を環境変数として読み込み（Nix用）
+# =============================================================================
+# Nix flake は gitignore されたファイル（.local/, overlay/）に相対パスで
+# アクセスできない。環境変数 + builtins.getEnv が回避策。
+# 詳細は flake.nix のコメントを参照。
+# =============================================================================
+load_nix_config() {
     local config_file="$SCRIPT_DIR/.local/nix/config.nix"
     
     if [[ ! -f "$config_file" ]]; then
@@ -226,62 +237,35 @@ export_nix_config() {
         return 1
     fi
     
-    # Export config values as environment variables for Nix
-    export NIX_DARWIN_SYSTEM=$(get_config_value "system")
-    export NIX_DARWIN_USERNAME=$(get_config_value "username")
-    export NIX_DARWIN_HOSTNAME=$(get_config_value "hostname")
+    export NIX_SYSTEM=$(get_config_value "system")
+    export NIX_USERNAME=$(get_config_value "username")
+    export NIX_HOSTNAME=$(get_config_value "hostname")
     
     # Fallback to system detection if not in config
-    [[ -z "$NIX_DARWIN_SYSTEM" ]] && export NIX_DARWIN_SYSTEM=$(detect_system)
-    [[ -z "$NIX_DARWIN_USERNAME" ]] && export NIX_DARWIN_USERNAME=$(whoami)
-    [[ -z "$NIX_DARWIN_HOSTNAME" ]] && export NIX_DARWIN_HOSTNAME=$(hostname | sed 's/\.local$//')
+    [[ -z "$NIX_SYSTEM" ]] && export NIX_SYSTEM=$(detect_system)
+    [[ -z "$NIX_USERNAME" ]] && export NIX_USERNAME=$(whoami)
+    [[ -z "$NIX_HOSTNAME" ]] && export NIX_HOSTNAME=$(hostname | sed 's/\.local$//')
     
-    log_info "Nix config: system=$NIX_DARWIN_SYSTEM, user=$NIX_DARWIN_USERNAME, host=$NIX_DARWIN_HOSTNAME"
-}
-
-get_hostname() {
-    # Use exported variable if available, otherwise read from config
-    if [[ -n "${NIX_DARWIN_HOSTNAME:-}" ]]; then
-        echo "$NIX_DARWIN_HOSTNAME"
-        return
-    fi
-    
-    local value=$(get_config_value "hostname")
-    if [[ -n "$value" ]]; then
-        echo "$value"
-    else
-        hostname | sed 's/\.local$//'
-    fi
+    log_info "Config: hostname=$NIX_HOSTNAME, system=$NIX_SYSTEM, user=$NIX_USERNAME"
 }
 
 # =============================================================================
 # Darwin Rebuild
 # =============================================================================
 run_darwin_rebuild() {
-    local target_hostname
-    target_hostname=$(get_hostname)
-    
-    log_info "Target hostname: $target_hostname"
     log_info "Running darwin-rebuild switch (requires sudo for system activation)..."
     
-    # --impure is needed to read environment variables
-    # sudo with explicit HOME and environment variables preserved
-    local flake_ref="$SCRIPT_DIR#$target_hostname"
-    local user_home="$HOME"
+    # --impure is needed because overlay/ is gitignored and we use getEnv
+    local flake_ref="$SCRIPT_DIR#$NIX_HOSTNAME"
     
     if ! command -v darwin-rebuild &> /dev/null; then
-        # First time: use nix run for darwin-rebuild
         log_info "First time setup: bootstrapping nix-darwin..."
-        sudo HOME="$user_home" NIX_CONFIG="${NIX_CONFIG:-}" \
-            NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
-            NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
-            NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
+        sudo NIX_CONFIG="${NIX_CONFIG:-}" \
+            NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
             nix run nix-darwin -- switch --flake "$flake_ref" --impure
     else
-        sudo HOME="$user_home" NIX_CONFIG="${NIX_CONFIG:-}" \
-            NIX_DARWIN_SYSTEM="$NIX_DARWIN_SYSTEM" \
-            NIX_DARWIN_USERNAME="$NIX_DARWIN_USERNAME" \
-            NIX_DARWIN_HOSTNAME="$NIX_DARWIN_HOSTNAME" \
+        sudo NIX_CONFIG="${NIX_CONFIG:-}" \
+            NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
             darwin-rebuild switch --flake "$flake_ref" --impure
     fi
     
@@ -345,8 +329,8 @@ main() {
     log_success "Nix is already installed"
     echo ""
     
-    # Export config as environment variables for Nix
-    export_nix_config
+    # Load config as environment variables for Nix
+    load_nix_config
     echo ""
     
     # Run darwin-rebuild

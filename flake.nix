@@ -18,30 +18,38 @@
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
   let
     # ==========================================================================
-    # Configuration loading with overlay support
+    # 環境変数経由での設定読み込み
+    # ==========================================================================
+    # 
+    # なぜ環境変数を使うのか？
+    # ------------------------
+    # マシン固有の設定は .local/nix/config.nix に保存される（gitignore対象）。
+    # Nix flake は --impure フラグを使っても、gitignore されたファイルには
+    # 相対パス（./.local/nix/config.nix など）でアクセスできない。
+    # 
+    # そのため、nix-rebuild スクリプトが .local/nix/config.nix を読み込み、
+    # 環境変数（NIX_SYSTEM, NIX_USERNAME, NIX_HOSTNAME）として渡す。
+    # builtins.getEnv の使用には --impure フラグが必要。
+    #
+    # ※ `import ./.local/...` へのリファクタリングは不可能。
+    #   gitignore されたファイルは flake のソースツリーに含まれないため。
     # ==========================================================================
     
-    # Default configuration (for personal machines)
+    # デフォルト設定（個人マシン用）
     defaultConfig = {
       system = "aarch64-darwin";
       username = "otaro";
       hostname = "personal-mac";
     };
 
-    # Load config from environment variables (set by bootstrap.sh) or use defaults
-    # This requires --impure flag
-    envConfig = {
-      system = let v = builtins.getEnv "NIX_DARWIN_SYSTEM"; in if v != "" then v else null;
-      username = let v = builtins.getEnv "NIX_DARWIN_USERNAME"; in if v != "" then v else null;
-      hostname = let v = builtins.getEnv "NIX_DARWIN_HOSTNAME"; in if v != "" then v else null;
-    };
+    # 環境変数から設定を読み込み、なければデフォルト値を使用
+    getEnvOr = name: default:
+      let val = builtins.getEnv name;
+      in if val != "" then val else default;
 
-    # Merge: env vars override defaults
-    config = defaultConfig // (builtins.removeAttrs envConfig (
-      builtins.filter (k: envConfig.${k} == null) (builtins.attrNames envConfig)
-    ));
-
-    inherit (config) system username hostname;
+    system = getEnvOr "NIX_SYSTEM" defaultConfig.system;
+    username = getEnvOr "NIX_USERNAME" defaultConfig.username;
+    hostname = getEnvOr "NIX_HOSTNAME" defaultConfig.hostname;
 
     # Helper to optionally import overlay modules
     optionalOverlay = path: 
