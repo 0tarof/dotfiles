@@ -27,6 +27,15 @@ in
   # Let Home Manager manage itself
   programs.home-manager.enable = true;
 
+
+  # ==========================================================================
+  # Direnv - 宣言的に管理、nix-direnv で Nix 開発環境を高速化
+  # ==========================================================================
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;  # use nix-shell キャッシュで高速化
+  };
+
   # ==========================================================================
   # Zsh - Declarative shell configuration
   # ==========================================================================
@@ -166,8 +175,6 @@ in
         DISABLE_AUTO_UPDATE="true"
         DISABLE_MAGIC_FUNCTIONS="true"
 
-        # direnv integration
-        eval "$(direnv hook zsh)"
 
         # asdf completion
         fpath=(''${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
@@ -239,7 +246,6 @@ in
     # Shell & Terminal
     # zsh  # Managed by programs.zsh
     tmux
-    direnv
 
     # Editors
     neovim
