@@ -388,7 +388,7 @@ in
       CONFIG_FILE="$DOTFILES_DIR/.local/nix/config.nix"
 
       get_config() {
-          grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/'
+          grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/' | head -1
       }
 
       if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -404,10 +404,10 @@ in
       
       # --impure required: overlay/ is gitignored + builtins.getEnv usage
       if command -v darwin-rebuild &> /dev/null; then
-          sudo NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+          sudo HOME="$HOME" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
               darwin-rebuild switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
       else
-          sudo NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+          sudo HOME="$HOME" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
               nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
       fi
     '';
