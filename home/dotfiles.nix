@@ -43,7 +43,12 @@ in
     source = ../ghostty;
     recursive = true;
   };
-  
+
+  home.file.".config/zellij" = {
+    source = ../zellij;
+    recursive = true;
+  };
+
   home.file.".config/nvim" = {
     source = ../nvim;
     recursive = true;

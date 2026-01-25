@@ -1,0 +1,15 @@
+// Zellij Configuration
+// https://zellij.dev/documentation/configuration
+
+// Enable mouse mode to properly handle mouse events
+mouse_mode true
+
+// UI settings
+simplified_ui true
+pane_frames true
+
+// Default mode
+default_mode "normal"
+
+// Copy on select
+copy_on_select true
