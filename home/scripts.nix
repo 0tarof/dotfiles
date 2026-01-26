@@ -44,20 +44,20 @@ in
     in
     lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [[ -z "''${DRY_RUN:-}" ]]; then
-        if command -v claude &> /dev/null; then
+        if [[ -x "$HOME/.local/bin/claude" ]]; then
           # Already installed - just update
           $VERBOSE_ECHO "Claude Code already installed, checking for updates..."
           if [[ -n "''${VERBOSE_ECHO:-}" ]]; then
             claude_update_err="$(mktemp)"
             claude_update_status=0
-            claude update 2>"$claude_update_err" || claude_update_status=$?
+            PATH="$HOME/.local/bin:$PATH" claude update 2>"$claude_update_err" || claude_update_status=$?
             if [[ "$claude_update_status" -ne 0 ]]; then
               $VERBOSE_ECHO "Claude update failed with exit code $claude_update_status. Error output:"
               cat "$claude_update_err" >&2
             fi
             rm -f "$claude_update_err"
           else
-            claude update 2>/dev/null || true
+            PATH="$HOME/.local/bin:$PATH" claude update 2>/dev/null || true
           fi
         else
           # Not installed - verify install.sh checksum before running
@@ -88,7 +88,8 @@ in
             exit 1
           else
             # Run install.sh with all required dependencies in PATH (pure Nix, no system deps)
-            PATH="${installerDeps}/bin:$PATH" ${pkgs.bash}/bin/bash "$installer"
+            # Include ~/.local/bin so installer doesn't warn about PATH
+            PATH="$HOME/.local/bin:${installerDeps}/bin:$PATH" ${pkgs.bash}/bin/bash "$installer"
             rm -f "$installer"
           fi
         fi
