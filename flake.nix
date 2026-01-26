@@ -57,9 +57,12 @@
     dotfilesDir = builtins.toString ./.;
 
     # Helper to optionally import overlay modules
-    optionalOverlay = path: 
-      if builtins.pathExists path
-      then [ path ]
+    # overlay/ is gitignored, so we must use absolute path with --impure
+    # Nix module system accepts absolute path strings directly
+    optionalOverlay = relativePath: 
+      let absolutePath = dotfilesDir + "/" + relativePath;
+      in if builtins.pathExists absolutePath
+      then [ absolutePath ]
       else [ ];
 
   in
@@ -83,7 +86,8 @@
         }
       ]
       # Overlay darwin configuration (company-specific)
-      ++ optionalOverlay ./overlay/nix/darwin.nix;
+      # Uses absolute path because overlay/ is gitignored
+      ++ optionalOverlay "overlay/nix/darwin.nix";
     };
 
     # ==========================================================================
