@@ -142,6 +142,9 @@ in
           sudo HOME="$HOME" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
               nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
       fi
+
+      echo "Installing mise tools..."
+      mise install
     '';
   };
 
