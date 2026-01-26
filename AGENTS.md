@@ -60,7 +60,7 @@ bin/git-delete-merged-branch
 2. Add packages to `home/default.nix` under `home.packages`
 3. Always place environment-specific configs in `overlay/`
 4. Add proper error handling (`set -euo pipefail`) to scripts
-5. Run `nix-rebuild` after configuration changes
+5. **Commit before nix-rebuild**: Nix flake requires changes to be committed before `nix-rebuild` can see them (gitignored files are not accessible to flake)
 6. Zsh overlay configs:
    - Create `overlay/zsh/.zshrc` for environment-specific shell config
    - Create `overlay/zsh/.zprofile` for environment-specific PATH/env setup
