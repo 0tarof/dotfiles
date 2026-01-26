@@ -51,10 +51,11 @@
     username = getEnvOr "NIX_USERNAME" defaultConfig.username;
     hostname = getEnvOr "NIX_HOSTNAME" defaultConfig.hostname;
 
-    # Dotfiles directory path (used for mkOutOfStoreSymlink)
-    # builtins.toString ./. で flake.nix のあるディレクトリの絶対パスを取得
+    # Dotfiles directory path (used for mkOutOfStoreSymlink and overlay imports)
+    # builtins.toString ./. returns /nix/store/... path which doesn't contain gitignored files
+    # So we use environment variable set by nix-rebuild script instead
     # --impure フラグが必要（既に環境変数読み込みで使用中）
-    dotfilesDir = builtins.toString ./.;
+    dotfilesDir = getEnvOr "DOTFILES_DIR" (builtins.toString ./.);
 
     # Helper to optionally import overlay modules
     # overlay/ is gitignored, so we must use absolute path with --impure

@@ -4,11 +4,11 @@
 
 [credential "https://github.com"]
 	helper = 
-	helper = !/usr/bin/env gh auth git-credential
+	helper = !~/bin/gh-credential-helper
 
 [credential "https://gist.github.com"]
 	helper = 
-	helper = !/usr/bin/env gh auth git-credential
+	helper = !~/bin/gh-credential-helper
 
 [ghq]
 	root = ~/projects

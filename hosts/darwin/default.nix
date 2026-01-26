@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ config, lib, pkgs, username, ... }:
 
 {
   # Nix settings
@@ -113,4 +113,42 @@
 
   # Enable sudo with Touch ID
   security.pam.services.sudo_local.touchIdAuth = true;
+
+  # ==========================================================================
+  # Homebrew activation script override
+  # ==========================================================================
+  # Move homebrew bundle to postActivation so it runs AFTER home-manager
+  # This ensures ~/bin/gh-credential-helper exists for private tap authentication
+  system.activationScripts.homebrew.text = lib.mkForce ''
+    # Homebrew bundle moved to postActivation (after home-manager)
+    # to ensure credential helper is available for private taps
+  '';
+
+  system.activationScripts.postActivation.text = let
+    cfg = config.homebrew;
+    userProfileBin = "/etc/profiles/per-user/${username}/bin";
+    userHomeBin = "/Users/${username}/bin";
+  in lib.mkAfter ''
+    # Homebrew Bundle (moved here to run after home-manager activation)
+    echo >&2 "Homebrew bundle..."
+    if [ -f "${cfg.brewPrefix}/brew" ]; then
+      # Get GitHub API token from gh CLI if available (for private taps)
+      # Run as user since gh auth config is in user's home directory
+      HOMEBREW_GITHUB_API_TOKEN=""
+      if [ -x "${userProfileBin}/gh" ]; then
+        HOMEBREW_GITHUB_API_TOKEN=$(sudo --user=${lib.escapeShellArg cfg.user} --set-home "${userProfileBin}/gh" auth token 2>/dev/null || true)
+      fi
+      
+      PATH="${cfg.brewPrefix}:${lib.makeBinPath [ pkgs.mas ]}:${userProfileBin}:${userHomeBin}:$PATH" \
+      HOMEBREW_GITHUB_API_TOKEN="$HOMEBREW_GITHUB_API_TOKEN" \
+      sudo \
+        --preserve-env=PATH,HOMEBREW_GITHUB_API_TOKEN \
+        --user=${lib.escapeShellArg cfg.user} \
+        --set-home \
+        env \
+        ${cfg.onActivation.brewBundleCmd}
+    else
+      echo -e "\e[1;31merror: Homebrew is not installed, skipping...\e[0m" >&2
+    fi
+  '';
 }
