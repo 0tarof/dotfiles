@@ -1,67 +1,68 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルは、Claude Code (claude.ai/code) がこのリポジトリで作業する際のガイダンスを提供します。
 
-## Overview
+## 概要
 
-Personal dotfiles repository for managing macOS/Linux development environment configurations using Nix, nix-darwin, and Home Manager.
+Nix、nix-darwin、Home Manager を使用して macOS/Linux 開発環境の設定を管理する個人用 dotfiles リポジトリです。
 
-## Commands
+## コマンド
 
-### Setup
+### セットアップ
 ```bash
-# Initial installation (installs Nix, nix-darwin, Home Manager)
+# 初期インストール（Nix、nix-darwin、Home Manager をインストール）
 ./bootstrap.sh
 
-# Rebuild configuration after changes
+# 設定変更後の再ビルド
 nix-rebuild
 ```
 
-### Git Operations
+### Git 操作
 ```bash
-# Delete merged branches
+# マージ済みブランチの削除
 bin/git-delete-merged-branch
 ```
 
-## Architecture
+## アーキテクチャ
 
-### Directory Structure
-- `bin/`: Utility scripts
-- `zsh/`: Zsh theme file (.p10k.zsh)
-- `home/`: Home Manager configuration
-- `hosts/`: Host-specific configurations (darwin, linux)
-- `overlay/`: Environment-specific configs (gitignored, e.g., work PC)
-  - `overlay/nix/home.nix`: Environment-specific Home Manager config
-  - `overlay/zsh/`: Environment-specific Zsh configurations
-  - `overlay/bin/`: Environment-specific scripts
-- `flake.nix`: Nix flake configuration
+### ディレクトリ構造
+- `bin/`: ユーティリティスクリプト
+- `zsh/`: Zsh テーマファイル (.p10k.zsh)
+- `home/`: Home Manager 設定
+- `hosts/`: ホスト固有の設定（darwin、linux）
+- `overlay/`: 環境固有の設定（gitignore対象、例：会社PC）
+  - `overlay/nix/home.nix`: 環境固有の Home Manager 設定
+  - `overlay/zsh/`: 環境固有の Zsh 設定
+  - `overlay/bin/`: 環境固有のスクリプト
+- `flake.nix`: Nix flake 設定
 
-### Design Principles
-1. **Declarative Management**: All packages and configs managed via Nix
-2. **Environment Separation**: Base and environment-specific configs separated via `overlay/`
-3. **Reproducibility**: Nix ensures consistent environments across machines
-4. **Error Handling**: All scripts use `set -euo pipefail`
+### 設計原則
+1. **宣言的管理**: すべてのパッケージと設定を Nix で管理
+2. **環境分離**: ベースと環境固有の設定を `overlay/` で分離
+3. **再現性**: Nix がマシン間で一貫した環境を保証
+4. **エラーハンドリング**: すべてのスクリプトで `set -euo pipefail` を使用
 
-### Key Files
-- `bootstrap.sh`: Initial Nix setup script
-- `flake.nix`: Nix flake defining system configurations
-- `home/default.nix`: Home Manager user configuration
-- `hosts/darwin/default.nix`: macOS-specific system configuration (including Homebrew)
-- `overlay/nix/home.nix`: Environment-specific Home Manager config (if exists)
+### 主要ファイル
+- `bootstrap.sh`: 初期 Nix セットアップスクリプト
+- `flake.nix`: システム設定を定義する Nix flake
+- `home/default.nix`: Home Manager ユーザー設定
+- `hosts/darwin/default.nix`: macOS 固有のシステム設定（Homebrew を含む）
+- `overlay/nix/home.nix`: 環境固有の Home Manager 設定（存在する場合）
 
-### Nix Configuration
-- **nix-darwin**: Manages macOS system settings and Homebrew
-- **Home Manager**: Manages user packages and dotfiles
-- **programs.zsh**: Declarative Zsh configuration with Antidote plugin manager
+### Nix 設定
+- **nix-darwin**: macOS システム設定と Homebrew を管理
+- **Home Manager**: ユーザーパッケージと dotfiles を管理
+- **programs.zsh**: Antidote プラグインマネージャーを使用した宣言的 Zsh 設定
 
-## Development Notes
+## 開発メモ
 
-1. Place new scripts in `bin/` with execute permissions
-2. Add packages to `home/default.nix` under `home.packages`
-3. Always place environment-specific configs in `overlay/`
-4. Add proper error handling (`set -euo pipefail`) to scripts
-5. **Commit before nix-rebuild**: Nix flake requires changes to be committed before `nix-rebuild` can see them (gitignored files are not accessible to flake)
-6. Zsh overlay configs:
-   - Create `overlay/zsh/.zshrc` for environment-specific shell config
-   - Create `overlay/zsh/.zprofile` for environment-specific PATH/env setup
-   - These files are automatically loaded by the main zsh configs
+1. 新しいスクリプトは `bin/` に実行権限付きで配置
+2. パッケージは `home/default.nix` の `home.packages` に追加
+3. 環境固有の設定は必ず `overlay/` に配置
+4. スクリプトには適切なエラーハンドリング（`set -euo pipefail`）を追加
+5. **コミットしてから nix-rebuild**: Nix flake は変更がコミットされないと認識できない（gitignore されたファイルは flake からアクセス不可）
+6. Zsh overlay 設定:
+   - 環境固有のシェル設定は `overlay/zsh/.zshrc` を作成
+   - 環境固有の PATH/env 設定は `overlay/zsh/.zprofile` を作成
+   - これらのファイルはメインの zsh 設定から自動的に読み込まれる
+7. **変更を入れたら動作確認を優先**: 設定変更後は謝罪や説明の前にまず `nix-rebuild` を実行して動作確認すること
