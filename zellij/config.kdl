@@ -1,8 +1,13 @@
 // Zellij Configuration
 // https://zellij.dev/documentation/configuration
 
-// Enable mouse mode to properly handle mouse events
-mouse_mode true
+// DISABLED: Mouse mode causes escape sequence leaks in v0.43.1
+// マウスモード無効化: v0.43.1でエスケープシーケンスが漏洩する既知のバグ対策
+// Issue: https://github.com/zellij-org/zellij/discussions/4445
+// Related: wezterm/wezterm#7076 (termwiz library issue)
+// Note: TUI applications (vim, htop, etc.) still support mouse through Ghostty
+// 注意: TUIアプリ (vim, htop等) のマウス機能はGhostty経由で引き続き動作します
+mouse_mode false
 
 // UI settings
 simplified_ui true
