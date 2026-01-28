@@ -1,6 +1,9 @@
 // Zellij Configuration
 // https://zellij.dev/documentation/configuration
 
+// Theme - Match Ghostty's Solarized Light
+theme "solarized-light"
+
 // DISABLED: Mouse mode causes escape sequence leaks in v0.43.1
 // マウスモード無効化: v0.43.1でエスケープシーケンスが漏洩する既知のバグ対策
 // Issue: https://github.com/zellij-org/zellij/discussions/4445
