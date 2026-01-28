@@ -1,11 +1,12 @@
 # ==========================================================================
 # Home Manager configuration - Main entry point
 # ==========================================================================
-{ username, ... }:
+{ username, dotfilesDir, ... }:
 
 let
   # Helper to optionally import overlay modules
-  overlayPath = ../overlay/nix/home.nix;
+  # Use absolute path from dotfilesDir because overlay/ is gitignored
+  overlayPath = dotfilesDir + "/overlay/nix/home.nix";
   hasOverlay = builtins.pathExists overlayPath;
 in
 {
