@@ -62,6 +62,7 @@
       "karabiner-elements"
       "microsoft-auto-update"
       "microsoft-office"
+      "mysqlworkbench"
       "notion"
       "obs"
       "omnidisksweeper"
@@ -69,6 +70,7 @@
       "sequel-ace"
       "session-manager-plugin"
       "snowflake-snowsql"
+      "tableplus"
       "visual-studio-code"
       "vlc"
     ];
