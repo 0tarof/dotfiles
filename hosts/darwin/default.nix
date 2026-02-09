@@ -44,6 +44,7 @@
       "canva"
       "chatgpt"
       "claude"
+      "codex-app"
       "cursor"
       "deepl"
       "discord"
