@@ -50,6 +50,7 @@
       "discord"
       "discord@ptb"
       "docker-desktop"
+      "dotnet-sdk"
       "dropbox"
       "font-meslo-for-powerlevel10k"
       "font-migu-1p"
