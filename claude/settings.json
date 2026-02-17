@@ -9,7 +9,13 @@
       "Read(//Users/a14993/**)",
       "mcp__chrome-devtools__*",
       "WebSearch",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(go test:*)",
+      "Bash(git push)",
+      "Bash(gh pr view:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr list:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
@@ -26,7 +32,7 @@
       "Read(id_ed25519)",
       "Write(.env*)"
     ],
-    "defaultMode": "plan"
+    "defaultMode": "acceptEdits"
   },
   "model": "opus",
   "enabledPlugins": {

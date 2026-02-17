@@ -256,6 +256,9 @@ mise.toml
 **/.claude/settings.local.json
 .mcp.json
 
+# OpenAI Codex
+.codex
+
 # Worktrees
 /worktrees/
 
