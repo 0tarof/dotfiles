@@ -116,8 +116,9 @@
   # Add Nix's zsh to /etc/shells
   environment.shells = [ pkgs.zsh ];
 
-  # Enable sudo with Touch ID
+  # Enable sudo with Touch ID (reattach enables Touch ID inside tmux)
   security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.reattach = true;
 
   # ==========================================================================
   # Homebrew activation script override
