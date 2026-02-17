@@ -31,6 +31,7 @@
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "html2markdown"     # Not in nixpkgs
       "mise"              # Runtime version manager
+      "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
       "pinentry-mac"      # macOS-specific
       "dlvhdr/formulae/diffnav"
