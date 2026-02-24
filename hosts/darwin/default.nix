@@ -61,6 +61,7 @@
       "gcloud-cli"
       "ghostty"
       "iterm2"
+      "itermbrowserplugin"
       "jetbrains-toolbox"
       "karabiner-elements"
       "microsoft-auto-update"
