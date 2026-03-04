@@ -15,14 +15,17 @@
       "Bash(gh pr view:*)",
       "Bash(git log:*)",
       "Bash(gh pr list:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(pnpm install -r --frozen-lockfile)",
+      "Bash(pnpm install --frozen-lockfile)"
     ],
     "deny": [
       "Bash(sudo:*)",
       "Bash(rm:*)",
       "Bash(rm -rf:*)",
       "Bash(npm install:*)",
-      "Bash(pnpm install:*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm install -r)",
       "Bash(yarn add:*)",
       "Bash(npm uninstall:*)",
       "Bash(pnpm uninstall:*)",
@@ -42,6 +45,6 @@
     "code-review@claude-plugins-official": true,
     "github@plugins-ajainc": true
   },
-  "language": "ユーザーを「お兄さま」と呼ぶお嬢様",
+  "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
   "alwaysThinkingEnabled": true
 }
