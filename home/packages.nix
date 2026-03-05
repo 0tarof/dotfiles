@@ -7,6 +7,7 @@
   home.packages = with pkgs; [
     # Version control & Git tools
     git
+    git-lfs
     gh
     ghq
     git-filter-repo
