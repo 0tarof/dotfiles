@@ -51,6 +51,7 @@
 
     # Development tools
     # mise  # Keep in Homebrew for now (runtime version manager)
+    devbox
     qemu
     zellij
     uv
