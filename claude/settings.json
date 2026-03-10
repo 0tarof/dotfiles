@@ -18,7 +18,8 @@
       "Bash(sqlite3:*)",
       "Bash(pnpm install -r --frozen-lockfile)",
       "Bash(pnpm install --frozen-lockfile)",
-      "Bash(difit:*)"
+      "Bash(difit:*)",
+      "Bash(git fetch origin:*)"
     ],
     "deny": [
       "Bash(sudo:*)",
