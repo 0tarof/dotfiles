@@ -19,5 +19,8 @@ Thumbs.db
 # Neovim
 nvim/.netrwhist
 
+# Zsh plugin manager (managed at runtime)
+zsh/.antidote/
+
 # Claude skills - Snowflake schema (contains sensitive database structure)
 claude/skills/snowflake-query/schema.json

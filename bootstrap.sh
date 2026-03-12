@@ -305,8 +305,13 @@ set_login_shell() {
     if [[ "$(uname -s)" == "Darwin" ]]; then
         target_shell="/run/current-system/sw/bin/zsh"
     else
-        # Linux/WSL: zsh is managed by home-manager in the user profile
-        target_shell="/etc/profiles/per-user/$USER/bin/zsh"
+        # Linux/WSL: zsh is managed by home-manager
+        # Prefer /etc/profiles path (NixOS), fallback to ~/.nix-profile
+        if [[ -x "/etc/profiles/per-user/$USER/bin/zsh" ]]; then
+            target_shell="/etc/profiles/per-user/$USER/bin/zsh"
+        else
+            target_shell="$HOME/.nix-profile/bin/zsh"
+        fi
     fi
 
     # Check if target shell exists
