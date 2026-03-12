@@ -185,6 +185,21 @@
         # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
         [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
+        # Fix git core.bare=true caused by worktree + extensions.worktreeConfig
+        # libgit2 (used by gitstatus/p10k) doesn't read .git/config.worktree,
+        # so core.bare=true in .git/config breaks branch display.
+        _fix_git_core_bare() {
+          local git_dir
+          git_dir="$(git rev-parse --git-dir 2>/dev/null)" || return
+          [[ -f "$git_dir/config.worktree" ]] || return
+          if [[ "$(git config --file "$git_dir/config" core.bare 2>/dev/null)" == "true" ]]; then
+            git config --file "$git_dir/config" core.bare false
+          fi
+        }
+        autoload -Uz add-zsh-hook
+        add-zsh-hook chpwd _fix_git_core_bare
+        _fix_git_core_bare  # 初回シェル起動時にも実行
+
         # Ensure $HOME/bin comes before mise shims in PATH
         typeset -U path PATH
         path=(
