@@ -254,45 +254,86 @@ load_nix_config() {
 # =============================================================================
 run_darwin_rebuild() {
     log_info "Running darwin-rebuild switch (requires sudo for system activation)..."
-    
+
     # --impure is needed because overlay/ is gitignored and we use getEnv
     local flake_ref="$SCRIPT_DIR#$NIX_HOSTNAME"
-    
+
     if ! command -v darwin-rebuild &> /dev/null; then
         log_info "First time setup: bootstrapping nix-darwin..."
-        sudo NIX_CONFIG="${NIX_CONFIG:-}" \
+        sudo NIX_CONFIG="${NIX_CONFIG:-}" DOTFILES_DIR="$SCRIPT_DIR" \
             NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
             nix run nix-darwin -- switch --flake "$flake_ref" --impure
     else
-        sudo NIX_CONFIG="${NIX_CONFIG:-}" \
+        sudo NIX_CONFIG="${NIX_CONFIG:-}" DOTFILES_DIR="$SCRIPT_DIR" \
             NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
             darwin-rebuild switch --flake "$flake_ref" --impure
     fi
-    
+
     log_success "darwin-rebuild completed"
+}
+
+# =============================================================================
+# Linux/WSL Rebuild (standalone home-manager)
+# =============================================================================
+run_linux_rebuild() {
+    log_info "Running home-manager switch (Linux/WSL)..."
+
+    # --impure is needed because overlay/ is gitignored and we use getEnv
+    local flake_ref="$SCRIPT_DIR#$NIX_USERNAME@$NIX_HOSTNAME"
+
+    if ! command -v home-manager &> /dev/null; then
+        log_info "home-manager not found, bootstrapping via nix run..."
+        NIX_CONFIG="${NIX_CONFIG:-}" DOTFILES_DIR="$SCRIPT_DIR" \
+            NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+            nix run home-manager/master -- switch --flake "$flake_ref" --impure
+    else
+        NIX_CONFIG="${NIX_CONFIG:-}" DOTFILES_DIR="$SCRIPT_DIR" \
+            NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+            home-manager switch --flake "$flake_ref" --impure
+    fi
+
+    log_success "home-manager switch completed"
 }
 
 # =============================================================================
 # Set Login Shell
 # =============================================================================
 set_login_shell() {
-    local target_shell="/run/current-system/sw/bin/zsh"
-    
+    local target_shell
+
+    # Determine Nix-managed zsh path based on OS
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        target_shell="/run/current-system/sw/bin/zsh"
+    else
+        # Linux/WSL: zsh is managed by home-manager in the user profile
+        target_shell="/etc/profiles/per-user/$USER/bin/zsh"
+    fi
+
     # Check if target shell exists
     if [[ ! -x "$target_shell" ]]; then
         log_info "Nix zsh not found at $target_shell, skipping login shell setup"
         return 0
     fi
-    
+
     # Get current login shell
     local current_shell
-    current_shell=$(dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}')
-    
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        current_shell=$(dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}')
+    else
+        current_shell=$(getent passwd "$USER" | cut -d: -f7)
+    fi
+
     if [[ "$current_shell" == "$target_shell" ]]; then
         log_info "Login shell already set to $target_shell"
         return 0
     fi
-    
+
+    # Ensure the shell is in /etc/shells (required by chsh)
+    if ! grep -qxF "$target_shell" /etc/shells 2>/dev/null; then
+        log_info "Adding $target_shell to /etc/shells..."
+        echo "$target_shell" | sudo tee -a /etc/shells > /dev/null
+    fi
+
     log_info "Setting login shell to $target_shell..."
     chsh -s "$target_shell"
     log_success "Login shell updated (will take effect in new terminal)"
@@ -332,11 +373,15 @@ main() {
     # Load config as environment variables for Nix
     load_nix_config
     echo ""
-    
-    # Run darwin-rebuild
-    run_darwin_rebuild
+
+    # Run rebuild based on OS
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        run_darwin_rebuild
+    else
+        run_linux_rebuild
+    fi
     echo ""
-    
+
     # Set login shell to Nix's zsh
     set_login_shell
     

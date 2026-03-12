@@ -1,13 +1,15 @@
 # ==========================================================================
 # Home Manager configuration - Main entry point
 # ==========================================================================
-{ username, dotfilesDir, ... }:
+{ username, dotfilesDir, pkgs, ... }:
 
 let
   # Helper to optionally import overlay modules
   # Use absolute path from dotfilesDir because overlay/ is gitignored
   overlayPath = dotfilesDir + "/overlay/nix/home.nix";
   hasOverlay = builtins.pathExists overlayPath;
+
+  homeDir = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
 in
 {
   # ==========================================================================
@@ -15,7 +17,7 @@ in
   # ==========================================================================
   home.stateVersion = "24.11";
   home.username = username;
-  home.homeDirectory = "/Users/${username}";
+  home.homeDirectory = homeDir;
 
   # Let Home Manager manage itself
   programs.home-manager.enable = true;

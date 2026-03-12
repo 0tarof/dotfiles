@@ -120,7 +120,7 @@
         export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)"
       fi
 
-      HOMEBREW_BUNDLE_FILE="$HOME/.dotfiles/Brewfile"
+      HOMEBREW_BUNDLE_FILE="$HOME/projects/github.com/0tarof/dotfiles/Brewfile"
       export PATH HOMEBREW_BUNDLE_FILE HOMEBREW_PREFIX HOMEBREW_CELLAR HOMEBREW_REPOSITORY
 
       # Load overlay configuration if exists

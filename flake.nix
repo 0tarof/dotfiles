@@ -66,38 +66,56 @@
       then [ absolutePath ]
       else [ ];
 
+    isDarwin = nixpkgs.lib.hasSuffix "-darwin" system;
+    isLinux  = nixpkgs.lib.hasSuffix "-linux" system;
+
   in
   {
-    # nix-darwin configuration
-    darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-      inherit system;
-      specialArgs = { inherit inputs username; };
-      modules = [
-        ./hosts/darwin
+    # nix-darwin configuration (macOS only)
+    darwinConfigurations = nixpkgs.lib.optionalAttrs isDarwin {
+      ${hostname} = nix-darwin.lib.darwinSystem {
+        inherit system;
+        specialArgs = { inherit inputs username; };
+        modules = [
+          ./hosts/darwin
 
-        # home-manager module
-        home-manager.darwinModules.home-manager
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            users.${username} = import ./home;
-            extraSpecialArgs = { inherit inputs username dotfilesDir; };
-          };
-        }
-      ]
-      # Overlay darwin configuration (company-specific)
-      # Uses absolute path because overlay/ is gitignored
-      ++ optionalOverlay "overlay/nix/darwin.nix";
+          # home-manager module
+          home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.${username} = import ./home;
+              extraSpecialArgs = { inherit inputs username dotfilesDir; };
+            };
+          }
+        ]
+        # Overlay darwin configuration (company-specific)
+        # Uses absolute path because overlay/ is gitignored
+        ++ optionalOverlay "overlay/nix/darwin.nix";
+      };
+    };
+
+    # Standalone home-manager configuration (Linux/WSL)
+    homeConfigurations = nixpkgs.lib.optionalAttrs isLinux {
+      "${username}@${hostname}" = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+        modules = [
+          ./home
+        ]
+        # Overlay home configuration (company-specific)
+        ++ optionalOverlay "overlay/nix/home.nix";
+        extraSpecialArgs = { inherit username dotfilesDir; };
+      };
     };
 
     # ==========================================================================
     # Convenience outputs
     # ==========================================================================
-    
+
     # Allow running: nix run .#rebuild
     # This auto-detects the hostname
-    apps.${system}.rebuild = {
+    apps.${system}.rebuild = nixpkgs.lib.optionalAttrs isDarwin {
       type = "app";
       program = toString (nixpkgs.legacyPackages.${system}.writeShellScript "rebuild" ''
         darwin-rebuild switch --flake .#${hostname} "$@"
