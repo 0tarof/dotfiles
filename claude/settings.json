@@ -22,8 +22,6 @@
       "Bash(git fetch origin:*)"
     ],
     "deny": [
-      "Bash(sudo:*)",
-      "Bash(rm:*)",
       "Bash(rm -rf:*)",
       "Bash(npm install:*)",
       "Bash(pnpm install)",
@@ -49,5 +47,18 @@
     "skill-creator@claude-plugins-official": true
   },
   "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "$HOME/.claude/hooks/block-find-delete.sh",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
 }

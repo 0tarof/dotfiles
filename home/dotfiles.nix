@@ -75,6 +75,11 @@ in
     recursive = true;
   };
   
+  home.file.".claude/hooks" = {
+    source = ../claude/hooks;
+    recursive = true;
+  };
+
   home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/claude/settings.json";
   
   # ==========================================================================
