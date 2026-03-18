@@ -15,6 +15,14 @@
       "Bash(gh pr view:*)",
       "Bash(git log:*)",
       "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr status:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh repo view:*)",
       "Bash(sqlite3:*)",
       "Bash(pnpm install -r --frozen-lockfile)",
       "Bash(pnpm install --frozen-lockfile)",
@@ -37,17 +45,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus",
-  "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true,
-    "github@plugins-ajainc": true,
-    "skill-creator@claude-plugins-official": true
-  },
-  "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
-  "alwaysThinkingEnabled": true,
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -61,5 +59,15 @@
         ]
       }
     ]
-  }
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "github@plugins-ajainc": true,
+    "skill-creator@claude-plugins-official": true
+  },
+  "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
+  "alwaysThinkingEnabled": true
 }
