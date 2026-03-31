@@ -30,7 +30,8 @@
       "Bash(git fetch origin:*)"
     ],
     "ask": [
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(rmdir:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
