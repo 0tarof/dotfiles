@@ -31,16 +31,16 @@
     ],
     "ask": [
       "Bash(rm:*)",
-      "Bash(rmdir:*)"
+      "Bash(rmdir:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm install -r:*)",
+      "Bash(pnpm uninstall:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
       "Bash(npm install:*)",
-      "Bash(pnpm install)",
-      "Bash(pnpm install -r)",
       "Bash(yarn add:*)",
       "Bash(npm uninstall:*)",
-      "Bash(pnpm uninstall:*)",
       "Bash(yarn remove:*)",
       "Bash(git add -A:*)",
       "Read(id_rsa)",
