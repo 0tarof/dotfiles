@@ -66,7 +66,16 @@
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "github@plugins-ajainc": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": true,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
   },
   "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
   "alwaysThinkingEnabled": true
