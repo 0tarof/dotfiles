@@ -29,6 +29,9 @@
       "Bash(difit:*)",
       "Bash(git fetch origin:*)"
     ],
+    "ask": [
+      "Bash(rm:*)"
+    ],
     "deny": [
       "Bash(rm -rf:*)",
       "Bash(npm install:*)",
