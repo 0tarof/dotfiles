@@ -60,11 +60,6 @@ in
   # ==========================================================================
   # Claude Code configuration
   # ==========================================================================
-  home.file.".claude/commands" = {
-    source = ../claude/commands;
-    recursive = true;
-  };
-  
   home.file.".claude/skills" = {
     source = ../claude/skills;
     recursive = true;
