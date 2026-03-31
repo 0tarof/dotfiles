@@ -191,8 +191,8 @@
         _fix_git_core_bare() {
           local git_dir
           git_dir="$(git rev-parse --git-dir 2>/dev/null)" || return
-          [[ -f "$git_dir/config.worktree" ]] || return
-          if [[ "$(git config --file "$git_dir/config" core.bare 2>/dev/null)" == "true" ]]; then
+          if [[ "$(git config --file "$git_dir/config" core.bare 2>/dev/null)" == "true" ]] \
+            && [[ -d "$git_dir/refs" || -f "$git_dir/packed-refs" ]]; then
             git config --file "$git_dir/config" core.bare false
           fi
         }
