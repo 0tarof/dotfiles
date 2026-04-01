@@ -1,8 +1,14 @@
 ---
 name: auto-review-fix
-description: PRのBotレビュー（Greptile、Devin）を監視し、レビュー指摘への対応・再レビュー依頼を自動化するスキル。「レビュー対応して」「レビュー待って」「PRのレビュー見て」「Greptileの指摘直して」「レビュー修正」などの依頼で起動。PRを作成した後のレビュー対応フローに使う。
+description: PRのBotレビュー（Greptile、Devin）を監視し、レビュー指摘への対応・再レビュー依頼を自動化するスキル。「レビュー対応して」「レビュー待って」「PRのレビュー見て」「Greptileの指摘直して」「レビュー修正」などの依頼で起動。また「Greptileにレビュー依頼」「レビューリクエスト」「Greptileレビューして」などのレビュー依頼にも対応。PRを作成した後のレビュー依頼・対応フローに使う。
 allowed-tools:
-  - Bash
+  - Bash(gh pr view:*)
+  - Bash(gh pr comment:*)
+  - Bash(gh pr checks:*)
+  - Bash(gh api graphql:*)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(git push:*)
   - Read
   - Grep
   - Glob
@@ -45,13 +51,13 @@ PR番号がわからない場合はユーザーに確認する。
 gh pr view <PR番号> --comments
 
 # PRのレビューを確認（reviewとcommentは別）
-gh api repos/{owner}/{repo}/pulls/<PR番号>/reviews
+gh pr view <PR番号> --json reviews
 ```
 
 以下を確認する：
 - Greptileのレビューが付いているか（`greptile-apps[bot]`）
 - Devinのレビューが付いているか（`devin-ai-integration[bot]`）
-- まだレビューが付いていない場合はユーザーに報告して終了（自動ポーリングで再度チェックされる）
+- Greptileのレビューがまだ付いていない場合 → `gh pr comment <PR番号> --body "@greptileai review"` でレビューをリクエストする
 
 ### 3. レビュー状態の判定
 
@@ -164,7 +170,7 @@ gh pr comment <PR番号> --body "@greptileai review"
 
 ユーザーが「レビュー対応して」と言うだけで、全Botレビューが完了するまで自動で監視・対応し続ける。
 
-- レビューがまだ付いていない場合 → 「まだレビューが付いていません。3分後に再チェックします」と報告
+- レビューがまだ付いていない場合 → Greptileにレビューをリクエストし、「レビューを依頼しました。3分後に再チェックします」と報告
 - レビューに対応して再依頼した場合 → 「対応済み、3分後に再チェックします」と報告
 - 全Bot完了の場合 → 「全てのBotレビューが完了しました！」と報告し、`CronDelete` でスケジュールを削除してループを終了
 
