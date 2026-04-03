@@ -63,18 +63,26 @@
         ]
       },
       {
-        "matcher": "Bash(sed:*)|Bash(awk:*)|Bash(perl -i:*)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
+            "if": "Bash(sed *)",
             "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
+          },
+          {
+            "type": "command",
+            "if": "Bash(awk *)",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(perl -i *)",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
+            "timeout": 5
+          },
           {
             "type": "command",
             "if": "Bash(find:*)",
