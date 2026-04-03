@@ -53,6 +53,26 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Edit|Write|Update",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(sed:*)|Bash(awk:*)|Bash(perl -i:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
