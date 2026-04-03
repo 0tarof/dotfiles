@@ -85,19 +85,19 @@
           },
           {
             "type": "command",
-            "if": "Bash(find:*)",
+            "if": "Bash(find *)",
             "command": "$HOME/.claude/hooks/block-find-delete.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "if": "Bash(gh api:*)",
+            "if": "Bash(gh api *)",
             "command": "$HOME/.claude/hooks/allow-gh-api-read.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "if": "Bash(gh api graphql:*)",
+            "if": "Bash(gh api graphql *)",
             "command": "$HOME/.claude/hooks/ask-graphql-mutation.sh",
             "timeout": 5
           },
