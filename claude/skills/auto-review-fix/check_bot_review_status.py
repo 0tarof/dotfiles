@@ -157,8 +157,11 @@ def check_devin(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
         if author == bot:
             info["found"] = True
 
-    # checksでDevin Reviewの状態を確認
-    checks_output = run_gh(["pr", "checks", str(pr)])
+    # checksでDevin Reviewの状態を確認（pending/failでも非ゼロになるので許容）
+    result = subprocess.run(
+        ["gh", "pr", "checks", str(pr)], capture_output=True, text=True, check=False
+    )
+    checks_output = result.stdout.strip()
     for line in checks_output.splitlines():
         if "Devin Review" in line or "devin" in line.lower():
             info["checks_pass"] = "pass" in line
