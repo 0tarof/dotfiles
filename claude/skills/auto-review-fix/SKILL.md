@@ -191,3 +191,4 @@ gh pr comment <PR番号> --body "@greptileai review"
 2. Botの指摘でも技術的に正しいか判断してから対応する
 3. 人間のレビューコメントはこのスキルの対象外（CLAUDE.mdのPRレビュー対応ルールに従う）
 4. CIチェックも確認し、失敗している場合はユーザーに報告する
+5. Greptileがコメントに記載する再トリガーURL（Re-trigger linkなど）は認証が必要なため使用できない。再レビュー依頼は必ず `@greptileai review` コメントで行うこと
