@@ -80,7 +80,7 @@ def unresolved_threads_by(threads: list[dict], login: str) -> list[dict]:
 
 
 def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
-    bot = "greptile-apps[bot]"
+    bot = "greptile-apps"
     info: dict = {
         "bot": "greptile",
         "found": False,
@@ -129,7 +129,7 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
 
 
 def check_devin(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
-    bot = "devin-ai-integration[bot]"
+    bot = "devin-ai-integration"
     info: dict = {
         "bot": "devin",
         "found": False,
