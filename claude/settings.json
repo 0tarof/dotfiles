@@ -104,7 +104,7 @@
           {
             "type": "command",
             "if": "Bash(git *)",
-            "command": "bash -c 'COMMAND=$(cat | jq -r \".tool_input.command // empty\"); if echo \"$COMMAND\" | grep -Eq \"(--no-verify|-n)\"; then echo \"❌ --no-verify / -n は禁止です。pre-commit hookをパスするように修正してください。\" >&2; exit 2; fi'",
+            "command": "$HOME/.claude/hooks/block-git-no-verify.sh",
             "timeout": 5
           }
         ]
