@@ -27,7 +27,8 @@
       "Bash(pnpm install -r --frozen-lockfile)",
       "Bash(pnpm install --frozen-lockfile)",
       "Bash(difit:*)",
-      "Bash(git fetch origin:*)"
+      "Bash(git fetch origin:*)",
+      "Skill(sibling-repo)"
     ],
     "ask": [
       "Bash(rm:*)",
