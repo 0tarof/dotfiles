@@ -6,7 +6,7 @@
 Usage: python3 minimize_old_review_comments.py [PR_NUMBER]
   PR_NUMBER省略時は現在のブランチから自動取得。
 
-Exit codes: 0=Minimize実行, 1=対象なし, 2=エラー
+Exit codes: 0=正常終了（結果はJSONで判定）, 2=エラー
 """
 
 import json
@@ -113,7 +113,7 @@ def main() -> None:
             "message": "対象のコメントが2件未満のためスキップ",
         }
         print(json.dumps(result, indent=2, ensure_ascii=False))
-        sys.exit(1)
+        return
 
     # createdAtでソートして最新を残す
     review_comments.sort(key=lambda c: c["createdAt"])
