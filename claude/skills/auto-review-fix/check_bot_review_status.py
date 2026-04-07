@@ -4,7 +4,7 @@
 Usage: python3 check_bot_review_status.py [PR_NUMBER]
   PR_NUMBER省略時は現在のブランチから自動取得。
 
-Exit codes: 0=全Bot完了, 1=未完了, 2=エラー
+Exit codes: 0=正常終了（完了状態はall_completeフィールドで判定）, 2=エラー
 """
 
 import json
@@ -195,7 +195,6 @@ def main() -> None:
     }
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
-    sys.exit(0 if result["all_complete"] else 1)
 
 
 if __name__ == "__main__":
