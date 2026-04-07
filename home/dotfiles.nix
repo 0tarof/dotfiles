@@ -44,6 +44,9 @@ in
     recursive = true;
   };
 
+  # cmux reads Ghostty config from Application Support path
+  home.file."Library/Application Support/com.mitchellh.ghostty/config".source = ../ghostty/config;
+
   home.file.".config/zellij" = {
     source = ../zellij;
     recursive = true;
