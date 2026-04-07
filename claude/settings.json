@@ -92,6 +92,11 @@
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/allow-skill-bash.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "if": "Bash(gh api *)",
             "command": "$HOME/.claude/hooks/allow-gh-api-read.sh",
             "timeout": 5
