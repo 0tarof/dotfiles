@@ -66,7 +66,7 @@ gh pr view <PR番号> --json reviews
 **まず判定スクリプトを実行して、機械的にステータスを確認する：**
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/check_bot_review_status.py <PR番号>
+${CLAUDE_SKILL_DIR}/check_bot_review_status.py <PR番号>
 ```
 
 スクリプトはJSON形式で結果を出力する。`all_complete` が `true` なら全Bot完了。
@@ -159,7 +159,7 @@ gh pr comment <PR番号> --body "@greptileai review"
 古い `@greptileai review` コメントを非表示にする：
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/minimize_old_review_comments.py <PR番号>
+${CLAUDE_SKILL_DIR}/minimize_old_review_comments.py <PR番号>
 ```
 
 ### 7. 状態報告
