@@ -2,15 +2,15 @@
 name: auto-review-fix
 description: PRのBotレビュー（Greptile、Devin）を監視し、レビュー指摘への対応・再レビュー依頼を自動化するスキル。「レビュー対応して」「レビュー待って」「PRのレビュー見て」「Greptileの指摘直して」「レビュー修正」などの依頼で起動。また「Greptileにレビュー依頼」「レビューリクエスト」「Greptileレビューして」などのレビュー依頼にも対応。PRを作成した後のレビュー依頼・対応フローに使う。
 allowed-tools:
-  - Bash(gh pr view:*)
-  - Bash(gh pr comment:*)
-  - Bash(gh pr checks:*)
-  - Bash(gh api graphql:*)
-  - Bash(*check_bot_review_status.py:*)
-  - Bash(*minimize_old_review_comments.py:*)
-  - Bash(git add:*)
-  - Bash(git commit:*)
-  - Bash(git push:*)
+  - Bash(gh pr view *)
+  - Bash(gh pr comment *)
+  - Bash(gh pr checks *)
+  - Bash(gh api graphql *)
+  - Bash(*check_bot_review_status.py *)
+  - Bash(*minimize_old_review_comments.py *)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(git push *)
   - Read
   - Grep
   - Glob

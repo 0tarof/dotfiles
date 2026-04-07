@@ -8,8 +8,8 @@ description: >-
   「関連リポ」などの依頼で起動。「しぶりん」はsibling repoの愛称。リポ名が文脈に出てきたら積極的に使う。
 allowed-tools:
   - Bash(*sibling-repo.sh *)
-  - Bash(gh issue:*)
-  - Bash(gh repo:*)
+  - Bash(gh issue *)
+  - Bash(gh repo *)
   - Read
   - Glob
   - Grep

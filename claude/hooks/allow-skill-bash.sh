@@ -38,9 +38,11 @@ glob_to_regex() {
 # 全スキルのSKILL.mdからallowed-toolsのBashパターンを抽出してマッチ
 matched=false
 while IFS= read -r skill_file; do
-  patterns=$(awk '/^---$/{n++; next} n==1' "$skill_file" \
+  # Bash(...)パターンを抽出し、コロン区切り(:*)をスペース区切り( *)に正規化
+  patterns=$(awk '/^---$/{c++; next} c==1' "$skill_file" \
     | grep -oE 'Bash\([^)]+\)' \
-    | sed 's/^Bash(//; s/)$//' || true)
+    | sed 's/^Bash(//; s/)$//' \
+    | sed 's/:\*/\ \*/' || true)
 
   [ -z "$patterns" ] && continue
 
