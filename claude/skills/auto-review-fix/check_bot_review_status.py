@@ -79,17 +79,39 @@ def unresolved_threads_by(threads: list[dict], login: str) -> list[dict]:
     return result
 
 
+def extract_summary_p2(body: str) -> list[str]:
+    """レビュー本文のSummaryセクションからP2アイテムを抽出する。"""
+    items = []
+    in_summary = False
+    for line in body.splitlines():
+        stripped = line.strip()
+        # Summaryセクションの開始
+        if re.match(r"^#{1,3}\s+Summary", stripped, re.IGNORECASE):
+            in_summary = True
+            continue
+        # 次のセクション見出しでSummary終了
+        if in_summary and re.match(r"^#{1,3}\s+", stripped):
+            break
+        if in_summary and re.search(r"\bP2\b", stripped):
+            items.append(stripped)
+    return items
+
+
 def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
     bot = "greptile-apps"
     info: dict = {
         "bot": "greptile",
         "found": False,
+        "approved": False,
         "confidence": None,
+        "summary_p2": [],
         "unresolved_comments": 0,
         "complete": False,
     }
 
-    # reviewsからConfidenceを取得
+    review_body = ""
+
+    # reviewsからConfidence・承認状態を取得
     raw = run_gh(["pr", "view", str(pr), "--json", "reviews"])
     reviews = json.loads(raw).get("reviews", [])
 
@@ -98,8 +120,11 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
         author = review.get("author", {}).get("login", "")
         if author == bot:
             info["found"] = True
-            body = review.get("body", "")
-            m = re.search(r"Confidence\s*(\d+)/5", body)
+            review_body = review.get("body", "")
+            state = review.get("state", "")
+            if state == "APPROVED":
+                info["approved"] = True
+            m = re.search(r"Confidence\s*(\d+)/5", review_body)
             if m:
                 info["confidence"] = f"{m.group(1)}/5"
             break
@@ -112,18 +137,25 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
             author = comment.get("author", {}).get("login", "")
             if author == bot:
                 info["found"] = True
-                body = comment.get("body", "")
-                m = re.search(r"Confidence\s*(\d+)/5", body)
+                review_body = comment.get("body", "")
+                m = re.search(r"Confidence\s*(\d+)/5", review_body)
                 if m:
                     info["confidence"] = f"{m.group(1)}/5"
                 break
+
+    # SummaryセクションからP2を抽出
+    if review_body:
+        info["summary_p2"] = extract_summary_p2(review_body)
 
     # 未解決インラインコメント
     unresolved = unresolved_threads_by(threads, bot)
     info["unresolved_comments"] = len(unresolved)
 
-    # 完了判定: Confidence 5/5 かつ 未解決コメント0件
-    info["complete"] = info["confidence"] == "5/5" and info["unresolved_comments"] == 0
+    # 完了判定: APPROVED または (Confidence 5/5 かつ 未解決コメント0件)
+    info["complete"] = (
+        (info["approved"] and info["unresolved_comments"] == 0)
+        or (info["confidence"] == "5/5" and info["unresolved_comments"] == 0)
+    )
 
     return info
 
