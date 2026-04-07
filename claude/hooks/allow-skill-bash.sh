@@ -52,7 +52,7 @@ while IFS= read -r skill_file; do
       break 2
     fi
   done <<< "$patterns"
-done < <(find "$SKILLS_DIR" -name "SKILL.md" -type f 2>/dev/null)
+done < <(find "$SKILLS_DIR" -name "SKILL.md" 2>/dev/null)
 
 if [ "$matched" = true ]; then
   jq -n '{
