@@ -4,7 +4,7 @@ set -euo pipefail
 input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
-if echo "$command" | grep -Eq "(--no-verify|(^|\s)-n(\s|$))"; then
+if echo "$command" | grep -Eq "^git\s" && echo "$command" | grep -Eq "(--no-verify|(^|\s)-n(\s|$))"; then
   jq -n '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
