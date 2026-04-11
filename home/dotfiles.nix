@@ -78,6 +78,8 @@ in
     recursive = true;
   };
 
+  home.file.".claude/CLAUDE.md".source = ../claude/CLAUDE.md;
+
   home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/claude/settings.json";
   
   # ==========================================================================
