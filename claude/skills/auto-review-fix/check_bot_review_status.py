@@ -124,24 +124,26 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
             state = review.get("state", "")
             if state == "APPROVED":
                 info["approved"] = True
-            m = re.search(r"Confidence\s*(\d+)/5", review_body)
+            m = re.search(r"Confidence.*?(\d+)/5", review_body)
             if m:
                 info["confidence"] = f"{m.group(1)}/5"
             break
 
-    # commentsにもConfidenceがある場合がある
-    if not info["found"]:
-        raw = run_gh(["pr", "view", str(pr), "--json", "comments"])
-        comments = json.loads(raw).get("comments", [])
-        for comment in reversed(comments):
-            author = comment.get("author", {}).get("login", "")
-            if author == bot:
-                info["found"] = True
-                review_body = comment.get("body", "")
-                m = re.search(r"Confidence\s*(\d+)/5", review_body)
+    # commentsにもConfidenceがある場合がある（reviewのbodyが空のケース）
+    raw = run_gh(["pr", "view", str(pr), "--json", "comments"])
+    comments = json.loads(raw).get("comments", [])
+    for comment in reversed(comments):
+        author = comment.get("author", {}).get("login", "")
+        if author == bot:
+            info["found"] = True
+            comment_body = comment.get("body", "")
+            if not info["confidence"]:
+                m = re.search(r"Confidence.*?(\d+)/5", comment_body)
                 if m:
                     info["confidence"] = f"{m.group(1)}/5"
-                break
+            if not review_body:
+                review_body = comment_body
+            break
 
     # SummaryセクションからP2を抽出
     if review_body:
