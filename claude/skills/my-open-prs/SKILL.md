@@ -48,23 +48,39 @@ ${CLAUDE_SKILL_DIR}/scripts/fetch_open_prs.sh [--org ORG] [--include-drafts] [--
 
 ### 3. プレゼンテーション
 
-差分サイズ（小さい順）でテーブル表示する：
+差分サイズ（小さい順）でリスト表示する。コピペしやすいようにテーブルではなくリスト形式で出力する：
 
 ```markdown
 ## オープンPR一覧（N件）
 
-| # | 差分 | リポジトリ | PR | タイトル |
-|---|------|-----------|-----|---------|
-| 1 | +28/-3 | am-glasgow-cdk | [#1892](URL) | feat(eks): ... |
-| 2 | +22/-19 | bolas | [#5797](URL) | [Phase 2] ... |
+1. タイトル (+additions/-deletions)
+URL
+
+2. タイトル (+additions/-deletions)
+URL
+
 ...
+```
+
+実際の出力例：
+
+```
+## オープンPR一覧（3件）
+
+1. feat(eks): default EC2NodeClassのAMIをBottlerocketに変更 (+28/-3)
+https://github.com/ajainc/am-glasgow-cdk/pull/1892
+
+2. fix: Spot中断時のgraceful shutdown猶予を延長 (+91/-95)
+https://github.com/ajainc/ssp-adserver/pull/8882
+
+3. feat: Black/mypy を Ruff/ty に置換し pre-commit を導入 (+194/-68)
+https://github.com/ajainc/glue-etl-job/pull/948
 ```
 
 ### プレゼンテーションルール
 
 1. 差分サイズ昇順（total_changes）で表示
 2. `--count N` 指定時は上位N件のみ
-3. リポジトリ名は `owner/name` の `name` 部分のみ表示
-4. PR番号はURLへのリンクにする
-5. デフォルトの除外条件（ドラフト、アーカイブ）は明示的に注記しない
-6. `--exclude` で追加除外した場合は、何を除外したか簡潔に注記する
+3. 各項目は「番号. タイトル (差分)」の行とURLの行で構成し、項目間は空行で区切る
+4. デフォルトの除外条件（ドラフト、アーカイブ）は明示的に注記しない
+5. `--exclude` で追加除外した場合は、何を除外したか簡潔に注記する
