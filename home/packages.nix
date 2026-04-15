@@ -56,5 +56,6 @@
     zellij
     uv
     pnpm
+    sbt
   ];
 }
