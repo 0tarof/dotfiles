@@ -2,14 +2,14 @@
 # https://ghostty.org/docs/config
 
 # Theme
-theme = Builtin Solarized Light
+# theme = Builtin Solarized Light
 
 # Font
-# font-family = "JetBrains Mono"
+font-family = "Source Han Code JP"
 # font-size = 14
-font-thicken = true
-font-thicken-strength = 1
-font-feature = -dlig
+# font-thicken = true
+# font-thicken-strength = 1
+# font-feature = -dlig
 
 # Window
 window-padding-x = 10
