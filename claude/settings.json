@@ -4,49 +4,67 @@
   },
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(cat:*)",
+      "Bash(mkdir *)",
+      "Bash(cat *)",
       "Read(//Users/a14993/**)",
       "mcp__chrome-devtools__*",
       "WebSearch",
-      "Bash(echo:*)",
-      "Bash(go test:*)",
+      "Bash(echo *)",
+      "Bash(go test)",
+      "Bash(go test *)",
       "Bash(git push)",
-      "Bash(gh pr view:*)",
-      "Bash(git log:*)",
-      "Bash(gh pr list:*)",
-      "Bash(gh pr checks:*)",
-      "Bash(gh pr diff:*)",
-      "Bash(gh pr status:*)",
-      "Bash(gh issue view:*)",
-      "Bash(gh issue list:*)",
-      "Bash(gh run view:*)",
-      "Bash(gh run list:*)",
-      "Bash(gh repo view:*)",
-      "Bash(sqlite3:*)",
+      "Bash(git log)",
+      "Bash(git log *)",
+      "Bash(git show)",
+      "Bash(git show *)",
+      "Bash(gh pr view)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr checks)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr diff)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr status)",
+      "Bash(gh pr status *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue list)",
+      "Bash(gh issue list *)",
+      "Bash(gh run view *)",
+      "Bash(gh run list)",
+      "Bash(gh run list *)",
+      "Bash(gh repo view)",
+      "Bash(gh repo view *)",
+      "Bash(sqlite3 *)",
       "Bash(pnpm install -r --frozen-lockfile)",
       "Bash(pnpm install --frozen-lockfile)",
-      "Bash(difit:*)",
-      "Bash(git fetch origin:*)",
+      "Bash(difit)",
+      "Bash(difit *)",
+      "Bash(git fetch origin)",
+      "Bash(git fetch origin *)",
       "Skill(sibling-repo)"
     ],
-    "ask": [
-      "Bash(rm:*)",
-      "Bash(rmdir:*)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm install -r:*)",
-      "Bash(pnpm uninstall:*)"
-    ],
     "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(npm install:*)",
-      "Bash(yarn add:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(yarn remove:*)",
-      "Bash(git add -A:*)",
+      "Bash(rm -rf *)",
+      "Bash(npm install)",
+      "Bash(npm install *)",
+      "Bash(yarn add *)",
+      "Bash(npm uninstall *)",
+      "Bash(yarn remove *)",
+      "Bash(git add -A)",
+      "Bash(git add -A *)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
       "Write(.env*)"
+    ],
+    "ask": [
+      "Bash(rm *)",
+      "Bash(rmdir *)",
+      "Bash(pnpm install)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm install -r)",
+      "Bash(pnpm install -r *)",
+      "Bash(pnpm uninstall *)"
     ],
     "defaultMode": "acceptEdits"
   },
@@ -68,26 +86,26 @@
         "hooks": [
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "if": "Bash(sed *)",
-            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "if": "Bash(awk *)",
-            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
           },
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "if": "Bash(perl -i *)",
-            "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "if": "Bash(find *)",
             "command": "$HOME/.claude/hooks/block-find-delete.sh",
+            "if": "Bash(find *)",
             "timeout": 5
           },
           {
@@ -97,20 +115,20 @@
           },
           {
             "type": "command",
-            "if": "Bash(gh api *)",
             "command": "$HOME/.claude/hooks/allow-gh-api-read.sh",
+            "if": "Bash(gh api *)",
             "timeout": 5
           },
           {
             "type": "command",
-            "if": "Bash(gh api graphql *)",
             "command": "$HOME/.claude/hooks/ask-graphql-mutation.sh",
+            "if": "Bash(gh api graphql *)",
             "timeout": 5
           },
           {
             "type": "command",
-            "if": "Bash(git *)",
             "command": "$HOME/.claude/hooks/block-git-no-verify.sh",
+            "if": "Bash(git *)",
             "timeout": 5
           }
         ]
@@ -124,7 +142,8 @@
     "code-review@claude-plugins-official": true,
     "github@plugins-ajainc": true,
     "skill-creator@claude-plugins-official": true,
-    "codex@openai-codex": true
+    "codex@openai-codex": true,
+    "slack@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
