@@ -108,12 +108,16 @@ claude_sessions_for_path() {
     }'
 }
 
-# Build the final JSON array
+# Build the final JSON array. Only include worktrees that have at least one
+# Claude Code session ("active" worktrees).
 results="[]"
 while IFS=$'\t' read -r wt_path branch; do
   [[ -z "$wt_path" ]] && continue
-  prs="$(prs_for_branch "$branch")"
   claude_info="$(claude_sessions_for_path "$wt_path")"
+  has_session=$(jq -r '.session_count > 0' <<<"$claude_info")
+  [[ "$has_session" != "true" ]] && continue
+
+  prs="$(prs_for_branch "$branch")"
   entry=$(jq -n \
     --arg path "$wt_path" \
     --arg branch "$branch" \

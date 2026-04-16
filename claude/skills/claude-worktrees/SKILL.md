@@ -8,7 +8,7 @@ user-invocable: true
 
 # Claude Worktrees スキル
 
-現在のgitリポジトリの全worktreeを、ブランチ・PR・Claude Codeセッションとセットで俯瞰表示するスキル。複数worktreeで並行作業する際の状況把握と、セッション再開コマンドの生成を支援する。
+現在のgitリポジトリで **Claude Codeのセッションが存在する worktree** だけを、ブランチ・PR・セッション情報とセットで俯瞰表示するスキル。複数worktreeで並行作業する際の状況把握と、セッション再開コマンドの生成を支援する。
 
 **IMPORTANT: 日本語でユーザーとコミュニケーションを取ること。**
 
@@ -40,49 +40,38 @@ ${CLAUDE_SKILL_DIR}/scripts/list_worktrees.sh
 
 ### 2. プレゼンテーション
 
-以下のフォーマットで、worktreeごとにまとめて表示する。各worktreeは見出し（`###`）で区切り、情報が密集しないように整形する。
+スクリプトはClaudeセッションがあるworktreeだけを返す。以下のフォーマットで、worktreeごとにまとめて表示する。見出し（`###`）で区切り、情報が密集しないように整形する。
 
 ```markdown
-## Worktree一覧（N件: リポジトリ名）
+## アクティブなClaude Worktree（N件: リポジトリ名）
 
 ### <worktree-path> [branch: <branch>]
 
 - PR: #<番号> <タイトル> (<state>) — <url>
     (PRがない場合は「なし」と表示)
-- Claudeセッション: <count>件（最終更新: <latest_mtime>）
-    (セッションがない場合は「なし」と表示)
+- セッション: <count>件（最終更新: <latest_mtime>）
 - 再開コマンド:
   ```
-  cd <worktree-path> && claude --resume <session-id>
-  ```
-  ピッカーで選ぶ場合:
-  ```
-  cd <worktree-path> && claude --resume
-  ```
-  最新を続ける場合:
-  ```
-  cd <worktree-path> && claude --continue
+  claude --resume <session-id>
   ```
 ```
 
 ### プレゼンテーションルール
 
-1. **worktreeの並び順**: メインワークツリー（リポジトリルート）を最初にし、残りは `claude.latest_mtime` の降順（最近使ったものが上）で並べる。セッションがないworktreeは最後にまとめる。
+1. **worktreeの並び順**: `claude.latest_mtime` の降順（最近使ったものが上）で並べる。
 
-2. **Claude未使用worktreeの扱い**: `claude.exists == false` または `session_count == 0` の場合は、「Claudeセッション: なし」とだけ表示し、再開コマンドは出力しない（コピペ時に迷うため）。
+2. **再開コマンドには `cd` を含めない**: Claude Codeは session-id からセッション元のworking directoryを特定して再開する。ユーザーが任意のディレクトリから `claude --resume <id>` を実行すればよい。`--continue` やピッカーコマンドは、起動ディレクトリに依存するため出力しない。
 
 3. **PR情報**: 各PRは1行で「#番号 タイトル (状態) — URL」形式。Draftは `(Draft)` を状態の後ろに付ける。複数ある場合は箇条書きで列挙。
 
-4. **再開コマンド**: `latest_session_id` がある場合のみ、具体的なIDを含む `--resume <id>` コマンドを最初に提示する。ピッカー用と `--continue` 用の代替コマンドも併記する（ユーザーが状況に応じて選べるように）。
-
-5. **長いパスの扱い**: worktreeパスが長い場合でも省略せずそのまま表示する（コピペで使うため）。
+4. **長いパスの扱い**: worktreeパスが長い場合でも省略せずそのまま表示する（参考情報として）。
 
 ### 3. サマリー（任意）
 
 全体の末尾に一行でサマリーを付けると見通しが良い：
 
 ```
-合計: Nワークツリー / Claudeセッションありは M件 / オープンPRは K件
+合計: Nアクティブworktree / オープンPRは K件
 ```
 
 ## 実装メモ
