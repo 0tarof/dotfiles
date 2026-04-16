@@ -2,12 +2,7 @@
 name: claude-worktrees
 description: 現在のgitリポジトリのworktree一覧を、各worktreeのブランチ・関連PR・Claude Codeセッション情報・再開コマンドと一緒に表示するスキル。「ワークツリー一覧」「アクティブなClaude」「worktree list」「worktree表示」「再開コマンド」「claude worktree」「claudeの状態」「並行作業の状態」などの依頼で必ず起動すること。複数のworktreeでClaude Codeを並行で動かしている時に、どのworktreeで何が進んでいるかを俯瞰するのに使う。
 allowed-tools:
-  - Bash(*list_worktrees.sh*)
-  - Bash(git worktree *)
-  - Bash(gh pr list *)
-  - Bash(gh pr view *)
-  - Bash(gh repo view *)
-  - Bash(jq *)
+  - Bash(*list_worktrees.sh)
 user-invocable: true
 ---
 
