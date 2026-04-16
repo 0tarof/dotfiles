@@ -2,7 +2,7 @@
 # https://ghostty.org/docs/config
 
 # Theme
-theme = Builtin Solarized Light
+theme = iTerm2 Solarized Light
 
 # Font
 font-family = "HackGen Console NF"
