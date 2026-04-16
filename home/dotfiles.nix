@@ -118,4 +118,9 @@ in
     source = ../bin/gws;
     executable = true;
   };
+
+  home.file."bin/cmux-backup-session" = {
+    source = ../bin/cmux-backup-session;
+    executable = true;
+  };
 }
