@@ -30,9 +30,8 @@ in
     ./packages.nix   # CLI tools
     ./dotfiles.nix   # Symlinks to config files
     ./scripts.nix    # Custom scripts, Claude Code installer
+    ./launchd.nix    # macOS Launch Agents
   ]
-  # macOS Launch Agents (launchd is Darwin-only)
-  ++ (if pkgs.stdenv.isDarwin then [ ./launchd.nix ] else [ ])
   # Overlay (company-specific settings)
   ++ (if hasOverlay then [ overlayPath ] else [ ]);
 }
