@@ -58,7 +58,7 @@
       "font-hackgen-nerd"
       "font-meslo-for-powerlevel10k"
       "font-migu-1p"
-      "font-moralerspace-nf"
+      "font-moralerspace"
       "font-noto-sans-cjk"
       "font-plemol-jp-nf"
       "font-source-han-code-jp"
