@@ -32,6 +32,8 @@ ${CLAUDE_SKILL_DIR}/scripts/list_worktrees.sh
 
 - `path`: worktreeの絶対パス
 - `branch`: ブランチ名（detached HEADの場合は `(detached)`）
+- `worktree_name`: worktreeパスのbasename（`claude --worktree <name>` の引数に使う）
+- `is_main`: メインworktree（リポジトリルート）かどうかの bool
 - `prs`: `gh pr list --head <branch>` で見つかったPRの配列（title, number, url, state, isDraft）
 - `claude.exists`: `~/.claude/projects/<encoded-path>/` が存在するか
 - `claude.session_count`: そのディレクトリ内の `.jsonl` セッションファイル数
@@ -60,7 +62,16 @@ ${CLAUDE_SKILL_DIR}/scripts/list_worktrees.sh
 
 1. **worktreeの並び順**: `claude.latest_mtime` の降順（最近使ったものが上）で並べる。
 
-2. **再開コマンドには `cd` を含めない**: Claude Codeは session-id からセッション元のworking directoryを特定して再開する。ユーザーが任意のディレクトリから `claude --resume <id>` を実行すればよい。`--continue` やピッカーコマンドは、起動ディレクトリに依存するため出力しない。
+2. **再開コマンドの出し分け**:
+   - `is_main == true` のとき（メインワークツリー）:
+     ```
+     claude --resume <session-id>
+     ```
+   - `is_main == false` のとき（`claude -w` で作られた worktree）:
+     ```
+     claude --worktree <worktree_name> --resume <session-id>
+     ```
+   `--worktree` は `--resume` より前に置く。`cd` は付けない。`claude --worktree <name>` が必要なのは、メインリポジトリ以外の worktree で作られたセッションを再開する場合のみ。
 
 3. **PR情報**: 各PRは1行で「#番号 タイトル (状態) — URL」形式。Draftは `(Draft)` を状態の後ろに付ける。複数ある場合は箇条書きで列挙。
 

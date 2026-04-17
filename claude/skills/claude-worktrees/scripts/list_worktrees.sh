@@ -20,33 +20,28 @@ repo_slug() {
 REPO_SLUG="$(repo_slug)"
 
 # Parse `git worktree list --porcelain` output into worktree blocks.
-# Each block is separated by a blank line and contains lines like:
-#   worktree <path>
-#   HEAD <sha>
-#   branch refs/heads/<name>   (or "detached")
+# Output format: <path>\t<branch>\t<is_main>
+# The first entry in porcelain output is always the main worktree.
 parse_worktrees() {
   git worktree list --porcelain | awk '
-    BEGIN { wt=""; br=""; det=0 }
+    BEGIN { wt=""; br=""; det=0; idx=0 }
     /^worktree / { wt=substr($0, 10) }
     /^branch / { br=substr($0, 19) }
     /^detached/ { det=1 }
     /^$/ {
       if (wt != "") {
-        if (det == 1) {
-          print wt "\t(detached)"
-        } else {
-          print wt "\t" br
-        }
+        is_main = (idx == 0) ? "true" : "false"
+        branch_out = (det == 1) ? "(detached)" : br
+        print wt "\t" branch_out "\t" is_main
+        idx++
       }
       wt=""; br=""; det=0
     }
     END {
       if (wt != "") {
-        if (det == 1) {
-          print wt "\t(detached)"
-        } else {
-          print wt "\t" br
-        }
+        is_main = (idx == 0) ? "true" : "false"
+        branch_out = (det == 1) ? "(detached)" : br
+        print wt "\t" branch_out "\t" is_main
       }
     }
   '
@@ -111,19 +106,22 @@ claude_sessions_for_path() {
 # Build the final JSON array. Only include worktrees that have at least one
 # Claude Code session ("active" worktrees).
 results="[]"
-while IFS=$'\t' read -r wt_path branch; do
+while IFS=$'\t' read -r wt_path branch is_main; do
   [[ -z "$wt_path" ]] && continue
   claude_info="$(claude_sessions_for_path "$wt_path")"
   has_session=$(jq -r '.session_count > 0' <<<"$claude_info")
   [[ "$has_session" != "true" ]] && continue
 
   prs="$(prs_for_branch "$branch")"
+  wt_name="$(basename "$wt_path")"
   entry=$(jq -n \
     --arg path "$wt_path" \
     --arg branch "$branch" \
+    --arg wt_name "$wt_name" \
+    --argjson is_main "$is_main" \
     --argjson prs "$prs" \
     --argjson claude "$claude_info" \
-    '{path: $path, branch: $branch, prs: $prs, claude: $claude}')
+    '{path: $path, branch: $branch, worktree_name: $wt_name, is_main: $is_main, prs: $prs, claude: $claude}')
   results=$(jq --argjson e "$entry" '. + [$e]' <<<"$results")
 done < <(parse_worktrees)
 
