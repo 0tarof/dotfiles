@@ -38,6 +38,9 @@ in
     source = ../mise;
     recursive = true;
   };
+
+  # Empty sbtopts to prevent nix-packaged sbt from enforcing a specific Java version
+  home.file.".config/sbt/sbtopts".text = "";
   
   home.file.".config/ghostty" = {
     source = ../ghostty;
