@@ -1,8 +1,11 @@
 [settings]
-disable_backends = ["asdf", "vfox"]
+disable_backends = ["vfox"]
 
 [settings.pipx]
 uvx = true
+
+[plugins]
+mysql = "https://github.com/iroddis/asdf-mysql"
 
 [tools]
 go = "latest"
