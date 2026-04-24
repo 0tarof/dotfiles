@@ -19,6 +19,16 @@ repo_slug() {
 
 REPO_SLUG="$(repo_slug)"
 
+# Detect whether the current working directory is the main worktree.
+# When true, we skip the main worktree entry in the final output because
+# the user already knows what's happening there.
+CURRENT_WT="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
+MAIN_WT="$(git worktree list --porcelain | awk '/^worktree / {print substr($0, 10); exit}')"
+IS_CURRENT_MAIN="false"
+if [[ -n "$CURRENT_WT" && "$CURRENT_WT" == "$MAIN_WT" ]]; then
+  IS_CURRENT_MAIN="true"
+fi
+
 # Parse `git worktree list --porcelain` output into worktree blocks.
 # Output format: <path>\t<branch>\t<is_main>
 # The first entry in porcelain output is always the main worktree.
@@ -108,6 +118,10 @@ claude_sessions_for_path() {
 results="[]"
 while IFS=$'\t' read -r wt_path branch is_main; do
   [[ -z "$wt_path" ]] && continue
+  # Skip the main worktree entry when the user is currently sitting in it.
+  if [[ "$IS_CURRENT_MAIN" == "true" && "$is_main" == "true" ]]; then
+    continue
+  fi
   claude_info="$(claude_sessions_for_path "$wt_path")"
   has_session=$(jq -r '.session_count > 0' <<<"$claude_info")
   [[ "$has_session" != "true" ]] && continue
