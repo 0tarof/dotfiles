@@ -131,10 +131,10 @@
   # Homebrew activation script override
   # ==========================================================================
   # Move homebrew bundle to postActivation so it runs AFTER home-manager
-  # This ensures ~/bin/gh-credential-helper exists for private tap authentication
+  # This ensures gh CLI is available for private tap authentication
   system.activationScripts.homebrew.text = lib.mkForce ''
     # Homebrew bundle moved to postActivation (after home-manager)
-    # to ensure credential helper is available for private taps
+    # to ensure gh CLI is available for private taps
   '';
 
   system.activationScripts.postActivation.text = let

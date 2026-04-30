@@ -2,13 +2,11 @@
 	name = Taro FURUKAWA
 	email = tarowin12@gmail.com
 
-[credential "https://github.com"]
-	helper = 
-	helper = !~/bin/gh-credential-helper
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !~/bin/gh-credential-helper
+[url "git@gist.github.com:"]
+	insteadOf = https://gist.github.com/
 
 [ghq]
 	root = ~/projects

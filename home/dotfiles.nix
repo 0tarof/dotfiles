@@ -106,17 +106,6 @@ in
     executable = true;
   };
 
-  # ==========================================================================
-  # Git credential helper wrapper
-  # ==========================================================================
-  # Wrapper script that sets PATH before calling gh auth git-credential
-  # This ensures gh is found even in contexts without full PATH
-  # (e.g., nix-darwin's homebrew activation script)
-  home.file."bin/gh-credential-helper" = {
-    source = ../bin/gh-credential-helper;
-    executable = true;
-  };
-  
   home.file."bin/gws" = {
     source = ../bin/gws;
     executable = true;
