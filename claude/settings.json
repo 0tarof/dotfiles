@@ -158,5 +158,5 @@
   "autoMemoryEnabled": false,
   "theme": "light-daltonized",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": false
 }
