@@ -48,7 +48,7 @@
     # Converters
     html2text
     # html2markdown  # Not in nixpkgs, keep in Homebrew
-    poppler_utils  # pdftotext, pdfinfo, pdftoppm などの PDF CLI ツール
+    poppler-utils  # pdftotext, pdfinfo, pdftoppm などの PDF CLI ツール
 
     # Development tools
     # mise  # Keep in Homebrew for now (runtime version manager)
