@@ -157,6 +157,7 @@
   "alwaysThinkingEnabled": true,
   "autoMemoryEnabled": false,
   "theme": "light-daltonized",
+  "verbose": true,
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false
 }
