@@ -1,7 +1,7 @@
 # ==========================================================================
 # Dotfiles - declarative symlinks managed by Home Manager
 # ==========================================================================
-{ lib, ... }:
+{ config, lib, dotfilesDir, ... }:
 
 let
   # Zsh overlay path
@@ -83,10 +83,8 @@ in
 
   home.file.".claude/CLAUDE.md".source = ../claude/CLAUDE.md;
 
-  # Read-only /nix/store symlink so Claude Code cannot follow it and rewrite the
-  # tracked dotfile (otherwise skipAutoPermissionPrompt etc. get flipped silently).
-  # Runtime-mutable settings should land in ~/.claude/settings.local.json (gitignored).
-  home.file.".claude/settings.json".source = ../claude/settings.json;
+  # Claude Code からの設定変更を許容
+  home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/claude/settings.json";
   
   # ==========================================================================
   # Cursor configuration
