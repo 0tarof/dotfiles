@@ -64,6 +64,11 @@
       ll = "ls -la";
       la = "ls -a";
       l = "ls -CF";
+
+      # Redirect pip to uv pip so UV_EXCLUDE_NEWER applies and we avoid
+      # using pip directly (no min-release-age support on its own).
+      pip = "uv pip";
+      pip3 = "uv pip";
     };
     
     # Antidote plugin manager
