@@ -5,6 +5,15 @@
 
 {
   # ==========================================================================
+  # Session variables - supply-chain guardrails
+  # ==========================================================================
+  # Reject Python packages uploaded within the last 3 days (uv equivalent of
+  # npm's min-release-age). Mirrors mise's minimum_release_age and .npmrc.
+  home.sessionVariables = {
+    UV_EXCLUDE_NEWER = "3 days";
+  };
+
+  # ==========================================================================
   # Docker CLI completion - regenerate _docker on each rebuild
   # https://docs.docker.com/engine/cli/completion/
   # ==========================================================================
