@@ -1,5 +1,6 @@
 [settings]
 disable_backends = ["vfox"]
+minimum_release_age = "7d"
 
 [settings.pipx]
 uvx = true
