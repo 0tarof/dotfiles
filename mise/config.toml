@@ -4,6 +4,9 @@ disable_backends = ["vfox"]
 [settings.pipx]
 uvx = true
 
+[settings.github]
+credential_command = "gh auth token"
+
 [plugins]
 mysql = "https://github.com/iroddis/asdf-mysql"
 
