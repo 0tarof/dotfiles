@@ -62,7 +62,10 @@ in
   
   # Git config in home directory
   home.file.".gitconfig".source = ../.gitconfig;
-  
+
+  # npm global config
+  home.file.".npmrc".source = ../.npmrc;
+
   # ==========================================================================
   # Claude Code configuration
   # ==========================================================================
