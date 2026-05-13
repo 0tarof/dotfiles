@@ -230,6 +230,17 @@
             ''${path:#$HOME/bin}
         )
 
+        # Block npm install shorthands to enforce explicit `npm install`
+        npm() {
+          case "$1" in
+            i|in|ins|inst|insta|instal|add)
+              print -u2 "Use 'npm install' explicitly (alias '$1' is blocked)"
+              return 1
+              ;;
+          esac
+          command npm "$@"
+        }
+
         # Load overlay configuration if exists
         [[ -f ~/.config/zsh/overlay/.zshrc ]] && source ~/.config/zsh/overlay/.zshrc
       ''
