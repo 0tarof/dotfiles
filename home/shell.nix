@@ -244,8 +244,17 @@
             ''${path:#$HOME/bin}
         )
 
-        # Block npm install shorthands to enforce explicit `npm install`
+        # Guard npm: require v11+ (for min-release-age support) and block
+        # install shorthands so the deny rules / .npmrc cooldown are not
+        # bypassed via `npm i`.
         npm() {
+          local version major
+          version="$(command npm --version 2>/dev/null)"
+          major="''${version%%.*}"
+          if [[ -z "$major" || "$major" -lt 11 ]]; then
+            print -u2 "npm v11+ required for min-release-age (current: ''${version:-unknown})"
+            return 1
+          fi
           case "$1" in
             i|in|ins|inst|insta|instal|add)
               print -u2 "Use 'npm install' explicitly (alias '$1' is blocked)"
