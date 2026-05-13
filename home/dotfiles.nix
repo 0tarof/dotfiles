@@ -39,6 +39,11 @@ in
     recursive = true;
   };
 
+  home.file.".config/uv" = {
+    source = ../uv;
+    recursive = true;
+  };
+
   # Empty sbtopts to prevent nix-packaged sbt from enforcing a specific Java version
   home.file.".config/sbt/sbtopts".text = "";
   
