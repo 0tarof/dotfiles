@@ -115,6 +115,29 @@ in
       #!/usr/bin/env bash
       set -euo pipefail
 
+      UPGRADE=0
+      for arg in "$@"; do
+          case "$arg" in
+              -u|--upgrade)
+                  UPGRADE=1
+                  ;;
+              -h|--help)
+                  cat <<'USAGE'
+      Usage: nix-rebuild [--upgrade]
+
+        --upgrade, -u  Run `brew upgrade` after the rebuild to update
+                       Homebrew formulae and casks.
+        --help, -h     Show this help.
+      USAGE
+                  exit 0
+                  ;;
+              *)
+                  echo "Unknown option: $arg" >&2
+                  exit 2
+                  ;;
+          esac
+      done
+
       DOTFILES_DIR="$HOME/projects/github.com/0tarof/dotfiles"
       CONFIG_FILE="$DOTFILES_DIR/.local/nix/config.nix"
 
@@ -147,6 +170,11 @@ in
           # Linux/WSL: standalone home-manager (no sudo needed)
           HOME="$HOME" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
               home-manager switch --flake "$DOTFILES_DIR#$NIX_USERNAME@$NIX_HOSTNAME" --impure
+      fi
+
+      if [[ "$UPGRADE" == "1" ]] && command -v brew &> /dev/null; then
+          echo "Upgrading Homebrew packages..."
+          brew upgrade
       fi
 
       echo "Installing mise tools..."
