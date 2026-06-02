@@ -42,7 +42,8 @@
       "Bash(difit *)",
       "Bash(git fetch origin)",
       "Bash(git fetch origin *)",
-      "Skill(sibling-repo)"
+      "Skill(sibling-repo)",
+      "Bash(npm run cdk:*)"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -66,7 +67,7 @@
       "Bash(pnpm install -r *)",
       "Bash(pnpm uninstall *)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "acceptEdits"
   },
   "model": "opus[1m]",
   "hooks": {
