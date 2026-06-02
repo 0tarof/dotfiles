@@ -43,6 +43,7 @@
       "adobe-creative-cloud"
       "affinity"
       "android-studio"
+      "caffeine"
       "canva"
       "chatgpt"
       "claude"
