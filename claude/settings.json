@@ -160,5 +160,6 @@
   "theme": "light-daltonized",
   "verbose": true,
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": false
+  "skipAutoPermissionPrompt": false,
+  "useAutoModeDuringPlan": false
 }
