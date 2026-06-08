@@ -35,6 +35,7 @@
       "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
       "pinentry-mac"      # macOS-specific
+      "telnet"            # Removed from macOS base system
       "dlvhdr/formulae/diffnav"
     ];
 
