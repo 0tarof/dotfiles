@@ -29,6 +29,7 @@ in
     ./shell.nix      # Zsh, Direnv
     ./packages.nix   # CLI tools
     ./dotfiles.nix   # Symlinks to config files
+    ./codex.nix      # Codex skills
     ./scripts.nix    # Custom scripts, Claude Code installer
     ./launchd.nix    # macOS Launch Agents
   ]
