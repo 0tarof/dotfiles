@@ -37,6 +37,16 @@ ${CODEX_HOME:-$HOME/.codex}/skills/auto-review-fix/check_bot_review_status.py <P
 ${CODEX_HOME:-$HOME/.codex}/skills/auto-review-fix/minimize_old_review_comments.py <PR_NUMBER>
 ```
 
+## Codex App GitHub Auth
+
+In Codex App, sandboxed commands may not be able to read macOS keyring-backed
+`gh` credentials. Run `gh` commands, and bundled scripts that invoke `gh`, with
+escalated / out-of-sandbox permissions so `gh` can use the system credential
+store.
+
+Do not work around this by running `gh auth token` or copying the main GitHub
+token into Codex environment files.
+
 ## Workflow
 
 1. Resolve the PR.

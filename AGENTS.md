@@ -23,6 +23,13 @@ nix-rebuild
 bin/git-delete-merged-branch
 ```
 
+### Codex App での GitHub CLI
+Codex App の sandbox 内では macOS keyring に保存された `gh` の認証情報を読めず、
+`gh auth status` が token invalid になることがある。`gh` コマンド、または内部で
+`gh` を呼ぶスクリプトを実行する場合は、sandbox 外（escalated permissions）で実行する。
+`gh auth token` で token を表示したり、通常利用している GitHub token を Codex の環境変数や
+設定ファイルにコピーして回避しない。
+
 ## アーキテクチャ
 
 ### ディレクトリ構造
