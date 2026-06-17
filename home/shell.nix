@@ -67,11 +67,11 @@
       enable = true;
       plugins = [
         "romkatv/powerlevel10k conditional:__dotfiles_zsh_has_prompt_tty"
-        "zsh-users/zsh-completions"
-        "zsh-users/zsh-syntax-highlighting"
-        "zsh-users/zsh-autosuggestions"
-        "zsh-users/zsh-history-substring-search"
-        "wintermi/zsh-mise"
+        "zsh-users/zsh-completions conditional:__dotfiles_zsh_has_prompt_tty"
+        "zsh-users/zsh-syntax-highlighting conditional:__dotfiles_zsh_has_prompt_tty"
+        "zsh-users/zsh-autosuggestions conditional:__dotfiles_zsh_has_prompt_tty"
+        "zsh-users/zsh-history-substring-search conditional:__dotfiles_zsh_has_prompt_tty"
+        "wintermi/zsh-mise conditional:__dotfiles_zsh_has_prompt_tty"
       ];
     };
     
@@ -191,35 +191,35 @@
         # asdf completion
         fpath=(''${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 
-        # Autosuggestions settings
-        ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-        ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-
-        # Key bindings for autosuggestions
-        bindkey '^[[Z' autosuggest-accept  # Shift+Tab to accept suggestion
-
-        # ghq + peco integration
-        function peco-src () {
-          local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
-          if [ -n "$selected_dir" ]; then
-            BUFFER="cd ''${selected_dir}"
-            zle accept-line
-          fi
-          zle clear-screen
-        }
-        zle -N peco-src
-        bindkey '^]' peco-src
-
-        # History search with peco
-        function peco-history-selection() {
-          BUFFER=`history -n 1 | tac | awk '!a[$0]++' | peco`
-          CURSOR=$#BUFFER
-          zle clear-screen
-        }
-        zle -N peco-history-selection
-        bindkey '^r' peco-history-selection
-
         if __dotfiles_zsh_has_prompt_tty; then
+          # Autosuggestions settings
+          ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+          ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+
+          # Key bindings for autosuggestions
+          bindkey '^[[Z' autosuggest-accept  # Shift+Tab to accept suggestion
+
+          # ghq + peco integration
+          function peco-src () {
+            local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
+            if [ -n "$selected_dir" ]; then
+              BUFFER="cd ''${selected_dir}"
+              zle accept-line
+            fi
+            zle clear-screen
+          }
+          zle -N peco-src
+          bindkey '^]' peco-src
+
+          # History search with peco
+          function peco-history-selection() {
+            BUFFER=`history -n 1 | tac | awk '!a[$0]++' | peco`
+            CURSOR=$#BUFFER
+            zle clear-screen
+          }
+          zle -N peco-history-selection
+          bindkey '^r' peco-history-selection
+
           # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
           [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
