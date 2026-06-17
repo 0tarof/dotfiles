@@ -66,7 +66,7 @@
     antidote = {
       enable = true;
       plugins = [
-        "romkatv/powerlevel10k"
+        "romkatv/powerlevel10k conditional:__dotfiles_zsh_has_prompt_tty"
         "zsh-users/zsh-completions"
         "zsh-users/zsh-syntax-highlighting"
         "zsh-users/zsh-autosuggestions"
@@ -80,9 +80,14 @@
       LANG=ja_JP.UTF-8
       export LANG
 
-      # mise initialization (always loaded)
+      # Full mise activation reads project config and may print trust warnings.
+      # Non-TTY shells only need quiet shims so command output stays clean.
       if command -v mise &> /dev/null; then
-          eval "$(mise activate zsh)"
+          if [[ -o interactive && -t 0 && -t 1 ]]; then
+              eval "$(mise activate zsh --quiet)"
+          else
+              eval "$(mise activate zsh --shims --quiet)"
+          fi
       fi
 
       # Ensure Nix paths are in PATH (mise may have overridden them)
@@ -156,8 +161,12 @@
     initContent = lib.mkMerge [
       # Before compinit (p10k instant prompt must be at the very top)
       (lib.mkBefore ''
-        # Enable Powerlevel10k instant prompt
-        if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+        __dotfiles_zsh_has_prompt_tty() {
+          [[ -o interactive && -t 0 && -t 1 ]]
+        }
+
+        # Enable Powerlevel10k instant prompt only in real terminal sessions.
+        if __dotfiles_zsh_has_prompt_tty && [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
           source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
         fi
 
@@ -210,23 +219,25 @@
         zle -N peco-history-selection
         bindkey '^r' peco-history-selection
 
-        # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-        [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+        if __dotfiles_zsh_has_prompt_tty; then
+          # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+          [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
-        # Fix git core.bare=true caused by worktree + extensions.worktreeConfig
-        # libgit2 (used by gitstatus/p10k) doesn't read .git/config.worktree,
-        # so core.bare=true in .git/config breaks branch display.
-        _fix_git_core_bare() {
-          local git_dir
-          git_dir="$(git rev-parse --git-dir 2>/dev/null)" || return
-          if [[ "$(git config --file "$git_dir/config" core.bare 2>/dev/null)" == "true" ]] \
-            && [[ -d "$git_dir/refs" || -f "$git_dir/packed-refs" ]]; then
-            git config --file "$git_dir/config" core.bare false
-          fi
-        }
-        autoload -Uz add-zsh-hook
-        add-zsh-hook chpwd _fix_git_core_bare
-        _fix_git_core_bare  # 初回シェル起動時にも実行
+          # Fix git core.bare=true caused by worktree + extensions.worktreeConfig
+          # libgit2 (used by gitstatus/p10k) doesn't read .git/config.worktree,
+          # so core.bare=true in .git/config breaks branch display.
+          _fix_git_core_bare() {
+            local git_dir
+            git_dir="$(git rev-parse --git-dir 2>/dev/null)" || return
+            if [[ "$(git config --file "$git_dir/config" core.bare 2>/dev/null)" == "true" ]] \
+              && [[ -d "$git_dir/refs" || -f "$git_dir/packed-refs" ]]; then
+              git config --file "$git_dir/config" core.bare false
+            fi
+          }
+          autoload -Uz add-zsh-hook
+          add-zsh-hook chpwd _fix_git_core_bare
+          _fix_git_core_bare  # 初回シェル起動時にも実行
+        fi
 
         # Ensure $HOME/bin comes before mise shims in PATH
         typeset -U path PATH
