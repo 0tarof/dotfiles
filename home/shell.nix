@@ -145,7 +145,7 @@
       if command -v gh &>/dev/null; then
         if gh auth status &>/dev/null; then
           export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token 2>/dev/null)"
-        else
+        elif [[ -o interactive && -t 2 ]]; then
           print -u2 "gh: not authenticated. Run 'gh auth login' to enable Homebrew private tap access."
         fi
       fi
