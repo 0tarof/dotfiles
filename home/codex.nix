@@ -1,7 +1,7 @@
 # ==========================================================================
 # Codex configuration
 # ==========================================================================
-{ lib, ... }:
+{ ... }:
 
 let
   codexSkillsDir = ../.agents/skills;
@@ -28,5 +28,10 @@ in
 {
   # Manage each skill directory individually so existing Codex-managed
   # directories such as ~/.codex/skills/.system remain untouched.
-  home.file = lib.mkIf hasCodexSkills codexSkillHomeFiles;
+  home.file = codexSkillHomeFiles // {
+    ".codex/AGENTS.md" = {
+      source = ../codex/AGENTS.md;
+      force = true;
+    };
+  };
 }
