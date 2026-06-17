@@ -32,6 +32,7 @@
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "helm"              # Kubernetes package manager
       "html2markdown"     # Not in nixpkgs
+      "kind"              # Kubernetes in Docker local clusters
       "mise"              # Runtime version manager
       "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
