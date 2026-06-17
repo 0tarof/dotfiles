@@ -30,7 +30,6 @@
     # Brews - packages not in Nixpkgs or macOS-specific
     brews = [
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
-      "helm"              # Kubernetes package manager
       "html2markdown"     # Not in nixpkgs
       "kind"              # Kubernetes in Docker local clusters
       "mise"              # Runtime version manager

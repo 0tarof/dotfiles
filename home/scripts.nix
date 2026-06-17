@@ -97,6 +97,49 @@ in
     '';
 
   # ==========================================================================
+  # Helm plugin synchronization
+  # ==========================================================================
+  home.file."bin/sync-helm-plugins" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      helm_unittest_source="https://github.com/helm-unittest/helm-unittest.git"
+      helm_unittest_version="1.1.1"
+
+      run_helm() {
+          mise exec -- helm "$@"
+      }
+
+      if ! command -v mise &> /dev/null; then
+          echo "mise is not installed, skipping Helm plugin sync."
+          exit 0
+      fi
+
+      if ! run_helm version --short &> /dev/null; then
+          echo "Helm is not available via mise, skipping Helm plugin sync."
+          exit 0
+      fi
+
+      current_version="$(run_helm plugin list 2>/dev/null | awk '$1 == "unittest" {print $2; exit}')"
+      if [[ "$current_version" == "$helm_unittest_version" ]]; then
+          echo "helm-unittest $helm_unittest_version is installed."
+          exit 0
+      fi
+
+      if [[ -n "$current_version" ]]; then
+          echo "Reinstalling helm-unittest plugin ($current_version -> $helm_unittest_version)..."
+          run_helm plugin uninstall unittest > /dev/null || true
+      else
+          echo "Installing helm-unittest plugin $helm_unittest_version..."
+      fi
+
+      run_helm plugin install "$helm_unittest_source" --version "$helm_unittest_version" --verify=false
+    '';
+  };
+
+  # ==========================================================================
   # nix-rebuild: darwin-rebuild のラッパースクリプト
   # ==========================================================================
   # .local/nix/config.nix を読み込み、環境変数として flake.nix に渡す。
@@ -179,6 +222,13 @@ in
 
       echo "Installing mise tools..."
       mise install
+
+      echo "Installing Helm plugins..."
+      if [[ -x "$HOME/bin/sync-helm-plugins" ]]; then
+          "$HOME/bin/sync-helm-plugins"
+      else
+          echo "sync-helm-plugins not found, skipping."
+      fi
     '';
   };
 
