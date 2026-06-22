@@ -7,6 +7,8 @@ let
   # Zsh overlay path
   zshOverlayPath = ../overlay/zsh;
   hasZshOverlay = builtins.pathExists zshOverlayPath;
+  reviewKnowledgeSkillPath = ../.agents/skills/review-knowledge-collect;
+  hasReviewKnowledgeSkill = builtins.pathExists reviewKnowledgeSkillPath;
 in
 {
   # ==========================================================================
@@ -76,6 +78,11 @@ in
   # ==========================================================================
   home.file.".claude/skills" = {
     source = ../claude/skills;
+    recursive = true;
+  };
+
+  home.file.".claude/skills/review-knowledge-collect" = lib.mkIf hasReviewKnowledgeSkill {
+    source = reviewKnowledgeSkillPath;
     recursive = true;
   };
   
