@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Knowledge Collect"
+  short_description: "Collect and organize PR review viewpoints"
+  default_prompt: "Use $review-knowledge-collect to capture and organize PR review knowledge."
