@@ -1,5 +1,6 @@
 {
   "env": {
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
@@ -160,6 +161,7 @@
   },
   "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
   "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
   "autoMemoryEnabled": false,
   "theme": "light-daltonized",
   "verbose": true,
