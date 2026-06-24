@@ -69,7 +69,7 @@ in
       for p in /opt/homebrew/bin/mise /usr/local/bin/mise /etc/profiles/per-user/$USER/bin/mise /run/current-system/sw/bin/mise; do
         if [[ -x "$p" ]]; then
           mkdir -p "$completions_dir"
-          if run_with_aqua_github_token "$p" completions zsh > "$completions_dir/_mise.tmp"; then
+          if run_with_aqua_github_token "$p" completions zsh --silent > "$completions_dir/_mise.tmp"; then
             mv "$completions_dir/_mise.tmp" "$completions_dir/_mise"
           else
             rm -f "$completions_dir/_mise.tmp"
