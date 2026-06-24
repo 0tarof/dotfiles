@@ -259,12 +259,8 @@ mise.toml
 .claude/scheduled_tasks.json
 .mcp.json
 
-# OpenAI Codex
-.codex
-
 # Worktrees
 /worktrees/
 .claude/worktrees/
 
 .perman-aws-vault
-
