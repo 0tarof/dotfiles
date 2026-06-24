@@ -7,6 +7,7 @@ uvx = true
 
 [settings.github]
 credential_command = "gh auth token"
+use_git_credentials = true
 
 [plugins]
 mysql = "https://github.com/iroddis/asdf-mysql"
