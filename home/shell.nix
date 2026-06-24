@@ -1,7 +1,7 @@
 # ==========================================================================
 # Shell configuration - Zsh and Direnv
 # ==========================================================================
-{ lib, pkgs, ... }:
+{ lib, pkgs, username, ... }:
 
 let
   antidotePlugins = [
@@ -48,10 +48,14 @@ in
           return
         fi
 
-        for gh_path in /opt/homebrew/bin/gh /usr/local/bin/gh /etc/profiles/per-user/$USER/bin/gh /run/current-system/sw/bin/gh; do
-          if [[ -x "$gh_path" ]] && "$gh_path" auth status &>/dev/null; then
+        for gh_path in /etc/profiles/per-user/${username}/bin/gh /run/current-system/sw/bin/gh /opt/homebrew/bin/gh /usr/local/bin/gh; do
+          if [[ -x "$gh_path" ]]; then
             local token
-            token="$("$gh_path" auth token 2>/dev/null || true)"
+            if [[ "$(id -u)" -eq 0 ]]; then
+              token="$(sudo --user=${lib.escapeShellArg username} --set-home "$gh_path" auth token 2>/dev/null || true)"
+            else
+              token="$("$gh_path" auth token 2>/dev/null || true)"
+            fi
             if [[ -n "$token" ]]; then
               AQUA_GITHUB_TOKEN="$token" "$@"
               return

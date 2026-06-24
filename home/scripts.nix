@@ -194,7 +194,7 @@ in
               return
           fi
 
-          if command -v gh &> /dev/null && gh auth status &> /dev/null; then
+          if command -v gh &> /dev/null; then
               local token
               token="$(gh auth token 2>/dev/null || true)"
               if [[ -n "$token" ]]; then
