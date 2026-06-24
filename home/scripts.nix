@@ -189,7 +189,7 @@ in
       }
 
       run_with_aqua_github_token() {
-          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" ]]; then
+          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" && -n "''${MISE_GITHUB_TOKEN:-}" ]]; then
               "$@"
               return
           fi
@@ -198,7 +198,10 @@ in
               local token
               token="$(gh auth token 2>/dev/null || true)"
               if [[ -n "$token" ]]; then
-                  AQUA_GITHUB_TOKEN="$token" "$@"
+                  AQUA_GITHUB_TOKEN="''${AQUA_GITHUB_TOKEN:-$token}" \
+                      GITHUB_TOKEN="''${GITHUB_TOKEN:-$token}" \
+                      MISE_GITHUB_TOKEN="''${MISE_GITHUB_TOKEN:-$token}" \
+                      "$@"
                   return
               fi
           fi
