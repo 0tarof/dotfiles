@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Thread Handover Recovery"
+  short_description: "Recover stuck Codex threads and branch handovers"
+  default_prompt: "Use $codex-thread-handover-recovery to recover a stuck Codex implementation thread and move its branch to a new thread safely."
