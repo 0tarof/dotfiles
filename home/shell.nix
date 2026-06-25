@@ -1,7 +1,7 @@
 # ==========================================================================
 # Shell configuration - Zsh and Direnv
 # ==========================================================================
-{ lib, pkgs, ... }:
+{ lib, pkgs, username, ... }:
 
 let
   antidotePlugins = [
@@ -41,10 +41,38 @@ in
   home.activation.miseCompletion = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [[ -z "''${DRY_RUN:-}" ]]; then
       completions_dir="$HOME/.config/zsh/completions"
+
+      run_with_aqua_github_token() {
+        if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" && -n "''${MISE_GITHUB_TOKEN:-}" ]]; then
+          "$@"
+          return
+        fi
+
+        for gh_path in /etc/profiles/per-user/${username}/bin/gh /run/current-system/sw/bin/gh /opt/homebrew/bin/gh /usr/local/bin/gh; do
+          if [[ -x "$gh_path" ]]; then
+            local token
+            if [[ "$(id -u)" -eq 0 ]]; then
+              token="$(sudo --user=${lib.escapeShellArg username} --set-home "$gh_path" auth token 2>/dev/null || true)"
+            else
+              token="$("$gh_path" auth token 2>/dev/null || true)"
+            fi
+            if [[ -n "$token" ]]; then
+              AQUA_GITHUB_TOKEN="''${AQUA_GITHUB_TOKEN:-$token}" \
+                GITHUB_TOKEN="''${GITHUB_TOKEN:-$token}" \
+                MISE_GITHUB_TOKEN="''${MISE_GITHUB_TOKEN:-$token}" \
+                "$@"
+              return
+            fi
+          fi
+        done
+
+        "$@"
+      }
+
       for p in /opt/homebrew/bin/mise /usr/local/bin/mise /etc/profiles/per-user/$USER/bin/mise /run/current-system/sw/bin/mise; do
         if [[ -x "$p" ]]; then
           mkdir -p "$completions_dir"
-          if "$p" completions zsh > "$completions_dir/_mise.tmp"; then
+          if run_with_aqua_github_token "$p" completions zsh > "$completions_dir/_mise.tmp"; then
             mv "$completions_dir/_mise.tmp" "$completions_dir/_mise"
           else
             rm -f "$completions_dir/_mise.tmp"

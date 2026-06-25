@@ -188,6 +188,27 @@ in
           grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/' | head -1
       }
 
+      run_with_aqua_github_token() {
+          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" && -n "''${MISE_GITHUB_TOKEN:-}" ]]; then
+              "$@"
+              return
+          fi
+
+          if command -v gh &> /dev/null; then
+              local token
+              token="$(gh auth token 2>/dev/null || true)"
+              if [[ -n "$token" ]]; then
+                  AQUA_GITHUB_TOKEN="''${AQUA_GITHUB_TOKEN:-$token}" \
+                      GITHUB_TOKEN="''${GITHUB_TOKEN:-$token}" \
+                      MISE_GITHUB_TOKEN="''${MISE_GITHUB_TOKEN:-$token}" \
+                      "$@"
+                  return
+              fi
+          fi
+
+          "$@"
+      }
+
       if [[ ! -f "$CONFIG_FILE" ]]; then
           echo "Error: Config not found. Run bootstrap.sh first."
           exit 1
@@ -221,7 +242,7 @@ in
       fi
 
       echo "Installing mise tools..."
-      mise install
+      run_with_aqua_github_token mise install
 
       echo "Installing Helm plugins..."
       if [[ -x "$HOME/bin/sync-helm-plugins" ]]; then
