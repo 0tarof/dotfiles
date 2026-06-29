@@ -167,5 +167,6 @@
   "verbose": true,
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false,
-  "useAutoModeDuringPlan": false
+  "useAutoModeDuringPlan": false,
+  "tui": "fullscreen"
 }
