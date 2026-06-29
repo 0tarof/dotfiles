@@ -132,6 +132,11 @@ in
       LANG=ja_JP.UTF-8
       export LANG
 
+      # Use socktainer (Apple Container) as the default Docker runtime on macOS
+      if [[ -S /opt/homebrew/var/run/socktainer/.socktainer/container.sock ]]; then
+          export DOCKER_HOST="unix:///opt/homebrew/var/run/socktainer/.socktainer/container.sock"
+      fi
+
       # Full mise activation reads project config and may print trust warnings.
       # Non-TTY shells only need quiet shims so command output stays clean.
       if command -v mise &> /dev/null; then

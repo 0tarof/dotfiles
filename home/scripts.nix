@@ -253,6 +253,18 @@ in
     '';
   };
 
+  # ==========================================================================
+  # Apple Container (socktainer) setup
+  # ==========================================================================
+  home.activation.setupAppleContainer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]] && [[ "$(uname)" == "Darwin" ]]; then
+      container=/opt/homebrew/bin/container
+      if [[ -x "$container" ]]; then
+        "$container" system kernel set --recommended 2>/dev/null || true
+      fi
+    fi
+  '';
+
   # Add ~/bin to PATH
   home.sessionPath = [ "$HOME/bin" ];
 }

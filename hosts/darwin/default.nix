@@ -30,12 +30,14 @@
     # Brews - packages not in Nixpkgs or macOS-specific
     brews = [
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
+      { name = "container"; start_service = true; }   # Apple Container runtime
       "html2markdown"     # Not in nixpkgs
       "kind"              # Kubernetes in Docker local clusters
       "mise"              # Runtime version manager
       "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
       "pinentry-mac"      # macOS-specific
+      { name = "socktainer"; start_service = true; } # Docker-compatible socket for Apple Container
       "telnet"            # Removed from macOS base system
       "dlvhdr/formulae/diffnav"
     ];
