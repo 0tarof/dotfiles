@@ -213,8 +213,14 @@ in
     initContent = lib.mkMerge [
       # Before compinit (p10k instant prompt must be at the very top)
       (lib.mkBefore ''
+        # Cache the result on the first call; p10k instant prompt
+        # redirects fd 0/1/2, making subsequent -t checks fail.
         __dotfiles_zsh_has_prompt_tty() {
-          [[ -o interactive && -t 0 && -t 1 ]]
+          if [[ -z "''${__dotfiles_prompt_tty+x}" ]]; then
+            [[ -o interactive && -t 0 && -t 1 ]]
+            __dotfiles_prompt_tty=$?
+          fi
+          return $__dotfiles_prompt_tty
         }
 
         # Enable Powerlevel10k instant prompt only in real terminal sessions.
