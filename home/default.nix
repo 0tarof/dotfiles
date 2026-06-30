@@ -1,7 +1,7 @@
 # ==========================================================================
 # Home Manager configuration - Main entry point
 # ==========================================================================
-{ username, dotfilesDir, pkgs, ... }:
+{ inputs, username, dotfilesDir, pkgs, ... }:
 
 let
   # Helper to optionally import overlay modules

@@ -309,6 +309,10 @@ in
         # asdf completion
         fpath=(''${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 
+        if command -v tirith &> /dev/null; then
+          eval "$(tirith init --shell zsh)"
+        fi
+
         if __dotfiles_zsh_has_prompt_tty; then
           # Autosuggestions settings
           ZSH_AUTOSUGGEST_STRATEGY=(history completion)

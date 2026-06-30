@@ -13,6 +13,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    tirith = {
+      # Use git+ssh instead of github: so Nix can use existing SSH auth and
+      # avoid unauthenticated GitHub API rate limits during rebuilds.
+      url = "git+ssh://git@github.com/sheeki03/tirith";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
@@ -105,7 +112,7 @@
         ]
         # Overlay home configuration (company-specific)
         ++ optionalOverlay "overlay/nix/home.nix";
-        extraSpecialArgs = { inherit username dotfilesDir; };
+        extraSpecialArgs = { inherit inputs username dotfilesDir; };
       };
     };
 
