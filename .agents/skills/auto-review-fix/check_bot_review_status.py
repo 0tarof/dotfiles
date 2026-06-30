@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""PRのBotレビュー（Greptile、Devin）の完了状態を機械的に判定するスクリプト。
+"""PRのGreptileレビュー状態を機械的に判定するスクリプト。
+
+Devinレビューは意図的に見ない。
 
 Usage: python3 check_bot_review_status.py [PR_NUMBER]
   PR_NUMBER省略時は現在のブランチから自動取得。
@@ -12,17 +14,26 @@ import re
 import subprocess
 import sys
 
+GREPTILE_LOGINS = {"greptile-apps", "greptile-apps[bot]"}
+
 GRAPHQL_QUERY = """
 query($owner: String!, $repo: String!, $pr: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $pr) {
       reviewThreads(first: 100) {
         nodes {
+          id
           isResolved
-          comments(first: 1) {
+          path
+          line
+          comments(first: 10) {
             nodes {
               author { login }
               body
+              path
+              line
+              url
+              createdAt
             }
           }
         }
@@ -67,16 +78,45 @@ def get_review_threads(owner: str, repo: str, pr: int) -> list[dict]:
     return data["data"]["repository"]["pullRequest"]["reviewThreads"]["nodes"]
 
 
-def unresolved_threads_by(threads: list[dict], login: str) -> list[dict]:
+def is_greptile_login(login: str) -> bool:
+    return login in GREPTILE_LOGINS
+
+
+def greptile_comments(thread: dict) -> list[dict]:
+    comments = thread.get("comments", {}).get("nodes", [])
+    return [
+        comment for comment in comments
+        if is_greptile_login(comment.get("author", {}).get("login", ""))
+    ]
+
+
+def unresolved_greptile_threads(threads: list[dict]) -> list[dict]:
     result = []
-    for t in threads:
-        comments = t.get("comments", {}).get("nodes", [])
-        if not comments:
+    for thread in threads:
+        if thread.get("isResolved", True):
             continue
-        author = comments[0].get("author", {}).get("login", "")
-        if author == login and not t.get("isResolved", True):
-            result.append(t)
+        if greptile_comments(thread):
+            result.append(thread)
     return result
+
+
+def compact_body(body: str, limit: int = 500) -> str:
+    compacted = re.sub(r"\s+", " ", body).strip()
+    if len(compacted) <= limit:
+        return compacted
+    return compacted[: limit - 1] + "…"
+
+
+def summarize_thread(thread: dict) -> dict:
+    comments = greptile_comments(thread)
+    first = comments[0] if comments else {}
+    return {
+        "id": thread.get("id"),
+        "path": thread.get("path") or first.get("path"),
+        "line": thread.get("line") or first.get("line"),
+        "url": first.get("url"),
+        "body_excerpt": compact_body(first.get("body", "")),
+    }
 
 
 def extract_summary_p2(body: str) -> list[str]:
@@ -85,11 +125,9 @@ def extract_summary_p2(body: str) -> list[str]:
     in_summary = False
     for line in body.splitlines():
         stripped = line.strip()
-        # Summaryセクションの開始
         if re.match(r"^#{1,3}\s+Summary", stripped, re.IGNORECASE):
             in_summary = True
             continue
-        # 次のセクション見出しでSummary終了
         if in_summary and re.match(r"^#{1,3}\s+", stripped):
             break
         if in_summary and re.search(r"\bP2\b", stripped):
@@ -97,8 +135,30 @@ def extract_summary_p2(body: str) -> list[str]:
     return items
 
 
-def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
-    bot = "greptile-apps"
+def confidence_from(body: str) -> str | None:
+    match = re.search(r"Confidence[^0-9]*(\d)\s*/\s*5", body, re.IGNORECASE)
+    if not match:
+        return None
+    return f"{match.group(1)}/5"
+
+
+def latest_greptile_review(reviews: list[dict]) -> dict | None:
+    for review in reversed(reviews):
+        author = review.get("author", {}).get("login", "")
+        if is_greptile_login(author):
+            return review
+    return None
+
+
+def latest_greptile_comment(comments: list[dict]) -> dict | None:
+    for comment in reversed(comments):
+        author = comment.get("author", {}).get("login", "")
+        if is_greptile_login(author):
+            return comment
+    return None
+
+
+def check_greptile(pr: int, threads: list[dict]) -> dict:
     info: dict = {
         "bot": "greptile",
         "found": False,
@@ -106,54 +166,39 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
         "confidence": None,
         "summary_p2": [],
         "unresolved_comments": 0,
+        "unresolved_threads": [],
         "complete": False,
     }
 
+    raw = run_gh(["pr", "view", str(pr), "--json", "reviews,comments"])
+    pr_view = json.loads(raw)
+    reviews = pr_view.get("reviews", [])
+    comments = pr_view.get("comments", [])
+
     review_body = ""
+    review = latest_greptile_review(reviews)
+    if review:
+        info["found"] = True
+        review_body = review.get("body", "")
+        info["approved"] = review.get("state", "") == "APPROVED"
+        info["confidence"] = confidence_from(review_body)
 
-    # reviewsからConfidence・承認状態を取得
-    raw = run_gh(["pr", "view", str(pr), "--json", "reviews"])
-    reviews = json.loads(raw).get("reviews", [])
+    comment = latest_greptile_comment(comments)
+    if comment:
+        info["found"] = True
+        comment_body = comment.get("body", "")
+        if not info["confidence"]:
+            info["confidence"] = confidence_from(comment_body)
+        if not review_body:
+            review_body = comment_body
 
-    # 最新のgreptileレビューを探す
-    for review in reversed(reviews):
-        author = review.get("author", {}).get("login", "")
-        if author == bot:
-            info["found"] = True
-            review_body = review.get("body", "")
-            state = review.get("state", "")
-            if state == "APPROVED":
-                info["approved"] = True
-            m = re.search(r"Confidence.*?(\d+)/5", review_body)
-            if m:
-                info["confidence"] = f"{m.group(1)}/5"
-            break
+    unresolved = unresolved_greptile_threads(threads)
+    if unresolved:
+        info["found"] = True
 
-    # commentsにもConfidenceがある場合がある（reviewのbodyが空のケース）
-    raw = run_gh(["pr", "view", str(pr), "--json", "comments"])
-    comments = json.loads(raw).get("comments", [])
-    for comment in reversed(comments):
-        author = comment.get("author", {}).get("login", "")
-        if author == bot:
-            info["found"] = True
-            comment_body = comment.get("body", "")
-            if not info["confidence"]:
-                m = re.search(r"Confidence.*?(\d+)/5", comment_body)
-                if m:
-                    info["confidence"] = f"{m.group(1)}/5"
-            if not review_body:
-                review_body = comment_body
-            break
-
-    # SummaryセクションからP2を抽出
-    if review_body:
-        info["summary_p2"] = extract_summary_p2(review_body)
-
-    # 未解決インラインコメント
-    unresolved = unresolved_threads_by(threads, bot)
+    info["summary_p2"] = extract_summary_p2(review_body) if review_body else []
     info["unresolved_comments"] = len(unresolved)
-
-    # 完了判定: APPROVED または (Confidence 5/5 かつ 未解決コメント0件)
+    info["unresolved_threads"] = [summarize_thread(thread) for thread in unresolved]
     info["complete"] = (
         (info["approved"] and info["unresolved_comments"] == 0)
         or (info["confidence"] == "5/5" and info["unresolved_comments"] == 0)
@@ -162,70 +207,17 @@ def check_greptile(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
     return info
 
 
-def check_devin(owner: str, repo: str, pr: int, threads: list[dict]) -> dict:
-    bot = "devin-ai-integration"
-    info: dict = {
-        "bot": "devin",
-        "found": False,
-        "no_issues_comment": False,
-        "checks_pass": None,
-        "unresolved_comments": 0,
-        "complete": False,
-    }
-
-    # "No Issues Found" コメントを確認
-    raw = run_gh(["pr", "view", str(pr), "--json", "comments"])
-    comments = json.loads(raw).get("comments", [])
-    for comment in comments:
-        author = comment.get("author", {}).get("login", "")
-        if author == bot:
-            info["found"] = True
-            if "Devin Review: No Issues Found" in comment.get("body", ""):
-                info["no_issues_comment"] = True
-
-    # reviewsも確認
-    raw = run_gh(["pr", "view", str(pr), "--json", "reviews"])
-    reviews = json.loads(raw).get("reviews", [])
-    for review in reviews:
-        author = review.get("author", {}).get("login", "")
-        if author == bot:
-            info["found"] = True
-
-    # checksでDevin Reviewの状態を確認（pending/failでも非ゼロになるので許容）
-    result = subprocess.run(
-        ["gh", "pr", "checks", str(pr)], capture_output=True, text=True, check=False
-    )
-    checks_output = result.stdout.strip()
-    for line in checks_output.splitlines():
-        if "Devin Review" in line or "devin" in line.lower():
-            info["checks_pass"] = "pass" in line
-
-    # 未解決インラインコメント
-    unresolved = unresolved_threads_by(threads, bot)
-    info["unresolved_comments"] = len(unresolved)
-
-    # 完了判定
-    if info["no_issues_comment"]:
-        info["complete"] = True
-    elif info["checks_pass"] and info["unresolved_comments"] == 0:
-        info["complete"] = True
-
-    return info
-
-
 def main() -> None:
     owner, repo = get_repo_info()
     pr = get_pr_number(sys.argv[1:])
     threads = get_review_threads(owner, repo, pr)
-
-    greptile = check_greptile(owner, repo, pr, threads)
-    devin = check_devin(owner, repo, pr, threads)
+    greptile = check_greptile(pr, threads)
 
     result = {
         "pr_number": pr,
+        "ignored_bots": ["devin"],
         "greptile": greptile,
-        "devin": devin,
-        "all_complete": greptile["complete"] and devin["complete"],
+        "all_complete": greptile["complete"],
     }
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
