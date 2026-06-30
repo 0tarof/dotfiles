@@ -30,7 +30,7 @@
     # Brews - packages not in Nixpkgs or macOS-specific
     brews = [
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
-      { name = "container"; start_service = true; }   # Apple Container runtime
+      "container"          # Apple Container runtime
       "html2markdown"     # Not in nixpkgs
       "kind"              # Kubernetes in Docker local clusters
       "mise"              # Runtime version manager
