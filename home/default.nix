@@ -27,6 +27,7 @@ in
   # ==========================================================================
   imports = [
     ./shell.nix      # Zsh, Direnv
+    ./tirith.nix     # Shell and agent command guard
     ./packages.nix   # CLI tools
     ./dotfiles.nix   # Symlinks to config files
     ./codex.nix      # Codex skills

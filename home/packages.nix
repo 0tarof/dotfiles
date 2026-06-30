@@ -1,17 +1,8 @@
 # ==========================================================================
 # Packages - CLI tools (migrated from Brewfile)
 # ==========================================================================
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 
-let
-  system = pkgs.stdenv.hostPlatform.system;
-  tirith = inputs.tirith.packages.${system}.default.overrideAttrs (_: {
-    # Upstream still references removed darwin.apple_sdk.frameworks.* stubs.
-    buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [
-      pkgs.apple-sdk
-    ];
-  });
-in
 {
   home.packages = with pkgs; [
     # Version control & Git tools
@@ -67,6 +58,5 @@ in
     uv
     pnpm
     sbt
-    tirith
   ];
 }
