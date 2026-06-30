@@ -1,7 +1,7 @@
 # ==========================================================================
 # Codex configuration
 # ==========================================================================
-{ ... }:
+{ lib, ... }:
 
 let
   codexSkillsDir = ../.agents/skills;
@@ -15,35 +15,41 @@ let
       (name: codexSkillEntries.${name} == "directory")
       (builtins.attrNames codexSkillEntries);
 
-  userSkillHomeFiles = builtins.listToAttrs (map
-    (name: {
-      name = ".agents/skills/${name}";
-      value = {
-        source = codexSkillsDir + "/${name}";
-        recursive = true;
-      };
-    })
-    codexSkillNames);
-
-  codexSkillHomeFiles = builtins.listToAttrs (map
-    (name: {
-      name = ".codex/skills/${name}";
-      value = {
-        source = codexSkillsDir + "/${name}";
-        recursive = true;
-      };
-    })
-    codexSkillNames);
+  installSkillCommands = lib.concatMapStringsSep "\n" (name: ''
+    install_skill ${lib.escapeShellArg name}
+  '') codexSkillNames;
 in
 {
-  # Codex discovers user-authored skills from ~/.agents/skills. Keep a
-  # ~/.codex/skills mirror for existing sessions and older local builds that
-  # already inspect it, while managing each directory individually so bundled
-  # directories such as ~/.codex/skills/.system remain untouched.
-  home.file = userSkillHomeFiles // codexSkillHomeFiles // {
+  home.file = {
     ".codex/AGENTS.md" = {
       source = ../codex/AGENTS.md;
       force = true;
     };
   };
+
+  # Codex currently ignores skills when SKILL.md itself is a symlink. Home
+  # Manager's recursive home.file source creates symlinked files into /nix/store,
+  # so copy managed skills as real files during activation instead.
+  home.activation.installCodexSkills = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      mkdir -p "$HOME/.agents/skills" "$HOME/.codex/skills"
+
+      install_skill() {
+        local name="$1"
+        local source="${codexSkillsDir}/$name"
+        local root
+        local target
+
+        for root in "$HOME/.agents/skills" "$HOME/.codex/skills"; do
+          target="$root/$name"
+          rm -rf "$target"
+          mkdir -p "$target"
+          cp -R "$source/." "$target/"
+          chmod -R u+w "$target"
+        done
+      }
+
+      ${installSkillCommands}
+    fi
+  '';
 }
