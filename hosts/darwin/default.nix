@@ -150,6 +150,13 @@
     # Homebrew Bundle (moved here to run after home-manager activation)
     echo >&2 "Homebrew bundle..."
     if [ -f "${cfg.brewPrefix}/brew" ]; then
+      for tap in cycloud-io/tap perman/tap dlvhdr/formulae; do
+        sudo \
+          --user=${lib.escapeShellArg cfg.user} \
+          --set-home \
+          "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
+      done
+
       # Get GitHub API token from gh CLI if available (for private taps)
       # Run as user since gh auth config is in user's home directory
       HOMEBREW_GITHUB_API_TOKEN=""
