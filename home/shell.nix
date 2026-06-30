@@ -132,6 +132,49 @@ in
       LANG=ja_JP.UTF-8
       export LANG
 
+      # Establish baseline paths before any tool activation. .zshenv runs
+      # before .zprofile, so mise must not depend on Homebrew paths being added
+      # later by login-shell setup.
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        HOMEBREW_PREFIX="/opt/homebrew"
+        HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+        HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
+      elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+        HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+        HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
+      fi
+
+      typeset -U path PATH
+
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        path=(
+          $HOME/bin(N-/)
+          $HOME/.local/bin(N-/)
+          /etc/profiles/per-user/$USER/bin(N-/)
+          /run/current-system/sw/bin(N-/)
+          /nix/var/nix/profiles/default/bin(N-/)
+          "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"(N-/)
+          $HOMEBREW_PREFIX/opt/mysql-client@8.0/bin(N-/)
+          $HOMEBREW_PREFIX/bin(N-/)
+          $HOMEBREW_PREFIX/sbin(N-/)
+          $path
+        )
+      else
+        path=(
+          $HOME/bin(N-/)
+          $HOME/.local/bin(N-/)
+          /etc/profiles/per-user/$USER/bin(N-/)
+          /run/current-system/sw/bin(N-/)
+          /nix/var/nix/profiles/default/bin(N-/)
+          $HOMEBREW_PREFIX/bin(N-/)
+          $HOMEBREW_PREFIX/sbin(N-/)
+          $path
+        )
+      fi
+
+      export PATH HOMEBREW_PREFIX HOMEBREW_CELLAR HOMEBREW_REPOSITORY
+
       # Use socktainer (Apple Container) as the default Docker runtime on macOS
       if [[ -S /opt/homebrew/var/run/socktainer/.socktainer/container.sock ]]; then
           export DOCKER_HOST="unix:///opt/homebrew/var/run/socktainer/.socktainer/container.sock"
@@ -314,11 +357,14 @@ in
           _fix_git_core_bare  # 初回シェル起動時にも実行
         fi
 
-        # Ensure $HOME/bin comes before mise shims in PATH
+        # Keep user scripts before mise shims, and keep mise shims present even
+        # when the shell was started as a non-login interactive shell.
         typeset -U path PATH
         path=(
             $HOME/bin(N-/)
+            $HOME/.local/share/mise/shims(N-/)
             ''${path:#$HOME/bin}
+            ''${path:#$HOME/.local/share/mise/shims}
         )
 
         # Guard npm: require v11+ (for min-release-age support) and block
