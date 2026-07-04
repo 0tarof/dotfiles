@@ -150,12 +150,16 @@
     # Homebrew Bundle (moved here to run after home-manager activation)
     echo >&2 "Homebrew bundle..."
     if [ -f "${cfg.brewPrefix}/brew" ]; then
-      for tap in cycloud-io/tap perman/tap dlvhdr/formulae; do
-        sudo \
-          --user=${lib.escapeShellArg cfg.user} \
-          --set-home \
-          "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
-      done
+      # Trust configured taps (incl. overlay ones) before bundle.
+      # Older brew has no `trust` subcommand; skip in that case.
+      if "${cfg.brewPrefix}/brew" trust --help >/dev/null 2>&1; then
+        for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
+          sudo \
+            --user=${lib.escapeShellArg cfg.user} \
+            --set-home \
+            "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
+        done
+      fi
 
       # Get GitHub API token from gh CLI if available (for private taps)
       # Run as user since gh auth config is in user's home directory
