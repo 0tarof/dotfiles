@@ -222,12 +222,14 @@ in
 
       # --impure required: overlay/ is gitignored + builtins.getEnv usage
       # DOTFILES_DIR is passed so flake can access gitignored overlay/ files
+      # SSH_AUTH_SOCK is passed so root can fetch git+ssh flake inputs with
+      # the user's ssh agent (root has no GitHub credentials of its own)
       if [[ "$(uname -s)" == "Darwin" ]]; then
           if command -v darwin-rebuild &> /dev/null; then
-              sudo HOME="$HOME" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+              sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
                   darwin-rebuild switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
           else
-              sudo HOME="$HOME" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
+              sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
                   nix run nix-darwin -- switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
           fi
       else
