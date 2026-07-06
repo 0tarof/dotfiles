@@ -225,6 +225,11 @@ in
       # SSH_AUTH_SOCK is passed so root can fetch git+ssh flake inputs with
       # the user's ssh agent (root has no GitHub credentials of its own)
       if [[ "$(uname -s)" == "Darwin" ]]; then
+          # Fetch all flake inputs as the user before the sudo evaluation:
+          # root cannot authenticate to GitHub for git+ssh inputs. Locked
+          # inputs already in the store are then reused by narHash.
+          nix flake archive "$DOTFILES_DIR"
+
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
                   darwin-rebuild switch --flake "$DOTFILES_DIR#$NIX_HOSTNAME" --impure
