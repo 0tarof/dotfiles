@@ -242,12 +242,28 @@ in
         )
       fi
 
-      if command -v gh &>/dev/null; then
-        if gh auth status &>/dev/null; then
-          export HOMEBREW_GITHUB_API_TOKEN="$(gh auth token 2>/dev/null)"
-        elif [[ -o interactive && -t 2 ]]; then
+      if command -v gh &>/dev/null && ! gh auth status &>/dev/null; then
+        if [[ -o interactive && -t 2 ]]; then
           print -u2 "gh: not authenticated. Run 'gh auth login' to enable Homebrew private tap access."
         fi
+      fi
+
+      # Do not export HOMEBREW_GITHUB_API_TOKEN in the shell profile.
+      # Cursor/VS Code WSL integration runs `zsh -ic "exec env ..."`, which
+      # embeds exported secrets in ZSH_EXECUTION_STRING and trips tirith.
+      if [[ -n "$HOMEBREW_PREFIX" && -x "$HOMEBREW_PREFIX/bin/brew" ]]; then
+        brew() {
+          local brew_bin="$HOMEBREW_PREFIX/bin/brew"
+          if command -v gh &>/dev/null && gh auth status &>/dev/null; then
+            local token
+            token="$(gh auth token 2>/dev/null || true)"
+            if [[ -n "$token" ]]; then
+              HOMEBREW_GITHUB_API_TOKEN="$token" "$brew_bin" "$@"
+              return $?
+            fi
+          fi
+          "$brew_bin" "$@"
+        }
       fi
 
       HOMEBREW_BUNDLE_FILE="$HOME/projects/github.com/0tarof/dotfiles/Brewfile"

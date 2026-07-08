@@ -245,9 +245,22 @@ in
               home-manager switch --flake "$DOTFILES_DIR#$NIX_USERNAME@$NIX_HOSTNAME" --impure
       fi
 
+      run_with_brew_github_token() {
+          if command -v gh &> /dev/null; then
+              local token
+              token="$(gh auth token 2>/dev/null || true)"
+              if [[ -n "$token" ]]; then
+                  HOMEBREW_GITHUB_API_TOKEN="$token" "$@"
+                  return
+              fi
+          fi
+
+          "$@"
+      }
+
       if [[ "$UPGRADE" == "1" ]] && command -v brew &> /dev/null; then
           echo "Upgrading Homebrew packages..."
-          brew upgrade
+          run_with_brew_github_token brew upgrade
       fi
 
       echo "Installing mise tools..."

@@ -40,14 +40,9 @@ in
   '';
 
   programs.zsh.envExtra = lib.mkAfter ''
-    # Guard non-interactive zsh command runs such as `zsh -lc ...`.
-    # Cursor/VS Code WSL integration resolves env via `zsh -ic "exec env ..."`.
-    # That command embeds exported tokens (e.g. HOMEBREW_GITHUB_API_TOKEN) and must
-    # not be blocked here or the terminal fails to start.
     if [[ -n "''${ZSH_EXECUTION_STRING:-}" \
        && "''${TIRITH_ZSHENV_SKIP:-}" != "1" \
-       && -z "''${VSCODE_RESOLVING_ENVIRONMENT:-}" \
-       && "''${ZSH_EXECUTION_STRING}" != exec\ env* ]]; then
+       && -z "''${VSCODE_RESOLVING_ENVIRONMENT:-}" ]]; then
       _tirith_bin="''${TIRITH_BIN:-${tirith}/bin/tirith}"
       if [[ "$_tirith_bin" != */* ]]; then
         _tirith_bin="$(command -v "$_tirith_bin" 2>/dev/null || true)"
