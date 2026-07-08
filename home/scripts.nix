@@ -231,7 +231,6 @@ in
           # metadata --refresh clears stale fetcher-cache entries for the local
           # git flake after making several commits in quick succession.
           nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
-          nix flake archive "$DOTFILES_DIR"
 
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
