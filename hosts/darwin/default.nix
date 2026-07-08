@@ -178,10 +178,11 @@
       if [ -x "${userProfileBin}/gh" ]; then
         HOMEBREW_GITHUB_API_TOKEN=$(sudo --user=${lib.escapeShellArg cfg.user} --set-home "${userProfileBin}/gh" auth token 2>/dev/null || true)
       fi
+      HOMEBREW_NO_AUTO_UPDATE=1
 
       run_brew_as_user() {
         sudo \
-          --preserve-env=HOMEBREW_GITHUB_API_TOKEN \
+          --preserve-env=HOMEBREW_GITHUB_API_TOKEN,HOMEBREW_NO_AUTO_UPDATE \
           --user=${lib.escapeShellArg cfg.user} \
           --set-home \
           "${cfg.brewPrefix}/brew" "$@"
