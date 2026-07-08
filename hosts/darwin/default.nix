@@ -25,6 +25,7 @@
     taps = [
       "dlvhdr/formulae"
       "manaflow-ai/cmux"
+      "steipete/tap"
     ];
 
     # Brews - packages not in Nixpkgs or macOS-specific
@@ -52,6 +53,7 @@
       "chatgpt"
       "claude"
       "cmux"
+      "codexbar"
       "codex-app"
       "cursor"
       "deepl"
