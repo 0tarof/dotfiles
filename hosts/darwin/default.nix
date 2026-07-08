@@ -190,7 +190,7 @@
       # Trust configured taps (incl. overlay ones) before bundle.
       # New taps must be tapped before they can be trusted.
       # Older brew has no `trust` subcommand; skip in that case.
-      if "${cfg.brewPrefix}/brew" trust --help >/dev/null 2>&1; then
+      if run_brew_as_user trust --help >/dev/null 2>&1; then
         for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
           run_brew_as_user tap "$tap" >/dev/null
           run_brew_as_user trust --tap "$tap" >/dev/null
