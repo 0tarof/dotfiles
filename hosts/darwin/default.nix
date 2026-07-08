@@ -156,8 +156,13 @@
     cfg = config.homebrew;
     userProfileBin = "/etc/profiles/per-user/${username}/bin";
     userHomeBin = "/Users/${username}/bin";
+    brewNames = map (b: if lib.isString b then b else b.name) cfg.brews;
+    qualifiedBrews = lib.filter (lib.hasInfix "/") brewNames;
     caskNames = map (c: if lib.isString c then c else c.name) cfg.casks;
     qualifiedCasks = lib.filter (lib.hasInfix "/") caskNames;
+    trustQualifiedBrewCommands = lib.concatMapStringsSep "\n" (brew: ''
+          run_brew_as_user trust --formula ${lib.escapeShellArg brew} >/dev/null
+    '') qualifiedBrews;
     trustQualifiedCaskCommands = lib.concatMapStringsSep "\n" (cask: ''
           run_brew_as_user trust --cask ${lib.escapeShellArg cask} >/dev/null
           # Some taps expose the same token as both a formula and a cask.
@@ -190,6 +195,7 @@
           run_brew_as_user tap "$tap" >/dev/null
           run_brew_as_user trust --tap "$tap" >/dev/null
         done
+${trustQualifiedBrewCommands}
 ${trustQualifiedCaskCommands}
       fi
       
