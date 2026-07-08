@@ -228,9 +228,10 @@ in
           # Fetch all flake inputs as the user before the sudo evaluation:
           # root cannot authenticate to GitHub for git+ssh inputs. Locked
           # inputs already in the store are then reused by narHash.
-          # --refresh avoids stale fetcher-cache entries for the local git flake
-          # after making several commits in quick succession.
-          nix flake archive --refresh "$DOTFILES_DIR"
+          # metadata --refresh clears stale fetcher-cache entries for the local
+          # git flake after making several commits in quick succession.
+          nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
+          nix flake archive "$DOTFILES_DIR"
 
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
