@@ -110,13 +110,16 @@ in
       fi
 
       if [[ -n "$codex_bin" ]]; then
+        export PATH="$HOME/.local/share/mise/shims:$HOME/.local/share/mise/installs/node/latest/bin:$PATH"
         export CODEX_HOME="''${CODEX_HOME:-$HOME/.codex}"
         mkdir -p "$CODEX_HOME"
-        "$codex_bin" mcp add tirith-gateway -- \
+        if ! "$codex_bin" mcp add tirith-gateway -- \
           "${tirith}/bin/tirith" gateway run \
           --upstream-bin "${tirith}/bin/tirith" \
           --upstream-arg mcp-server \
-          --config "$HOME/.config/tirith/gateway.yaml" >/dev/null
+          --config "$HOME/.config/tirith/gateway.yaml" >/dev/null; then
+          echo "tirith: codex MCP gateway setup failed; skipping" >&2
+        fi
       else
         echo "tirith: codex command not found; skipping Codex MCP gateway setup" >&2
       fi
