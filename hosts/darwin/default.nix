@@ -53,7 +53,6 @@
       "chatgpt"
       "claude"
       "cmux"
-      "codexbar"
       "codex-app"
       "cursor"
       "deepl"
@@ -87,6 +86,7 @@
       "sequel-ace"
       "session-manager-plugin"
       "snowflake-snowsql"
+      "steipete/tap/codexbar"
       "tableplus"
       "visual-studio-code"
       "vlc"
@@ -155,26 +155,41 @@
     cfg = config.homebrew;
     userProfileBin = "/etc/profiles/per-user/${username}/bin";
     userHomeBin = "/Users/${username}/bin";
+    caskNames = map (c: if lib.isString c then c else c.name) cfg.casks;
+    qualifiedCasks = lib.filter (lib.hasInfix "/") caskNames;
+    trustQualifiedCaskCommands = lib.concatMapStringsSep "\n" (cask: ''
+          run_brew_as_user trust --cask ${lib.escapeShellArg cask} >/dev/null
+          # Some taps expose the same token as both a formula and a cask.
+          run_brew_as_user trust --formula ${lib.escapeShellArg cask} >/dev/null || true
+    '') qualifiedCasks;
   in lib.mkAfter ''
     # Homebrew Bundle (moved here to run after home-manager activation)
     echo >&2 "Homebrew bundle..."
     if [ -f "${cfg.brewPrefix}/brew" ]; then
-      # Trust configured taps (incl. overlay ones) before bundle.
-      # Older brew has no `trust` subcommand; skip in that case.
-      if "${cfg.brewPrefix}/brew" trust --help >/dev/null 2>&1; then
-        for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
-          sudo \
-            --user=${lib.escapeShellArg cfg.user} \
-            --set-home \
-            "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
-        done
-      fi
-
       # Get GitHub API token from gh CLI if available (for private taps)
       # Run as user since gh auth config is in user's home directory
       HOMEBREW_GITHUB_API_TOKEN=""
       if [ -x "${userProfileBin}/gh" ]; then
         HOMEBREW_GITHUB_API_TOKEN=$(sudo --user=${lib.escapeShellArg cfg.user} --set-home "${userProfileBin}/gh" auth token 2>/dev/null || true)
+      fi
+
+      run_brew_as_user() {
+        sudo \
+          --preserve-env=HOMEBREW_GITHUB_API_TOKEN \
+          --user=${lib.escapeShellArg cfg.user} \
+          --set-home \
+          "${cfg.brewPrefix}/brew" "$@"
+      }
+
+      # Trust configured taps (incl. overlay ones) before bundle.
+      # New taps must be tapped before they can be trusted.
+      # Older brew has no `trust` subcommand; skip in that case.
+      if "${cfg.brewPrefix}/brew" trust --help >/dev/null 2>&1; then
+        for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
+          run_brew_as_user tap "$tap" >/dev/null
+          run_brew_as_user trust --tap "$tap" >/dev/null
+        done
+${trustQualifiedCaskCommands}
       fi
       
       PATH="${cfg.brewPrefix}:${lib.makeBinPath [ pkgs.mas ]}:${userProfileBin}:${userHomeBin}:$PATH" \
@@ -184,7 +199,7 @@
         --user=${lib.escapeShellArg cfg.user} \
         --set-home \
         env \
-        ${cfg.onActivation.brewBundleCmd}
+        ${cfg.onActivation.brewBundleCmd} --force-cleanup
     else
       echo -e "\e[1;31merror: Homebrew is not installed, skipping...\e[0m" >&2
     fi
