@@ -260,7 +260,9 @@ in
 
       if [[ "$UPGRADE" == "1" ]] && command -v brew &> /dev/null; then
           echo "Upgrading Homebrew packages..."
-          run_with_brew_github_token brew upgrade
+          HOMEBREW_NO_AUTO_UPDATE=1 \
+            HOMEBREW_DISPLAY_TIMES=1 \
+            run_with_brew_github_token brew upgrade -v
       fi
 
       echo "Installing mise tools..."
