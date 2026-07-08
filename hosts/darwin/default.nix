@@ -132,6 +132,13 @@
   security.pam.services.sudo_local.touchIdAuth = true;
   security.pam.services.sudo_local.reattach = true;
 
+  # git+ssh flake inputs are fetched by root during `sudo darwin-rebuild`,
+  # and root has no ~/.ssh/known_hosts. Register GitHub's host key globally
+  # (/etc/ssh/ssh_known_hosts) so host key verification succeeds.
+  # Key from https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+  programs.ssh.knownHosts."github.com".publicKey =
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+
   # ==========================================================================
   # Homebrew activation script override
   # ==========================================================================
@@ -150,12 +157,16 @@
     # Homebrew Bundle (moved here to run after home-manager activation)
     echo >&2 "Homebrew bundle..."
     if [ -f "${cfg.brewPrefix}/brew" ]; then
-      for tap in cycloud-io/tap perman/tap dlvhdr/formulae; do
-        sudo \
-          --user=${lib.escapeShellArg cfg.user} \
-          --set-home \
-          "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
-      done
+      # Trust configured taps (incl. overlay ones) before bundle.
+      # Older brew has no `trust` subcommand; skip in that case.
+      if "${cfg.brewPrefix}/brew" trust --help >/dev/null 2>&1; then
+        for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
+          sudo \
+            --user=${lib.escapeShellArg cfg.user} \
+            --set-home \
+            "${cfg.brewPrefix}/brew" trust --tap "$tap" >/dev/null
+        done
+      fi
 
       # Get GitHub API token from gh CLI if available (for private taps)
       # Run as user since gh auth config is in user's home directory
