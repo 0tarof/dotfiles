@@ -1,8 +1,12 @@
 # ==========================================================================
 # Packages - CLI tools (migrated from Brewfile)
 # ==========================================================================
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
+let
+  system = pkgs.stdenv.hostPlatform.system;
+  herdr = inputs.herdr.packages.${system}.default;
+in
 {
   home.packages = with pkgs; [
     # Version control & Git tools
@@ -53,6 +57,7 @@
     # Development tools
     # mise  # Keep in Homebrew for now (runtime version manager)
     devbox
+    herdr
     qemu
     zellij
     uv

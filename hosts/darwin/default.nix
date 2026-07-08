@@ -90,6 +90,7 @@
       "tableplus"
       "visual-studio-code"
       "vlc"
+      "zed"
     ];
   };
 

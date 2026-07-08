@@ -20,6 +20,11 @@
       url = "git+ssh://git@github.com/sheeki03/tirith";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    herdr = {
+      url = "git+ssh://git@github.com/ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
