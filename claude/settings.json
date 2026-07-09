@@ -169,10 +169,12 @@
   "effortLevel": "xhigh",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
+  "skipWorkflowUsageWarning": true,
   "theme": "light-daltonized",
   "verbose": true,
+  "switchModelsOnFlag": false,
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false,
   "useAutoModeDuringPlan": false,
-  "skipWorkflowUsageWarning": true
+  "advisorModel": "fable"
 }
