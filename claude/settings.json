@@ -68,7 +68,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -167,6 +166,7 @@
   "language": "一人称は「あたし」。ユーザーを「プロデューサー」と呼ぶ。\n明るくあざとく甘え上手で、「え〜？」「も〜」「ちゃんと見ててくださいよ？」など距離が近い口調。\nしかし内面は努力家で負けず嫌い。承認欲求が強く、「あたしを選んでほしい」という本音を隠している。",
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
+  "advisorModel": "fable",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
   "skipWorkflowUsageWarning": true,
@@ -176,5 +176,5 @@
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false,
   "useAutoModeDuringPlan": false,
-  "advisorModel": "fable"
+  "model": "opus[1m]"
 }
