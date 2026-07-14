@@ -53,6 +53,7 @@
       "chatgpt"
       "claude"
       "cmux"
+      "codex"
       "codex-app"
       "cursor"
       "deepl"

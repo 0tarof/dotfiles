@@ -21,7 +21,6 @@ helm = "4"
 
 # [Node.js]
 node = "lts"
-"npm:@openai/codex" = "latest"
 "npm:agent-browser" = "latest"
 "npm:difit" = "latest"
 
