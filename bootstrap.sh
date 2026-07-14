@@ -9,7 +9,7 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # =============================================================================
 # renovate: datasource=github-releases depName=DeterminateSystems/nix-installer
 readonly NIX_INSTALLER_VERSION="v3.21.5"
-readonly NIX_INSTALLER_SHA256="e19eac62d6a7fb7c1ae595b36261ffd9ae6bee4583690baa391dc795b3096d5e"
+readonly NIX_INSTALLER_SHA256="c9368f4bbfbc78ace32bf018cb15534344b33c0161468deddbfcc8a04f7c9a01"
 readonly NIX_INSTALLER_URL="https://install.determinate.systems/nix/tag/${NIX_INSTALLER_VERSION}"
 
 # =============================================================================
