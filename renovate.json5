@@ -28,6 +28,13 @@
       // GitHub Actions: コミットハッシュでピン留めされたものを更新
       "matchManagers": ["github-actions"],
       "pinDigests": true
+    },
+    {
+      // mise: 固定バージョン更新にも minimum_release_age=7d と揃える
+      // （exact pin は mise 側の minimum_release_age をすり抜けるため）
+      "matchManagers": ["mise"],
+      "minimumReleaseAge": "7 days",
+      "internalChecksFilter": "strict"
     }
   ]
 }

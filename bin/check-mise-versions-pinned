@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Warn when mise tool versions are not patch-pinned (e.g. latest, lts, 3.13).
+# Warning only: always exits 0 so commits are not blocked.
+
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+files=("$@")
+if ((${#files[@]} == 0)); then
+  files=("${root}/mise/config.toml")
+fi
+
+# Accept: 1.2.3, v1.2.3, 1.2.3-rc.1, 1.2.3+meta
+pinned_re='^v?[0-9]+\.[0-9]+\.[0-9]+([.+-].*)?$'
+fuzzy_re='^(latest|lts|stable|system)$'
+
+warnings=0
+
+check_file() {
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    echo "warning: mise config not found: $file" >&2
+    warnings=1
+    return
+  fi
+
+  local in_tools=0
+  local line_no=0
+  local line key version
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line_no=$((line_no + 1))
+
+    # Strip comments / trim
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z "$line" ]] && continue
+
+    if [[ "$line" =~ ^\[([^]]+)\]$ ]]; then
+      if [[ "${BASH_REMATCH[1]}" == "tools" ]]; then
+        in_tools=1
+      else
+        in_tools=0
+      fi
+      continue
+    fi
+
+    ((in_tools)) || continue
+
+    # tool = "version" or "npm:pkg" = "version"
+    if [[ "$line" =~ ^(\"([^\"]+)\"|([^[:space:]=]+))[[:space:]]*=[[:space:]]*\"([^\"]+)\"[[:space:]]*$ ]]; then
+      key="${BASH_REMATCH[2]:-${BASH_REMATCH[3]}}"
+      version="${BASH_REMATCH[4]}"
+    else
+      continue
+    fi
+
+    local lower
+    lower="$(printf '%s' "$version" | tr '[:upper:]' '[:lower:]')"
+
+    if [[ "$lower" =~ $fuzzy_re ]] || ! [[ "$version" =~ $pinned_re ]]; then
+      echo "warning: ${file}:${line_no}: ${key} = \"${version}\" is not patch-pinned (want X.Y.Z)" >&2
+      warnings=1
+    fi
+  done <"$file"
+}
+
+for file in "${files[@]}"; do
+  check_file "$file"
+done
+
+if ((warnings)); then
+  echo "warning: pin tool versions to X.Y.Z in mise config (Renovate will bump them)." >&2
+else
+  echo "mise tool versions look patch-pinned."
+fi
+
+exit 0

@@ -1,0 +1,10 @@
+# Warning-only checks for this repo. Jobs should exit 0 unless truly broken.
+pre-commit:
+  jobs:
+    - name: mise-versions-pinned
+      glob:
+        - "mise/*.toml"
+        - "mise/**/*.toml"
+        - "**/mise.toml"
+        - "**/.mise.toml"
+      run: bin/check-mise-versions-pinned {staged_files}
