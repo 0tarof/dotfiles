@@ -268,6 +268,13 @@ in
       echo "Installing mise tools..."
       run_with_aqua_github_token mise install
 
+      echo "Installing lefthook git hooks..."
+      if command -v lefthook &> /dev/null && [[ -f "$DOTFILES_DIR/lefthook.yml" ]]; then
+          (cd "$DOTFILES_DIR" && lefthook install)
+      else
+          echo "lefthook or lefthook.yml not found, skipping."
+      fi
+
       echo "Installing Helm plugins..."
       if [[ -x "$HOME/bin/sync-helm-plugins" ]]; then
           "$HOME/bin/sync-helm-plugins"

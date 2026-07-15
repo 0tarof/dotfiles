@@ -99,7 +99,7 @@ nix-rebuild
 
 を呼ぶ。macOS の場合 sudo が走るのでパスワード入力の可能性あり。
 
-完了後に `mise install` も自動実行される。
+完了後に `mise install` と `lefthook install` も自動実行される。
 
 ### よくあるエラーと対処
 
