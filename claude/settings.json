@@ -48,8 +48,6 @@
     ],
     "deny": [
       "Bash(rm -rf *)",
-      "Bash(npm install)",
-      "Bash(npm install *)",
       "Bash(yarn add *)",
       "Bash(npm uninstall *)",
       "Bash(yarn remove *)",
@@ -139,6 +137,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/block-git-add-all.sh",
             "if": "Bash(git *)",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-npm-in-pnpm.sh",
             "timeout": 5
           }
         ]
