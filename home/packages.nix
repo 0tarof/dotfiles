@@ -40,6 +40,8 @@ in
     terraform
     kubectl
     k9s
+    kind
+    # helm  # Need Helm 4; locked nixpkgs is still 3.x → mise
     nodePackages.aws-cdk
     # snowflake-cli  # Build fails in nixpkgs, keep in mise
 

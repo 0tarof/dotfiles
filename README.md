@@ -58,7 +58,8 @@ git clone https://github.com/COMPANY/dotfiles.git overlay
 
 | 項目 | 管理方法 |
 |------|----------|
-| CLI ツール | `home.packages` (Nix) |
+| ランタイム (Node / Go / Python など) | `mise`（グローバルはパッチ固定、プロジェクトで上書き） |
+| CLI ツール | `home.packages` (Nix)。無い・古い・版ピン必須だけ mise / Brew |
 | GUI アプリ | `homebrew.casks` (nix-darwin) |
 | Zsh 設定 | `programs.zsh` (Home Manager) |
 | dotfiles | `home.file` (Home Manager) |
