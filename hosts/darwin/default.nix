@@ -28,12 +28,11 @@
       "steipete/tap"
     ];
 
-    # Brews - packages not in Nixpkgs or macOS-specific
+    # Brews - Nix に無いもの / macOS 固有のみ（CLI は原則 home.packages）
     brews = [
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "container"          # Apple Container runtime
       "html2markdown"     # Not in nixpkgs
-      "kind"              # Kubernetes in Docker local clusters
       "mise"              # Runtime version manager
       "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
