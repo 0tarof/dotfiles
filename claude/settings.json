@@ -77,12 +77,22 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-other-repo-access.sh",
+            "timeout": 5
           }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-other-repo-access.sh",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/tirith-check.sh",
