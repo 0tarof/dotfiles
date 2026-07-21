@@ -205,7 +205,7 @@ ${trustQualifiedCaskCommands}
         --user=${lib.escapeShellArg cfg.user} \
         --set-home \
         env \
-        ${cfg.onActivation.brewBundleCmd} --force-cleanup
+        ${cfg.onActivation.brewBundleCmd} --cleanup --force
     else
       echo -e "\e[1;31merror: Homebrew is not installed, skipping...\e[0m" >&2
     fi
