@@ -188,6 +188,5 @@
   "switchModelsOnFlag": false,
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false,
-  "useAutoModeDuringPlan": false,
-  "model": "opus[1m]"
+  "useAutoModeDuringPlan": false
 }
