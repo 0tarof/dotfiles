@@ -15,6 +15,7 @@ in
     gh
     ghq
     git-filter-repo
+    git-delta
     gitleaks
     lefthook
 
