@@ -51,6 +51,7 @@ in
     # Media
     ffmpeg
     yt-dlp
+    imagemagick
 
     # Network
     wget
