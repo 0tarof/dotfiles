@@ -24,7 +24,7 @@ java = "26.0.1"
 maven = "3.9.16"
 node = "24.18.0"
 python = "3.13.14"
-rust = "1.96.1"
+rust = "1.97.1"
 
 # CLIs kept in mise (not suitable for Nix yet)
 # kubernetes-helm in locked nixpkgs is still 3.x; track Helm 4 here.
