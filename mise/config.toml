@@ -33,7 +33,7 @@ helm = "4.2.2"
 "pipx:snowflake-cli" = "3.21.0"
 
 # Language-ecosystem CLIs (npm / cargo)
-"npm:agent-browser" = "0.31.1"
+"npm:agent-browser" = "0.32.1"
 "npm:difit" = "5.0.7"
 "cargo:keifu" = "0.5.0"
 "cargo:filetree" = "0.3.5"
