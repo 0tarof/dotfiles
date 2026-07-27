@@ -4,7 +4,7 @@ description: Ghosttyターミナルエミュレータの設定・カスタマイ
 allowed-tools:
   - Read
   - Write
-  - StrReplace
+  - Edit
   - Bash
   - WebSearch
 model: claude-haiku-4-5-20251001
