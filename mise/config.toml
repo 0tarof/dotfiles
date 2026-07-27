@@ -11,8 +11,8 @@ pin = true
 uvx = true
 
 [settings.github]
-# credential_command = "gh auth token"
-# use_git_credentials = true
+# gh_cli_tokens reads only hosts.yml; our token lives in the Keychain.
+credential_command = "gh auth token"
 
 [plugins]
 mysql = "https://github.com/iroddis/asdf-mysql"
