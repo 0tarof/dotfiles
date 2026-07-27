@@ -53,7 +53,7 @@
       "Bash(yarn remove *)",
       "Read(id_rsa)",
       "Read(id_ed25519)",
-      "Write(.env*)"
+      "Edit(.env*)"
     ],
     "ask": [
       "Bash(rm *)",
