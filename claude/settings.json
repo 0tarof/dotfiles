@@ -66,6 +66,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -165,8 +166,8 @@
     "code-review@claude-plugins-official": true,
     "github@plugins-ajainc": true,
     "skill-creator@claude-plugins-official": true,
-    "codex@openai-codex": true,
-    "slack@claude-plugins-official": true
+    "slack@claude-plugins-official": true,
+    "codex@openai-codex": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
