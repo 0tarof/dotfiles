@@ -58,7 +58,6 @@
       "deepl"
       "discord"
       "discord@ptb"
-      "docker-desktop"
       "dotnet-sdk"
       "dropbox"
       "font-hackgen-nerd"
