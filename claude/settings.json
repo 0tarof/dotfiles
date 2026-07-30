@@ -51,8 +51,11 @@
       "Bash(yarn add *)",
       "Bash(npm uninstall *)",
       "Bash(yarn remove *)",
-      "Read(id_rsa)",
-      "Read(id_ed25519)",
+      "Read(//Users/a14993/.ssh/**)",
+      "Read(**/id_rsa)",
+      "Read(**/id_ed25519)",
+      "Read(**/id_ecdsa)",
+      "Read(**/id_dsa)",
       "Edit(.env*)"
     ],
     "ask": [
