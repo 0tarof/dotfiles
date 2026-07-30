@@ -1,7 +1,7 @@
 # ==========================================================================
 # Dotfiles - declarative symlinks managed by Home Manager
 # ==========================================================================
-{ config, lib, dotfilesDir, ... }:
+{ config, lib, pkgs, dotfilesDir, ... }:
 
 let
   # Zsh overlay path
@@ -72,6 +72,17 @@ in
 
   # npm global config
   home.file.".npmrc".source = ../.npmrc;
+
+  # ==========================================================================
+  # Docker CLI plugins
+  # ==========================================================================
+  # docker-client には plugin が同梱されないので、`docker compose` /
+  # `docker buildx` として呼べるよう CLI plugin ディレクトリにリンクする。
+  home.file.".docker/cli-plugins/docker-compose".source =
+    "${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose";
+
+  home.file.".docker/cli-plugins/docker-buildx".source =
+    "${pkgs.docker-buildx}/libexec/docker/cli-plugins/docker-buildx";
 
   # ==========================================================================
   # Claude Code configuration
