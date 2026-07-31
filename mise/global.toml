@@ -1,4 +1,7 @@
-# Global defaults for mise.
+# Global defaults for mise. Linked to ~/.config/mise/config.toml by Home Manager.
+# Keep the name off mise's auto-detected list (mise/config.toml, mise.toml, ...):
+# otherwise mise loads this file again as a project config while we work in this
+# repo, and warns that credential_command in a non-global config is ignored.
 # - Runtimes: pin to patch here; override per-project with .mise.toml
 # - CLIs: prefer Nix (home.packages). Keep here only when Nix is missing,
 #   too old, or a specific version must be pinned independently.

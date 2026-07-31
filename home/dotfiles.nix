@@ -36,10 +36,10 @@ in
     recursive = true;
   };
   
-  home.file.".config/mise" = {
-    source = ../mise;
-    recursive = true;
-  };
+  # mise は cwd から上位に向かって `mise/config.toml` をプロジェクト設定として自動検出する。
+  # リポジトリ内で作業するとグローバル設定が二重に読まれ、credential_command が
+  # 「non-global config なので無視」と警告されるので、ソース側は検出されない名前で持つ。
+  home.file.".config/mise/config.toml".source = ../mise/global.toml;
 
   home.file.".config/uv" = {
     source = ../uv;

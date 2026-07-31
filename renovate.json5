@@ -9,6 +9,12 @@
     "enabled": true
   },
 
+  // mise のグローバル設定は mise 自身に検出されない名前にしてあるため、
+  // Renovate のデフォルトパターン（mise/config.toml 等）に追加で拾わせる
+  "mise": {
+    "managerFilePatterns": ["mise/global.toml"]
+  },
+
   // カスタムマネージャー
   "customManagers": [
     {
