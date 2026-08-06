@@ -38,7 +38,7 @@ in
     # Cloud & DevOps
     awscli2
     # aws-sam-cli  # May need Homebrew for macOS
-    docker-client              # CLI のみ。daemon は socktainer (Apple Container)
+    docker-client              # CLI のみ。daemon は Docker Desktop
     docker-compose             # `docker compose` は dotfiles.nix で cli-plugins にリンク
     docker-buildx
     docker-credential-helpers  # docker-credential-osxkeychain

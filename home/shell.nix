@@ -177,9 +177,10 @@ in
 
       export PATH HOMEBREW_PREFIX HOMEBREW_CELLAR HOMEBREW_REPOSITORY
 
-      # Use socktainer (Apple Container) as the default Docker runtime on macOS
-      if [[ -S /opt/homebrew/var/run/socktainer/.socktainer/container.sock ]]; then
-          export DOCKER_HOST="unix:///opt/homebrew/var/run/socktainer/.socktainer/container.sock"
+      # Docker Desktop supplies the daemon. Point at its user socket so the CLI
+      # works without relying on the privileged /var/run/docker.sock helper.
+      if [[ -S "$HOME/.docker/run/docker.sock" ]]; then
+          export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"
       fi
 
       # Full mise activation reads project config and may print trust warnings.

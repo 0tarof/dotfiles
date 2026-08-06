@@ -40,7 +40,6 @@
       "newrelic-cli"      # New Relic CLI
       "mysql-client@8.0"  # Versioned package
       "pinentry-mac"      # macOS-specific
-      { name = "socktainer"; start_service = true; } # Docker-compatible socket for Apple Container
       "telnet"            # Removed from macOS base system
       "dlvhdr/formulae/diffnav"
     ];
@@ -61,6 +60,7 @@
       "deepl"
       "discord"
       "discord@ptb"
+      "docker-desktop"
       "dotnet-sdk"
       "dropbox"
       "font-hackgen-nerd"
