@@ -5,7 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "github:LnL7/nix-darwin/master";
+      # nix-darwin のブランチは nixpkgs のリリースと一致させる必要がある
+      # （master は 26.11 系で、26.05 の nixpkgs とは eval 時に弾かれる）。
+      # nixpkgs を 26.11 に上げるときに nix-darwin-26.11 / master へ切り替える。
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

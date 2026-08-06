@@ -22,10 +22,13 @@
     };
 
     # Taps
+    # Homebrew 6.0.0 で HOMEBREW_REQUIRE_TAP_TRUST が既定 ON になったため、
+    # 非公式 tap は trusted を明示する（Brewfile に trusted: true が入る）。
+    # brews / casks 側の trusted は既定 true なので指定不要。
     taps = [
-      "dlvhdr/formulae"
-      "manaflow-ai/cmux"
-      "steipete/tap"
+      { name = "dlvhdr/formulae"; trusted = true; }
+      { name = "manaflow-ai/cmux"; trusted = true; }
+      { name = "steipete/tap"; trusted = true; }
     ];
 
     # Brews - Nix に無いもの / macOS 固有のみ（CLI は原則 home.packages）
@@ -141,72 +144,4 @@
   programs.ssh.knownHosts."github.com".publicKey =
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
 
-  # ==========================================================================
-  # Homebrew activation script override
-  # ==========================================================================
-  # Move homebrew bundle to postActivation so it runs AFTER home-manager
-  # This ensures gh CLI is available for private tap authentication
-  system.activationScripts.homebrew.text = lib.mkForce ''
-    # Homebrew bundle moved to postActivation (after home-manager)
-    # to ensure gh CLI is available for private taps
-  '';
-
-  system.activationScripts.postActivation.text = let
-    cfg = config.homebrew;
-    userProfileBin = "/etc/profiles/per-user/${username}/bin";
-    userHomeBin = "/Users/${username}/bin";
-    brewNames = map (b: if lib.isString b then b else b.name) cfg.brews;
-    qualifiedBrews = lib.filter (lib.hasInfix "/") brewNames;
-    caskNames = map (c: if lib.isString c then c else c.name) cfg.casks;
-    qualifiedCasks = lib.filter (lib.hasInfix "/") caskNames;
-    trustQualifiedBrewCommands = lib.concatMapStringsSep "\n" (brew: ''
-          run_brew_as_user trust --formula ${lib.escapeShellArg brew} >/dev/null
-    '') qualifiedBrews;
-    trustQualifiedCaskCommands = lib.concatMapStringsSep "\n" (cask: ''
-          run_brew_as_user trust --cask ${lib.escapeShellArg cask} >/dev/null
-          # Some taps expose the same token as both a formula and a cask.
-          run_brew_as_user trust --formula ${lib.escapeShellArg cask} >/dev/null || true
-    '') qualifiedCasks;
-  in lib.mkAfter ''
-    # Homebrew Bundle (moved here to run after home-manager activation)
-    echo >&2 "Homebrew bundle..."
-    if [ -f "${cfg.brewPrefix}/brew" ]; then
-      # Get GitHub API token from gh CLI if available (for private taps)
-      # Run as user since gh auth config is in user's home directory
-      HOMEBREW_GITHUB_API_TOKEN=""
-      if [ -x "${userProfileBin}/gh" ]; then
-        HOMEBREW_GITHUB_API_TOKEN=$(sudo --user=${lib.escapeShellArg cfg.user} --set-home "${userProfileBin}/gh" auth token 2>/dev/null || true)
-      fi
-      run_brew_as_user() {
-        HOMEBREW_NO_AUTO_UPDATE=1 sudo \
-          --preserve-env=HOMEBREW_GITHUB_API_TOKEN,HOMEBREW_NO_AUTO_UPDATE \
-          --user=${lib.escapeShellArg cfg.user} \
-          --set-home \
-          "${cfg.brewPrefix}/brew" "$@"
-      }
-
-      # Trust configured taps (incl. overlay ones) before bundle.
-      # New taps must be tapped before they can be trusted.
-      # Older brew has no `trust` subcommand; skip in that case.
-      if run_brew_as_user trust --help >/dev/null 2>&1; then
-        for tap in ${lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) cfg.taps)}; do
-          run_brew_as_user tap "$tap" >/dev/null
-          run_brew_as_user trust --tap "$tap" >/dev/null
-        done
-${trustQualifiedBrewCommands}
-${trustQualifiedCaskCommands}
-      fi
-      
-      PATH="${cfg.brewPrefix}:${lib.makeBinPath [ pkgs.mas ]}:${userProfileBin}:${userHomeBin}:$PATH" \
-      HOMEBREW_GITHUB_API_TOKEN="$HOMEBREW_GITHUB_API_TOKEN" \
-      sudo \
-        --preserve-env=PATH,HOMEBREW_GITHUB_API_TOKEN \
-        --user=${lib.escapeShellArg cfg.user} \
-        --set-home \
-        env \
-        ${cfg.onActivation.brewBundleCmd} --cleanup --force
-    else
-      echo -e "\e[1;31merror: Homebrew is not installed, skipping...\e[0m" >&2
-    fi
-  '';
 }
