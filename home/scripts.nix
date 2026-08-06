@@ -245,24 +245,12 @@ in
               home-manager switch --flake "$DOTFILES_DIR#$NIX_USERNAME@$NIX_HOSTNAME" --impure
       fi
 
-      run_with_brew_github_token() {
-          if command -v gh &> /dev/null; then
-              local token
-              token="$(gh auth token 2>/dev/null || true)"
-              if [[ -n "$token" ]]; then
-                  HOMEBREW_GITHUB_API_TOKEN="$token" "$@"
-                  return
-              fi
-          fi
-
-          "$@"
-      }
-
+      # brew には GitHub トークンを渡さない（tap は insteadOf 経由の SSH で通る）。
       if [[ "$UPGRADE" == "1" ]] && command -v brew &> /dev/null; then
           echo "Upgrading Homebrew packages..."
           HOMEBREW_NO_AUTO_UPDATE=1 \
             HOMEBREW_DISPLAY_TIMES=1 \
-            run_with_brew_github_token brew upgrade -v
+            brew upgrade -v
       fi
 
       echo "Installing mise tools..."

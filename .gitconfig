@@ -8,6 +8,12 @@
 [url "git@gist.github.com:"]
 	insteadOf = https://gist.github.com/
 
+# github.com は上の insteadOf で SSH に落とす運用。HTTPS 用の credential helper を
+# 残すと、何かが x-access-token 形式で一度 HTTPS 認証を通した時点で osxkeychain に
+# トークンが保存され、以降すべての git HTTPS アクセスに自動付与されてしまう。
+[credential "https://github.com"]
+	helper =
+
 [ghq]
 	root = ~/projects
 
