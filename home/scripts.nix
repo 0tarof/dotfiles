@@ -159,24 +159,41 @@ in
       set -euo pipefail
 
       UPGRADE=0
+      UPDATE_FLAKE=0
+      FLAKE_INPUTS=()
       for arg in "$@"; do
           case "$arg" in
               -u|--upgrade)
                   UPGRADE=1
                   ;;
+              --update-flake)
+                  UPDATE_FLAKE=1
+                  ;;
               -h|--help)
                   cat <<'USAGE'
       Usage: nix-rebuild [--upgrade]
+             nix-rebuild --update-flake [INPUT...]
 
-        --upgrade, -u  Run `brew upgrade` after the rebuild to update
-                       Homebrew formulae and casks.
-        --help, -h     Show this help.
+        --upgrade, -u   Run `brew upgrade` after the rebuild to update
+                        Homebrew formulae and casks.
+        --update-flake  Update flake inputs (all, or only the named INPUTs)
+                        and exit without rebuilding. The flake only sees
+                        committed files, so flake.lock has to be committed
+                        before the next nix-rebuild.
+        --help, -h      Show this help.
       USAGE
                   exit 0
                   ;;
-              *)
+              -*)
                   echo "Unknown option: $arg" >&2
                   exit 2
+                  ;;
+              *)
+                  if [[ "$UPDATE_FLAKE" == "0" ]]; then
+                      echo "Unexpected argument: $arg (input names need --update-flake first)" >&2
+                      exit 2
+                  fi
+                  FLAKE_INPUTS+=("$arg")
                   ;;
           esac
       done
@@ -220,6 +237,31 @@ in
 
           "$@"
       }
+
+      # flake input の更新は rebuild と分ける。flake はコミット済みの状態しか見ないため、
+      # 更新と switch を続けて走らせると古い lock でビルドしてしまう。
+      if [[ "$UPDATE_FLAKE" == "1" ]]; then
+          # --refresh を付けないと tarball-ttl 内のキャッシュで解決され、更新指示なのに
+          # 黙って no-op になることがある。
+          if (( ''${#FLAKE_INPUTS[@]} > 0 )); then
+              echo "Updating flake inputs: ''${FLAKE_INPUTS[*]}"
+              (cd "$DOTFILES_DIR" && run_with_aqua_github_token nix flake update --refresh "''${FLAKE_INPUTS[@]}")
+          else
+              echo "Updating all flake inputs..."
+              (cd "$DOTFILES_DIR" && run_with_aqua_github_token nix flake update --refresh)
+          fi
+
+          if git -C "$DOTFILES_DIR" diff --quiet -- flake.lock; then
+              echo "flake.lock unchanged."
+          else
+              echo
+              echo "flake.lock was updated. Commit it before rebuilding:"
+              echo "    git -C $DOTFILES_DIR add flake.lock"
+              echo "    git -C $DOTFILES_DIR commit -m 'chore(deps): update flake inputs'"
+              echo "    nix-rebuild"
+          fi
+          exit 0
+      fi
 
       if [[ ! -f "$CONFIG_FILE" ]]; then
           echo "Error: Config not found. Run bootstrap.sh first."
