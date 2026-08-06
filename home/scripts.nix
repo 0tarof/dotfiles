@@ -188,8 +188,13 @@ in
           grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/' | head -1
       }
 
+      # gh (Keychain) から実行時にトークンを取り、そのコマンドの寿命だけ環境変数で渡す。
+      # ファイルにも永続環境にも残さない。nix は GITHUB_TOKEN を読まず access-tokens
+      # しか見ないので、nix 向けには NIX_CONFIG 経由で渡す。これが無いと github: input
+      # の解決が未認証 API 扱いになり、共有 IP ではレート制限で 403 になる。
       run_with_aqua_github_token() {
-          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" && -n "''${MISE_GITHUB_TOKEN:-}" ]]; then
+          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" \
+                && -n "''${MISE_GITHUB_TOKEN:-}" && "''${NIX_CONFIG:-}" == *access-tokens* ]]; then
               "$@"
               return
           fi
@@ -198,9 +203,16 @@ in
               local token
               token="$(gh auth token 2>/dev/null || true)"
               if [[ -n "$token" ]]; then
+                  # NIX_CONFIG は nix.conf 構文の複数行。呼び出し側の指定は潰さず足す。
+                  local nix_config="access-tokens = github.com=$token"
+                  if [[ -n "''${NIX_CONFIG:-}" ]]; then
+                      nix_config="''${NIX_CONFIG}"$'\n'"$nix_config"
+                  fi
+
                   AQUA_GITHUB_TOKEN="''${AQUA_GITHUB_TOKEN:-$token}" \
                       GITHUB_TOKEN="''${GITHUB_TOKEN:-$token}" \
                       MISE_GITHUB_TOKEN="''${MISE_GITHUB_TOKEN:-$token}" \
+                      NIX_CONFIG="$nix_config" \
                       "$@"
                   return
               fi
@@ -230,7 +242,9 @@ in
           # inputs already in the store are then reused by narHash.
           # metadata --refresh clears stale fetcher-cache entries for the local
           # git flake after making several commits in quick succession.
-          nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
+          # The wrapper supplies access-tokens so github: inputs are not resolved
+          # against the rate-limited unauthenticated API.
+          run_with_aqua_github_token nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
 
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
