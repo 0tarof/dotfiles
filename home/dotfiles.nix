@@ -73,16 +73,9 @@ in
   # npm global config
   home.file.".npmrc".source = ../.npmrc;
 
-  # ==========================================================================
-  # Docker CLI plugins
-  # ==========================================================================
-  # docker-client には plugin が同梱されないので、`docker compose` /
-  # `docker buildx` として呼べるよう CLI plugin ディレクトリにリンクする。
-  home.file.".docker/cli-plugins/docker-compose".source =
-    "${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose";
-
-  home.file.".docker/cli-plugins/docker-buildx".source =
-    "${pkgs.docker-buildx}/libexec/docker/cli-plugins/docker-buildx";
+  # Docker Desktop が起動のたびに ~/.docker/cli-plugins を自分のリンクで
+  # 塗り替えるため、ここで plugin を管理すると activation が collision で
+  # 落ちる。plugin は Docker Desktop 同梱のもの（daemon と版が揃う）に任せる。
 
   # ==========================================================================
   # Claude Code configuration
