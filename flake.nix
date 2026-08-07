@@ -2,18 +2,20 @@
   description = "0tarof's dotfiles with nix-darwin and home-manager";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    # nixpkgs / nix-darwin / home-manager は同じリリース系列に揃える。ずれると
+    # nix-darwin が eval 時に弾く。unstable 追従だと更新を溜めた分だけリリース境界を
+    # 跨ぎ、3つ同時のメジャー移動になるため、リリースブランチで更新幅を区切る。
+    # 版が新しいことを要求するものは mise / Homebrew 側に逃がしてある（README 参照）。
+    # 次サイクルでは 3 つまとめて 26.11 系へ上げる。
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
     nix-darwin = {
-      # nix-darwin のブランチは nixpkgs のリリースと一致させる必要がある
-      # （master は 26.11 系で、26.05 の nixpkgs とは eval 時に弾かれる）。
-      # nixpkgs を 26.11 に上げるときに nix-darwin-26.11 / master へ切り替える。
       url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
