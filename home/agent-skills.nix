@@ -30,7 +30,7 @@ let
 
   agentSkillsSync = pkgs.writeShellApplication {
     name = "agent-skills-sync";
-    runtimeInputs = [ pkgs.git pkgs.coreutils pkgs.gnugrep ];
+    runtimeInputs = [ pkgs.git pkgs.openssh pkgs.coreutils pkgs.gnugrep ];
     text = ''
       set -euo pipefail
 
