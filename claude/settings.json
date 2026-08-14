@@ -157,6 +157,11 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/block-npm-in-pnpm.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-gh-token-leak.sh",
+            "timeout": 5
           }
         ]
       }
