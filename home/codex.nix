@@ -8,32 +8,19 @@ let
   # copied to ~/.agents/skills during activation. Keep .agents/skills reserved
   # for repo-local skills so this dotfiles repo does not double-load them.
   codexSkillsDir = ../agents/skills;
-  repoLocalSkillsDir = ../.agents/skills;
   hasCodexSkills = builtins.pathExists codexSkillsDir;
-  hasRepoLocalSkills = builtins.pathExists repoLocalSkillsDir;
   codexSkillEntries =
     if hasCodexSkills
     then builtins.readDir codexSkillsDir
-    else { };
-  repoLocalSkillEntries =
-    if hasRepoLocalSkills
-    then builtins.readDir repoLocalSkillsDir
     else { };
   codexSkillNames =
     builtins.filter
       (name: codexSkillEntries.${name} == "directory")
       (builtins.attrNames codexSkillEntries);
-  repoLocalSkillNames =
-    builtins.filter
-      (name: repoLocalSkillEntries.${name} == "directory")
-      (builtins.attrNames repoLocalSkillEntries);
 
   installSkillCommands = lib.concatMapStringsSep "\n" (name: ''
     install_skill ${lib.escapeShellArg name}
   '') codexSkillNames;
-  removeRepoLocalSkillCommands = lib.concatMapStringsSep "\n" (name: ''
-    remove_global_skill ${lib.escapeShellArg name}
-  '') repoLocalSkillNames;
 in
 {
   home.file = {
@@ -67,15 +54,7 @@ in
         rm -rf "$legacy_target"
       }
 
-      remove_global_skill() {
-        local name="$1"
-
-        rm -rf "$HOME/.agents/skills/$name"
-        rm -rf "$HOME/.codex/skills/$name"
-      }
-
       ${installSkillCommands}
-      ${removeRepoLocalSkillCommands}
     fi
   '';
 }
