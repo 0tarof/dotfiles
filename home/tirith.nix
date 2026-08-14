@@ -17,6 +17,14 @@ in
     tirith
   ];
 
+  # Japanese paths are legitimate in day-to-day commands. Keep this finding in
+  # Tirith's audit data without printing a warning for every occurrence; hostname
+  # homoglyph and mixed-script detection remains at its default severity.
+  home.file.".config/tirith/policy.yaml".text = ''
+    severity_overrides:
+      non_ascii_path: LOW
+  '';
+
   home.file.".config/tirith/gateway.yaml".text = ''
     # Tirith MCP Gateway configuration
     guarded_tools:
