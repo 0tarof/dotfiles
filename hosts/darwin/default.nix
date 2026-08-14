@@ -33,6 +33,7 @@
 
     # Brews - Nix に無いもの / macOS 固有のみ（CLI は原則 home.packages）
     brews = [
+      "auth0"             # Auth0 CLI (newer than locked nixpkgs)
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "container"          # Apple Container runtime
       "html2markdown"     # Not in nixpkgs
