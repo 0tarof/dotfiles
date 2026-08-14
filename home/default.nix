@@ -30,6 +30,7 @@ in
     ./tirith.nix     # Shell and agent command guard
     ./packages.nix   # CLI tools
     ./gh.nix         # gh extensions
+    ./agent-skills.nix # External agent skill sources
     ./dotfiles.nix   # Symlinks to config files
     ./codex.nix      # Codex skills
     ./scripts.nix    # Custom scripts, Claude Code installer

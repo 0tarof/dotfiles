@@ -1,0 +1,17 @@
+# External agent skills managed by this dotfiles repository.
+#
+# `agents/skills` holds first-party skills. Use this manifest for skills fetched
+# from an upstream Git repository so the source, version, and target hosts stay
+# reviewable. `agent-skills-sync` checks out each pinned ref and copies only the
+# declared skill directory into the requested user-level skill locations.
+
+version = 1
+
+[[skill]]
+name = "gh-stack"
+repository = "https://github.com/github/gh-stack.git"
+path = "skills/gh-stack"
+# renovate: datasource=github-releases depName=github/gh-stack versioning=semver
+ref = "v0.1.0"
+targets = ["agents", "claude"]
+license = "MIT"

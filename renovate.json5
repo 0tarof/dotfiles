@@ -25,6 +25,15 @@
         "# renovate: datasource=github-releases depName=(?<depName>\\S+)\\nreadonly NIX_INSTALLER_VERSION=\"(?<currentValue>v[0-9.]+)\""
       ],
       "datasourceTemplate": "github-releases"
+    },
+    {
+      // agent-skills.toml の upstream skill ref
+      "customType": "regex",
+      "fileMatch": ["^agent-skills\\.toml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) versioning=(?<versioning>\\S+)\\nref = \\\"(?<currentValue>[^\\\"]+)\\\""
+      ],
+      "versioningTemplate": "{{{versioning}}}"
     }
   ],
 
@@ -39,6 +48,13 @@
       // mise: 固定バージョン更新にも minimum_release_age=7d と揃える
       // （exact pin は mise 側の minimum_release_age をすり抜けるため）
       "matchManagers": ["mise"],
+      "minimumReleaseAge": "7 days",
+      "internalChecksFilter": "strict"
+    },
+    {
+      // Agent skills are executable instructions. Review upstream changes before syncing.
+      "matchFileNames": ["agent-skills.toml"],
+      "automerge": false,
       "minimumReleaseAge": "7 days",
       "internalChecksFilter": "strict"
     }
