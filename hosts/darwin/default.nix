@@ -20,7 +20,7 @@
       # nix-darwin generates --force-cleanup which Homebrew 6.x removed.
       # Disable its cleanup and pass the correct flags via extraFlags.
       cleanup = "none";
-      extraFlags = [ "--cleanup" "--zap" ];
+      extraFlags = [ "--cleanup" "--force" "--zap" ];
       upgrade = false;
     };
 
