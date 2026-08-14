@@ -1,4 +1,0 @@
-interface:
-  display_name: "CLI Install Advisor"
-  short_description: "Choose the right dotfiles install path"
-  default_prompt: "Use $cli-install-advisor to recommend how to install a CLI in this dotfiles repo."

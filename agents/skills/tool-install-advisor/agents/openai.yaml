@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tool Install Advisor"
+  short_description: "Choose the right dotfiles install path"
+  default_prompt: "Use $tool-install-advisor to recommend how to install a tool in this dotfiles repo."
