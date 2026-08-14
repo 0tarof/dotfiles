@@ -16,9 +16,12 @@
     
     # Install Homebrew if not present
     onActivation = {
-      autoUpdate = false;  # Don't auto-update on activation
-      cleanup = "zap";     # Remove packages not in this list
-      upgrade = false;     # Don't auto-upgrade
+      autoUpdate = false;
+      # nix-darwin generates --force-cleanup which Homebrew 6.x removed.
+      # Disable its cleanup and pass the correct flags via extraFlags.
+      cleanup = "none";
+      extraFlags = [ "--cleanup" "--force" "--zap" ];
+      upgrade = false;
     };
 
     # Taps
