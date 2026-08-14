@@ -11,6 +11,10 @@ let
       pkgs.apple-sdk
     ];
   });
+  tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
+    severity_overrides:
+      non_ascii_path: LOW
+  '';
 in
 {
   home.packages = [
@@ -20,11 +24,6 @@ in
   # Japanese paths are legitimate in day-to-day commands. Keep this finding in
   # Tirith's audit data without printing a warning for every occurrence; hostname
   # homoglyph and mixed-script detection remains at its default severity.
-  home.file.".config/tirith/policy.yaml".text = ''
-    severity_overrides:
-      non_ascii_path: LOW
-  '';
-
   home.file.".config/tirith/gateway.yaml".text = ''
     # Tirith MCP Gateway configuration
     guarded_tools:
@@ -92,6 +91,14 @@ in
   programs.zsh.initContent = lib.mkAfter ''
     if [[ -o interactive ]]; then
       eval "$(${tirith}/bin/tirith init --shell zsh)"
+    fi
+  '';
+
+  # Tirith rejects Home Manager's symlinked home.file entries for policies.
+  # Copy this managed policy as a regular file instead.
+  home.activation.installTirithPolicy = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      ${pkgs.coreutils}/bin/install -Dm644 ${tirithPolicy} "$HOME/.config/tirith/policy.yaml"
     fi
   '';
 
