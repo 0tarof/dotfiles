@@ -4,7 +4,10 @@
 { lib, ... }:
 
 let
-  codexSkillsDir = ../.agents/skills;
+  # Global Codex skills managed by dotfiles live in agents/skills and are
+  # copied to ~/.agents/skills during activation. Keep .agents/skills reserved
+  # for repo-local skills so this dotfiles repo does not double-load them.
+  codexSkillsDir = ../agents/skills;
   hasCodexSkills = builtins.pathExists codexSkillsDir;
   codexSkillEntries =
     if hasCodexSkills
