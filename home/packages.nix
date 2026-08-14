@@ -46,7 +46,6 @@ in
     kind
     # helm  # Need Helm 4; locked nixpkgs is still 3.x → mise
     aws-cdk-cli                # 旧 nodePackages.aws-cdk（nodePackages は削除済み）
-    auth0-cli
     # snowflake-cli  # Build fails in nixpkgs, keep in mise
 
     # Media
