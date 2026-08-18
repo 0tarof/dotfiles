@@ -314,7 +314,11 @@ in
 
       echo "Installing lefthook git hooks..."
       if command -v lefthook &> /dev/null && [[ -f "$DOTFILES_DIR/lefthook.yml" ]]; then
-          (cd "$DOTFILES_DIR" && lefthook install)
+          # --force: worktree ツールが core.hooksPath を書くと lefthook 2.x は install を
+          # 拒否する。パスは .git/hooks のままなので上書き install で問題ない。
+          # 失敗しても後続ステップまで落とさない（set -e 対策）。
+          (cd "$DOTFILES_DIR" && lefthook install --force) \
+              || echo "warning: lefthook install failed, continuing."
       else
           echo "lefthook or lefthook.yml not found, skipping."
       fi
