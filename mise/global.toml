@@ -34,6 +34,8 @@ rust = "1.96.1"
 helm = "4.2.2"
 # snowflake-cli build fails in nixpkgs
 "pipx:snowflake-cli" = "3.21.0"
+# ast-grep: the outline subcommand landed in 0.44; locked nixpkgs is still 0.42.1.
+ast-grep = "0.45.1"
 
 # Language-ecosystem CLIs (npm / cargo)
 "npm:agent-browser" = "0.31.1"
