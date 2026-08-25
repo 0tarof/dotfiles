@@ -92,6 +92,7 @@
       "sequel-ace"
       "session-manager-plugin"
       "snowflake-snowsql"
+      "slack-cli"
       "steipete/tap/codexbar"
       "tableplus"
       "visual-studio-code"
