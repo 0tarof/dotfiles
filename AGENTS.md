@@ -68,8 +68,9 @@ Codex App の sandbox 内では macOS keyring に保存された `gh` の認証�
 3. 環境固有の設定は必ず `overlay/` に配置
 4. スクリプトには適切なエラーハンドリング（`set -euo pipefail`）を追加
 5. **コミットしてから nix-rebuild**: Nix flake は変更がコミットされないと認識できない（gitignore されたファイルは flake からアクセス不可）
-6. Zsh overlay 設定:
+6. **nix-rebuild を伴う変更ではブランチを使わない**: Nix / nix-darwin / Home Manager と、それらで反映する宣言的設定の変更は、最新の `main` を起点に `main` へ直接コミットする。ブランチの作成・checkout・push はしない。`main` を `origin/main` に fast-forward してから、コミット → `nix-rebuild` → push の順で完結させる。
+7. Zsh overlay 設定:
    - 環境固有のシェル設定は `overlay/zsh/.zshrc` を作成
    - 環境固有の PATH/env 設定は `overlay/zsh/.zprofile` を作成
    - これらのファイルはメインの zsh 設定から自動的に読み込まれる
-7. **変更を入れたら動作確認を優先**: 設定変更後は謝罪や説明の前にまず `nix-rebuild` を実行して動作確認すること
+8. **変更を入れたら動作確認を優先**: 設定変更後は謝罪や説明の前にまず `nix-rebuild` を実行して動作確認すること
