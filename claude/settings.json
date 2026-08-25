@@ -179,7 +179,6 @@
     "code-review@claude-plugins-official": true,
     "github@plugins-ajainc": true,
     "skill-creator@claude-plugins-official": true,
-    "slack@claude-plugins-official": true,
     "codex@openai-codex": true
   },
   "extraKnownMarketplaces": {
