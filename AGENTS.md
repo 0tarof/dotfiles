@@ -30,6 +30,13 @@ Codex App の sandbox 内では macOS keyring に保存された `gh` の認証�
 `gh auth token` で token を表示したり、通常利用している GitHub token を Codex の環境変数や
 設定ファイルにコピーして回避しない。
 
+### 認証情報の扱い
+- 既存の認証経路を優先する。GitHub の Git 操作は設定済みの SSH agent、`gh` は macOS Keychain、AWS などは既存の profile / credential chain を使う。
+- PAT、access token、秘密鍵などを表示、コミット、設定ファイルへ保存、恒久的な環境変数へコピーしない。認証が必要な処理は、利用中の credential helper や agent をそのまま使う。
+- 認証失敗時に HTTPS へ切り替えたり、署名・host key 検証を無効化したりして回避しない。まず sandbox、sudo、Nix daemon など実行主体の違いと、agent / credential helper の引き継ぎを確認する。
+- `nix-rebuild` では、`git+ssh` の flake input をユーザー側で解決し、必要なら `nix flake archive` で共有 Nix store に実体化してから sudo 側の rebuild に渡す。認証経路を変えるのではなく、既存の fetch 手順を修正する。
+- リポジトリ管理の wrapper が処理の寿命だけ認証情報を Nix に渡す場合を除き、token を手動で取得して別のコマンドや設定へ渡さない。wrapper の一時的な受け渡しもログへ出力しない。
+
 ## アーキテクチャ
 
 ### ディレクトリ構造
