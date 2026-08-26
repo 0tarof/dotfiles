@@ -20,9 +20,9 @@
     };
 
     tirith = {
-      # Use git+https instead of github: so Nix fetches the public repository
-      # directly and avoids unauthenticated GitHub API rate limits during builds.
-      url = "git+https://github.com/sheeki03/tirith";
+      # Use git+ssh instead of github: so the existing SSH authentication avoids
+      # unauthenticated GitHub API rate limits during flake resolution.
+      url = "git+ssh://git@github.com/sheeki03/tirith";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

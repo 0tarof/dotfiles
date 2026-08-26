@@ -134,11 +134,11 @@
         "rev": "7753f23b275acb2f2f61a2057086bab647126263",
         "revCount": 2551,
         "type": "git",
-        "url": "https://github.com/sheeki03/tirith"
+        "url": "ssh://git@github.com/sheeki03/tirith"
       },
       "original": {
         "type": "git",
-        "url": "https://github.com/sheeki03/tirith"
+        "url": "ssh://git@github.com/sheeki03/tirith"
       }
     }
   },

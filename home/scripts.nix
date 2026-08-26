@@ -287,6 +287,9 @@ in
           # The wrapper supplies access-tokens so github: inputs are not resolved
           # against the rate-limited unauthenticated API.
           run_with_aqua_github_token nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
+          # Materialize the resolved flake and all locked inputs in the shared
+          # store so the root-side rebuild does not need the user's SSH agent.
+          run_with_aqua_github_token nix flake archive --json "$DOTFILES_DIR" > /dev/null
 
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
