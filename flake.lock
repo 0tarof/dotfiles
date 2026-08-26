@@ -128,11 +128,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782806954,
-        "narHash": "sha256-wmTaOn7fmI8PMquLzdcpv3cf6QjnHw5gW3rHpKXz7Kc=",
+        "lastModified": 1787720714,
+        "narHash": "sha256-hqYQAnxyXQgBFGwQD22FF0uU3e3HwZOqfgrgF0bdUrA=",
         "ref": "refs/heads/main",
-        "rev": "f849777509d086820e49b2bd2c364db4e2afdce1",
-        "revCount": 870,
+        "rev": "7753f23b275acb2f2f61a2057086bab647126263",
+        "revCount": 2551,
         "type": "git",
         "url": "ssh://git@github.com/sheeki03/tirith"
       },
