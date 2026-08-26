@@ -37,6 +37,7 @@ in
 
     # Cloud & DevOps
     awscli2
+    namespace-cli
     # aws-sam-cli  # May need Homebrew for macOS
     docker-client              # CLI のみ。daemon と cli-plugins は Docker Desktop
     docker-credential-helpers  # docker-credential-osxkeychain
