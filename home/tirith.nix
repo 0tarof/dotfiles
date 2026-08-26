@@ -14,6 +14,9 @@ let
   tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
     severity_overrides:
       non_ascii_path: LOW
+      # Tirith issue #126: CJK punctuation/fullwidth characters in
+      # Japanese text are misclassified as ASCII confusables.
+      confusable_text: LOW
   '';
 in
 {
@@ -21,9 +24,10 @@ in
     tirith
   ];
 
-  # Japanese paths are legitimate in day-to-day commands. Keep this finding in
-  # Tirith's audit data without printing a warning for every occurrence; hostname
-  # homoglyph and mixed-script detection remains at its default severity.
+  # Japanese paths and mixed Japanese/ASCII prose are legitimate in day-to-day
+  # commands. Keep these text findings in Tirith's audit data without printing
+  # a warning for every occurrence; hostname homoglyph, mixed-script, and other
+  # terminal-injection detection remains at its default severity.
   home.file.".config/tirith/gateway.yaml".text = ''
     # Tirith MCP Gateway configuration
     guarded_tools:
