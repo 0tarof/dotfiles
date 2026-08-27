@@ -44,9 +44,10 @@ let
   # running the registration command directly from the shell.
   tirithZshHookSource = builtins.readFile
     "${inputs.tirith}/crates/tirith/assets/shell/lib/zsh-hook.zsh";
-  tirithZshHookRegistration = ''
-  _TIRITH_RECEIPT_INSTANCE="$(command "$_TIRITH_BIN" __execution-receipt register \
-    --family zsh --shell-pid "$_TIRITH_RECEIPT_SHELL_PID" 2>/dev/null)"'';
+  tirithZshHookRegistration = builtins.concatStringsSep "\n" [
+    "  _TIRITH_RECEIPT_INSTANCE=\"$(command \"$_TIRITH_BIN\" __execution-receipt register \\"
+    "    --family zsh --shell-pid \"$_TIRITH_RECEIPT_SHELL_PID\" 2>/dev/null)\""
+  ];
   tirithZshHook = builtins.replaceStrings
     [ tirithZshHookRegistration ]
     [ ''
