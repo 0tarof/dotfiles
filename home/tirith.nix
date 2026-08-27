@@ -33,6 +33,11 @@ let
       max_message_bytes: 1048576
   '';
   tirithGatewayConfigFile = pkgs.writeText "tirith-gateway.yaml" tirithGatewayConfig;
+  tirithCursorHook = builtins.replaceStrings
+    [ "__TIRITH_BIN__" "__TIRITH_PYTHON__" ]
+    [ "${tirith}/bin/tirith" "${pkgs.python3}/bin/python3" ]
+    (builtins.readFile "${inputs.tirith}/crates/tirith/assets/hooks/cursor-hook.sh");
+  tirithCursorHookFile = pkgs.writeText "tirith-cursor-hook.sh" tirithCursorHook;
   tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
     severity_overrides:
       non_ascii_path: LOW
@@ -85,6 +90,124 @@ in
   home.activation.installTirithPolicy = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     if [[ -z "''${DRY_RUN:-}" ]]; then
       ${pkgs.coreutils}/bin/install -Dm644 ${tirithPolicy} "$HOME/.config/tirith/policy.yaml"
+    fi
+  '';
+
+  # Protect Cursor Agent shell execution through its native beforeShellExecution
+  # hook. Keep the user-level Cursor config mergeable so unrelated hooks and MCP
+  # servers remain under Cursor's control.
+  home.activation.setupTirithCursor = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      cursor_dir="$HOME/.cursor"
+      hooks_json="$cursor_dir/hooks.json"
+      mcp_json="$cursor_dir/mcp.json"
+      cursor_hook="$cursor_dir/hooks/tirith-hook.sh"
+
+      mkdir -p "$cursor_dir/hooks"
+      ${pkgs.coreutils}/bin/install -m755 ${tirithCursorHookFile} "$cursor_hook"
+
+      merge_cursor_hooks() {
+        local tmp
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$cursor_dir/hooks.json.tmp.XXXXXX")"
+        if ${pkgs.jq}/bin/jq -e 'type == "object"' "$hooks_json" >/dev/null 2>&1; then
+          if ${pkgs.jq}/bin/jq --arg command "$cursor_hook" '
+            .version = 1
+            | .hooks = (.hooks // {})
+            | .hooks.beforeShellExecution = (
+                (.hooks.beforeShellExecution // []
+                  | if type == "array" then . else [] end
+                  | map(select((.command // "") | contains("tirith-hook") | not)))
+                + [{"command": $command, "type": "command", "timeout": 15}]
+              )
+          ' "$hooks_json" > "$tmp"; then
+            mv "$tmp" "$hooks_json"
+          else
+            rm -f "$tmp"
+            echo "tirith: could not merge Cursor hooks.json; leaving it unchanged" >&2
+          fi
+        elif [[ ! -e "$hooks_json" ]]; then
+          if ${pkgs.jq}/bin/jq -n --arg command "$cursor_hook" '
+            {
+              version: 1,
+              hooks: {
+                beforeShellExecution: [{"command": $command, "type": "command", "timeout": 15}]
+              }
+            }
+          ' > "$tmp"; then
+            mv "$tmp" "$hooks_json"
+          else
+            rm -f "$tmp"
+            echo "tirith: could not create Cursor hooks.json" >&2
+          fi
+        else
+          rm -f "$tmp"
+          echo "tirith: Cursor hooks.json is not a JSON object; leaving it unchanged" >&2
+        fi
+      }
+
+      merge_cursor_hooks
+
+      merge_cursor_mcp() {
+        local tmp
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$cursor_dir/mcp.json.tmp.XXXXXX")"
+        if ${pkgs.jq}/bin/jq -e 'type == "object"' "$mcp_json" >/dev/null 2>&1; then
+          if ${pkgs.jq}/bin/jq --arg command "${tirith}/bin/tirith" --arg config "$HOME/.config/tirith/gateway.yaml" '
+            .mcpServers = (.mcpServers // {})
+            | .mcpServers["tirith-gateway"] = {
+                command: $command,
+                args: [
+                  "gateway", "run",
+                  "--upstream-bin", $command,
+                  "--upstream-arg", "mcp-server",
+                  "--config", $config
+                ]
+              }
+          ' "$mcp_json" > "$tmp"; then
+            mv "$tmp" "$mcp_json"
+          else
+            rm -f "$tmp"
+            echo "tirith: could not merge Cursor mcp.json; leaving it unchanged" >&2
+          fi
+        elif [[ ! -e "$mcp_json" ]]; then
+          if ${pkgs.jq}/bin/jq -n --arg command "${tirith}/bin/tirith" --arg config "$HOME/.config/tirith/gateway.yaml" '
+            {
+              mcpServers: {
+                "tirith-gateway": {
+                  command: $command,
+                  args: [
+                    "gateway", "run",
+                    "--upstream-bin", $command,
+                    "--upstream-arg", "mcp-server",
+                    "--config", $config
+                  ]
+                }
+              }
+            }
+          ' > "$tmp"; then
+            mv "$tmp" "$mcp_json"
+          else
+            rm -f "$tmp"
+            echo "tirith: could not create Cursor mcp.json" >&2
+          fi
+        else
+          rm -f "$tmp"
+          echo "tirith: Cursor mcp.json is not a JSON object; leaving it unchanged" >&2
+        fi
+      }
+
+      if [[ -f "$mcp_json" ]]; then
+        current_cursor_mcp_command="$(${pkgs.jq}/bin/jq -r '.mcpServers["tirith-gateway"].command // empty' "$mcp_json" 2>/dev/null || true)"
+        case "$current_cursor_mcp_command" in
+          ""|tirith|*/bin/tirith)
+            merge_cursor_mcp
+            ;;
+          *)
+            echo "tirith: existing non-Tirith Cursor MCP entry left unchanged" >&2
+            ;;
+        esac
+      else
+        merge_cursor_mcp
+      fi
     fi
   '';
 
