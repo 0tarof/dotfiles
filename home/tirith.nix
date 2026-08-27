@@ -62,7 +62,7 @@ let
       command "$_TIRITH_RM_BIN" -f "$_TIRITH_RECEIPT_FILE"
     fi
   fi'' ]
-    (assert lib.assertMsg (builtins.hasInfix tirithZshHookRegistration tirithZshHookSource)
+    (assert lib.assertMsg (lib.strings.hasInfix tirithZshHookRegistration tirithZshHookSource)
       "Tirith zsh hook registration block changed upstream; update the local compatibility patch";
       tirithZshHookSource);
   tirithZshHookFile = pkgs.writeText "tirith-zsh-hook.zsh" tirithZshHook;
