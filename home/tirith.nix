@@ -14,10 +14,6 @@ let
   tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
     severity_overrides:
       non_ascii_path: LOW
-      # Shell wrappers such as `zsh -ilc` are legitimate in local tooling;
-      # keep their incomplete-analysis finding from blocking the wrapper while
-      # preserving the native severity of concrete dangerous-command rules.
-      analysis_incomplete: LOW
   '';
 in
 {
@@ -48,48 +44,6 @@ in
       fail_mode: "open"
       timeout_ms: 10000
       max_message_bytes: 1048576
-  '';
-
-  programs.zsh.envExtra = lib.mkAfter ''
-    if [[ -n "''${ZSH_EXECUTION_STRING:-}" \
-       && "''${TIRITH_ZSHENV_SKIP:-}" != "1" \
-       && -z "''${VSCODE_RESOLVING_ENVIRONMENT:-}" ]]; then
-      _tirith_bin="''${TIRITH_BIN:-${tirith}/bin/tirith}"
-      if [[ "$_tirith_bin" != */* ]]; then
-        _tirith_bin="$(command -v "$_tirith_bin" 2>/dev/null || true)"
-      fi
-
-      if [[ -z "$_tirith_bin" || ! -x "$_tirith_bin" ]]; then
-        echo "tirith: command not found - command blocked for safety" >&2
-        exit 1
-      fi
-
-      _tirith_tmp="$(mktemp 2>/dev/null)" || {
-        echo "tirith: could not create temp file - command blocked for safety" >&2
-        exit 1
-      }
-
-      "$_tirith_bin" check --non-interactive --shell posix -- "$ZSH_EXECUTION_STRING" >"$_tirith_tmp" 2>&1
-      _tirith_rc=$?
-
-      if [[ $_tirith_rc -eq 0 ]]; then
-        rm -f "$_tirith_tmp"
-      elif [[ $_tirith_rc -eq 1 ]]; then
-        cat "$_tirith_tmp" >&2
-        rm -f "$_tirith_tmp"
-        exit 1
-      elif [[ $_tirith_rc -eq 2 ]]; then
-        cat "$_tirith_tmp" >&2
-        rm -f "$_tirith_tmp"
-      else
-        cat "$_tirith_tmp" >&2
-        echo "tirith: unexpected exit code $_tirith_rc" >&2
-        rm -f "$_tirith_tmp"
-        exit 1
-      fi
-
-      unset _tirith_bin _tirith_tmp _tirith_rc
-    fi
   '';
 
   programs.zsh.initContent = lib.mkAfter ''
