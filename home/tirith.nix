@@ -14,6 +14,10 @@ let
   tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
     severity_overrides:
       non_ascii_path: LOW
+      # Shell wrappers such as `zsh -ilc` are legitimate in local tooling;
+      # keep their incomplete-analysis finding from blocking the wrapper while
+      # preserving the native severity of concrete dangerous-command rules.
+      analysis_incomplete: LOW
   '';
 in
 {
