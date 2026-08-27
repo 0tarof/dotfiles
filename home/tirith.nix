@@ -38,6 +38,34 @@ let
     [ "${tirith}/bin/tirith" "${pkgs.python3}/bin/python3" ]
     (builtins.readFile "${inputs.tirith}/crates/tirith/assets/hooks/cursor-hook.sh");
   tirithCursorHookFile = pkgs.writeText "tirith-cursor-hook.sh" tirithCursorHook;
+  # In a normal interactive zsh, command substitution runs the register
+  # command from a subshell. Tirith intentionally rejects that process as the
+  # registered shell's parent, so capture the token through a temp file while
+  # running the registration command directly from the shell.
+  tirithZshHookSource = builtins.readFile
+    "${inputs.tirith}/crates/tirith/assets/shell/lib/zsh-hook.zsh";
+  tirithZshHookRegistration = ''
+  _TIRITH_RECEIPT_INSTANCE="$(command "$_TIRITH_BIN" __execution-receipt register \
+    --family zsh --shell-pid "$_TIRITH_RECEIPT_SHELL_PID" 2>/dev/null)"'';
+  tirithZshHook = builtins.replaceStrings
+    [ tirithZshHookRegistration ]
+    [ ''
+  _TIRITH_RECEIPT_FILE=""
+  if [[ -n "$_TIRITH_MKTEMP_BIN" ]]; then
+    _TIRITH_RECEIPT_FILE="$(command "$_TIRITH_MKTEMP_BIN" -t tirith-receipt.XXXXXX 2>/dev/null)"
+    if [[ -n "$_TIRITH_RECEIPT_FILE" ]]; then
+      command "$_TIRITH_BIN" __execution-receipt register \
+        --family zsh --shell-pid "$_TIRITH_RECEIPT_SHELL_PID" >"$_TIRITH_RECEIPT_FILE" 2>/dev/null
+      if [[ $? -eq 0 ]]; then
+        IFS= read -r _TIRITH_RECEIPT_INSTANCE <"$_TIRITH_RECEIPT_FILE"
+      fi
+      command "$_TIRITH_RM_BIN" -f "$_TIRITH_RECEIPT_FILE"
+    fi
+  fi'' ]
+    (assert lib.assertMsg (builtins.hasInfix tirithZshHookRegistration tirithZshHookSource)
+      "Tirith zsh hook registration block changed upstream; update the local compatibility patch";
+      tirithZshHookSource);
+  tirithZshHookFile = pkgs.writeText "tirith-zsh-hook.zsh" tirithZshHook;
   tirithPolicy = pkgs.writeText "tirith-policy.yaml" ''
     severity_overrides:
       non_ascii_path: LOW
@@ -54,8 +82,8 @@ in
   home.file.".config/tirith/gateway.yaml".text = tirithGatewayConfig;
 
   # Codex marks its non-interactive shell sessions with CODEX_SHELL=1. Scope
-  # the zshenv guard to that marker so ordinary zsh -ilc and IDE probes keep
-  # working while commands launched by Codex are checked before execution.
+  # the zshenv guard to that marker so commands launched by Codex are checked
+  # before execution while the interactive hook remains available to humans.
   programs.zsh.envExtra = lib.mkAfter ''
     if [[ -n "''${ZSH_EXECUTION_STRING:-}" \
        && "''${CODEX_SHELL:-}" == "1" \
@@ -80,8 +108,8 @@ in
   '';
 
   programs.zsh.initContent = lib.mkAfter ''
-    if [[ -o interactive && -t 0 && -t 1 && "''${CODEX_SHELL:-}" != "1" ]]; then
-      eval "$(${tirith}/bin/tirith init --shell zsh)"
+    if [[ -o interactive && "''${CODEX_SHELL:-}" != "1" ]]; then
+      source "${tirithZshHookFile}"
     fi
   '';
 
