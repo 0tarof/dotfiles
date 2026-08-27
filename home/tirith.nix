@@ -75,7 +75,7 @@ in
   '';
 
   programs.zsh.initContent = lib.mkAfter ''
-    if [[ -o interactive ]]; then
+    if [[ -o interactive && "''${CODEX_SHELL:-}" != "1" ]]; then
       eval "$(${tirith}/bin/tirith init --shell zsh)"
     fi
   '';
