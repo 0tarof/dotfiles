@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dependency Update PR Fix"
+  short_description: "Fix dependency PR CI failures safely"
+  default_prompt: "Use $dependency-update-pr-fix to fix a dependency update PR CI failure in a separate repair PR."
