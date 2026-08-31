@@ -2,9 +2,16 @@
 name: auto-review-fix
 description: PRの既存Greptileレビューを確認し、指摘への対応、セルフレビュー、スレッド返信、Resolveまで行うスキル。Greptileの有料再レビュー依頼は投げず、Devinレビューは見ない。「レビュー対応して」「レビュー待って」「PRのレビュー見て」「Greptileの指摘直して」「レビュー修正」などの依頼で起動。
 allowed-tools:
+  - Bash(gh repo view *)
   - Bash(gh pr view *)
   - Bash(gh api graphql *)
   - Bash(*check_bot_review_status.py *)
+  - Bash(*sync_pr_branch.py *)
+  - Bash(git branch *)
+  - Bash(git rev-parse *)
+  - Bash(git fetch *)
+  - Bash(git merge *)
+  - Bash(git merge-base *)
   - Bash(git status *)
   - Bash(git diff *)
   - Bash(git add *)
@@ -42,12 +49,32 @@ Greptileの再レビューリクエストは課金されるため、このスキ
 ### 1. PR番号の特定
 
 ```bash
-gh pr view --json number,title,url,state
+gh pr view --json number,title,url,state,headRefName,baseRefName,mergeable
 ```
 
 PR番号がわからない場合はユーザーに確認する。
 
-### 2. Greptileレビュー状態の確認
+### 2. PRブランチを最新のデフォルトブランチに同期
+
+Greptileのコメントを読む前に、同梱スクリプトでPRブランチを最新のデフォルトブランチと同期する。PRのbaseがデフォルトブランチでない場合は、デフォルトブランチを勝手にmergeしない。
+
+```bash
+${CLAUDE_SKILL_DIR}/sync_pr_branch.py prepare [--pr <PR番号>]
+```
+
+スクリプトがデフォルトブランチの特定、PRのhead/base/state検証、最新baseのfetch、merge開始までの機械的処理を行う。`SYNC_NOT_NEEDED`なら通常のレビュー確認へ進み、`MERGE_COMPLETED`なら同期に伴うテストを実行する。終了コード2の`CONFLICTS_NEED_RESOLUTION`は想定された引き継ぎなので失敗扱いにしない。
+
+競合がある場合だけ、報告されたパスを意味を確認して個別に解消する。`ours`/`theirs`の一括適用は禁止する。バイナリ競合、仕様判断が必要な競合、古いまたは不明な`MERGE_HEAD`、dirtyなworktree、rebase/cherry-pick中の場合は停止する。ブランチ切り替え、stash、reset、clean、破棄、ユーザー変更の上書きはしない。
+
+解消後に関連テストを実行し、次のスクリプトで検証、必要なstage、merge commit、pushを行う。
+
+```bash
+${CLAUDE_SKILL_DIR}/sync_pr_branch.py finish [--pr <PR番号>]
+```
+
+`finish`はconflict pathだけをstageし、`MERGE_HEAD`がある場合だけmerge commitを作成する。auto-merge commit、fast-forward、no-opの後に余計なcommitは作らない。同期処理について手動でstage、commit、force pushしてはならない。
+
+### 3. Greptileレビュー状態の確認
 
 ```bash
 gh pr view <PR番号> --json state,comments,reviews
@@ -64,7 +91,7 @@ gh pr view <PR番号> --comments
 - Devin Reviewチェック
 - Devinの未解決スレッド
 
-### 3. 判定スクリプトの実行
+### 4. 判定スクリプトの実行
 
 ```bash
 ${CLAUDE_SKILL_DIR}/check_bot_review_status.py <PR番号>
@@ -74,14 +101,14 @@ ${CLAUDE_SKILL_DIR}/check_bot_review_status.py <PR番号>
 
 完了判定はスクリプトの出力に従うこと。スクリプトを実行せずに完了と判断してはならない。`gh` が使えない場合だけ、その制約を明示して手動確認に切り替える。
 
-### 4. Greptileレビューが未着の場合
+### 5. Greptileレビューが未着の場合
 
 `@greptileai review` は投稿しない。
 
 - PRがOPENの場合: 「Greptileレビューはまだ付いていないので待ちます」と報告し、必要なら5分後に再チェックする
 - PRがOPENでない場合: 自動レビューが走らない可能性を報告する。手動レビュー依頼はこのスキルからは投げない
 
-### 5. 未解決GreptileスレッドとSummaryの確認
+### 6. 未解決GreptileスレッドとSummaryの確認
 
 スレッドの解決状態が必要な場合はGraphQLで確認する：
 
@@ -113,7 +140,7 @@ query($owner: String!, $repo: String!, $pr: Int!) {
 
 GreptileのトップレベルSummaryコメントも必ず読む。未解決インラインコメントだけでなく、Summary内のConfidence、Concerns、Issues、Recommendations、P2項目をセルフレビュー観点として扱う。
 
-### 6. 指摘への対応方針
+### 7. 指摘への対応方針
 
 Botの指摘を鵜呑みにしない。
 
@@ -127,7 +154,7 @@ Botの指摘を鵜呑みにしない。
 - 同意しない場合: 理由を整理し、必要ならスレッドに短く返信してResolveする
 - 判断に迷う場合: ユーザーに確認する
 
-### 7. 10巡程度のセルフレビュー
+### 8. 10巡程度のセルフレビュー
 
 Greptileの結果を起点に、ローカルで批判的レビューを行う。
 
@@ -136,7 +163,7 @@ Greptileの結果を起点に、ローカルで批判的レビューを行う。
 - 各巡で具体的な問題が見つかったら修正し、関連するローカルチェックを再実行する
 - このループ中にGreptileへ再レビュー依頼は投げない
 
-### 8. 修正のコミット・プッシュ
+### 9. 修正のコミット・プッシュ
 
 修正がある場合：
 
@@ -148,7 +175,7 @@ git push
 
 `git add .` や `git add -A` は使わない。コミットメッセージに生成AI由来のtrailerは付けない。
 
-### 9. Greptileスレッドへ返信してResolve
+### 10. Greptileスレッドへ返信してResolve
 
 修正・検証が終わったGreptileスレッドには、修正内容と確認内容を短く返信し、その後でResolveする。
 
@@ -173,7 +200,7 @@ mutation($threadId: ID!) {
 
 Resolveしてよいのは、コード上の問題が修正済み、または指摘が不適切であることを十分に確認できた場合だけ。判断に迷う場合はResolveせずユーザーに確認する。
 
-### 10. 状態報告
+### 11. 状態報告
 
 以下を簡潔に報告する：
 - GreptileのConfidenceと未解決スレッド数

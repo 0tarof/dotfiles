@@ -1,6 +1,6 @@
 ---
 name: auto-review-fix
-description: Inspect and address existing Greptile PR review feedback without requesting paid re-reviews. Use when the user asks to handle Greptile feedback, check PR review status, fix Greptile comments, or continue an auto-review-fix loop after opening a PR.
+description: Inspect and address existing Greptile PR review feedback, synchronize the PR branch with the latest origin default branch, and verify the result without requesting paid re-reviews. Use when the user asks to handle Greptile feedback, check PR review status, fix Greptile comments, resolve PR conflicts, or continue an auto-review-fix loop after opening a PR.
 ---
 
 # Auto Review Fix
@@ -23,11 +23,12 @@ Greptile re-review requests cost money. This skill must not post `@greptileai re
 Use the scripts bundled in this skill directory:
 
 - `check_bot_review_status.py`: machine-readable Greptile-only review status
+- `sync_pr_branch.py`: mechanically validate and synchronize the current PR branch with the latest default branch
 
 When running them, resolve the path relative to this skill directory. If using the repository source directly, the path is:
 
 ```bash
-.agents/skills/auto-review-fix/check_bot_review_status.py <PR_NUMBER>
+agents/skills/auto-review-fix/check_bot_review_status.py <PR_NUMBER>
 ```
 
 When installed by Home Manager, the path is:
@@ -48,28 +49,38 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - If the user gives a PR URL or number, use it.
    - Otherwise use the current branch:
      ```bash
-     gh pr view --json number,title,url,state
+   gh pr view --json number,title,url,state,headRefName,baseRefName,mergeable
      ```
    - If `gh` cannot resolve the PR, ask the user for the repository and PR number.
 
-2. Read current Greptile state.
+2. Synchronize the PR branch with the latest default branch before reading review comments.
+   - Run the bundled script outside the sandbox so `gh` can use the existing credential store:
+     ```bash
+     <skill-dir>/sync_pr_branch.py prepare [--pr <PR_NUMBER>]
+     ```
+   - The script discovers the default branch, validates the PR head/base/state, fetches the latest remote base, and either reports `SYNC_NOT_NEEDED`, completes a clean merge, or returns exit status 2 with `CONFLICTS_NEED_RESOLUTION`.
+   - Treat exit status 2 as an expected handoff, not a failed workflow. Inspect and resolve the reported paths semantically; do not use blanket `ours`/`theirs` resolution. Stop for binary conflicts, unresolved product decisions, stale `MERGE_HEAD`, dirty worktrees, or an in-progress rebase/cherry-pick.
+   - After resolving conflicts, run relevant tests and then run `<skill-dir>/sync_pr_branch.py finish [--pr <PR_NUMBER>]`. The script verifies that no unmerged paths or conflict markers remain, stages only conflict paths, creates a merge commit only when `MERGE_HEAD` exists, and pushes without force. Do not manually stage or commit the base synchronization.
+   - When the script reports `MERGE_COMPLETED`, run the synchronization tests and then run `finish`; when it reports `SYNC_NOT_NEEDED`, continue without a synchronization commit.
+
+3. Read current Greptile state.
    ```bash
    gh pr view <PR_NUMBER> --json state,comments,reviews
    gh pr view <PR_NUMBER> --comments
    ```
    Check whether Greptile has reviewed and whether the PR is `OPEN`. Do not inspect Devin comments, checks, or review threads.
 
-3. Run the status script before deciding completion.
+4. Run the status script before deciding completion.
    ```bash
    <skill-dir>/check_bot_review_status.py <PR_NUMBER>
    ```
    Treat the script as Greptile-only. `all_complete: true` means the current Greptile review is approved or Confidence 5/5, with zero unresolved Greptile review threads. Do not declare Greptile completion without running the script unless `gh` is unavailable and you clearly report that limitation.
 
-4. If no Greptile review exists yet, do not request one.
+5. If no Greptile review exists yet, do not request one.
    - If the PR is `OPEN`, report that no Greptile review is present yet and, if the user asked to keep watching, schedule a follow-up.
    - If the PR is not `OPEN`, report that automatic review may not run. Do not post `@greptileai review` from this skill.
 
-5. Inspect unresolved actionable feedback.
+6. Inspect unresolved actionable feedback.
    - Use GraphQL review threads when thread resolution state matters:
      ```bash
      gh api graphql -f query='
@@ -98,26 +109,26 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
      ```
    - Use `gh pr view <PR_NUMBER> --comments` for top-level Greptile summary comments, confidence notes, concerns, recommendations, and P2 items.
 
-6. Judge each Greptile comment before editing.
+7. Judge each Greptile comment before editing.
    - Fix only comments that are technically correct and improve the code.
    - Skip comments that are stale, incorrect, overreaching, or inconsistent with project intent.
    - Ask the user when the tradeoff is real or the desired behavior is unclear.
    - Treat `greptile.summary_p2` from the status script as improvement candidates, not automatic requirements.
 
-7. Run a self-critical review loop before finalizing fixes.
+8. Run a self-critical review loop before finalizing fixes.
    - Build a checklist from Greptile inline comments, Greptile summary concerns, P2 items, nearby code risks, existing tests, and project style.
    - Do about 10 local review passes. In each pass, look for a concrete remaining bug, regression risk, missed test, or overfitted fix.
    - Fix issues found during those passes, then rerun relevant local checks.
    - Do not call Greptile again during this loop.
 
-8. Implement fixes locally.
+9. Implement fixes locally.
    - Keep edits scoped to the review feedback and the self-review issues it exposes.
    - Read the surrounding code and existing tests before changing behavior.
    - Use explicit `git add <path>` only; never use broad staging commands.
    - Commit with a normal project-style message. Do not add generated-by trailers.
    - Push after local checks pass when the PR branch needs the fixes.
 
-9. Reply to and resolve Greptile threads yourself.
+10. Reply to and resolve Greptile threads yourself.
    - For each fixed Greptile review thread, reply with a short summary of the fix and the verification performed.
    - Use GraphQL `addPullRequestReviewThreadReply`, then `resolveReviewThread`.
    - Resolve only after verifying the code no longer has the issue. For skipped comments, resolve only when the rationale is clearly correct; otherwise ask the user.
@@ -141,7 +152,7 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    }' -f threadId='<THREAD_ID>'
    ```
 
-10. Report status.
+11. Report status.
     Include Greptile confidence / unresolved count, what was fixed, what was skipped, what was pushed, which threads were replied to and resolved, and whether another human check is needed. Explicitly say that Devin was intentionally ignored and no paid Greptile re-review was requested.
 
 ## Polling and Follow-Up
