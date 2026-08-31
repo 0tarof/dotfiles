@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resolve Conflict"
+  short_description: "Resolve conflicts with the latest default branch"
+  default_prompt: "Use $resolve-conflict to resolve this branch against the latest origin default branch, test it, and push the fix."
