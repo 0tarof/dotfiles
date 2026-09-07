@@ -1,19 +1,20 @@
 ---
 name: auto-review-fix
-description: Inspect and address existing Greptile PR review feedback, synchronize the PR branch with the latest origin default branch, and verify the result without requesting paid re-reviews. Use when the user asks to handle Greptile feedback, check PR review status, fix Greptile comments, resolve PR conflicts, or continue an auto-review-fix loop after opening a PR.
+description: Inspect and address existing Greptile and human PR review feedback, synchronize the PR branch with the latest origin default branch, and verify the result without requesting paid re-reviews. Use when the user asks to handle PR review feedback, check review status, fix review comments, resolve PR conflicts, or continue an auto-review-fix loop after opening a PR.
 ---
 
 # Auto Review Fix
 
-PR に付いた既存の Greptile レビューを確認し、技術的に妥当な指摘だけを修正する。
+PR に付いた既存の Greptile レビューと人間のレビューを確認し、技術的に妥当な指摘だけを修正する。
 
 ユーザーとの会話は、特に指定がなければ日本語で行う。
 
 ## Scope
 
-| Bot | GitHub user | What to do |
+| Reviewer | GitHub user / type | What to do |
 | --- | --- | --- |
 | Greptile | `greptile-apps[bot]` / `greptile-apps` | Read existing reviews, fix valid issues, reply to the review thread, then resolve it yourself after verification |
+| Human reviewer | GitHub `User` authors other than the excluded accounts | Read review bodies, review decisions, comments, and threads; fix valid issues and reply with the verification result. Do not resolve the human thread automatically |
 | Devin | `devin-ai-integration[bot]` | Ignore Devin review comments, checks, and status entirely |
 
 Greptile re-review requests cost money. This skill must not post `@greptileai review` or use Greptile re-trigger links. If the user explicitly asks to request a new Greptile review, stop and confirm the cost before doing anything outside this workflow.
@@ -63,25 +64,25 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - After resolving conflicts, run relevant tests and then run `<skill-dir>/sync_pr_branch.py finish [--pr <PR_NUMBER>]`. The script verifies that no unmerged paths or conflict markers remain, stages only conflict paths, creates a merge commit only when `MERGE_HEAD` exists, and pushes without force. Do not manually stage or commit the base synchronization.
    - When the script reports `MERGE_COMPLETED`, run the synchronization tests and then run `finish`; when it reports `SYNC_NOT_NEEDED`, continue without a synchronization commit.
 
-3. Read current Greptile state.
+3. Read current Greptile and human review state.
    ```bash
-   gh pr view <PR_NUMBER> --json state,comments,reviews
+   gh pr view <PR_NUMBER> --json state,comments,reviews,reviewDecision
    gh pr view <PR_NUMBER> --comments
    ```
-   Check whether Greptile has reviewed and whether the PR is `OPEN`. Do not inspect Devin comments, checks, or review threads.
+   Check whether the PR is `OPEN`, whether Greptile has reviewed, the human `reviewDecision`, human review bodies, and human top-level comments. Classify authors before reading comment bodies: process Greptile and GitHub `User` authors, and discard Devin entries without inspecting their content. Do not inspect Devin comments, checks, or review threads.
 
 4. Run the status script before deciding completion.
    ```bash
    <skill-dir>/check_bot_review_status.py <PR_NUMBER>
    ```
-   Treat the script as Greptile-only. `all_complete: true` means the current Greptile review is approved or Confidence 5/5, with zero unresolved Greptile review threads. Do not declare Greptile completion without running the script unless `gh` is unavailable and you clearly report that limitation.
+   Treat the script as Greptile-only. `all_complete: true` means the current Greptile review is approved or Confidence 5/5, with zero unresolved Greptile review threads. It is not an overall workflow completion signal: human review bodies, decisions, comments, and actionable threads must be checked separately. Do not declare Greptile completion without running the script unless `gh` is unavailable and you clearly report that limitation.
 
 5. If no Greptile review exists yet, do not request one.
-   - If the PR is `OPEN`, report that no Greptile review is present yet and, if the user asked to keep watching, schedule a follow-up.
+   - If the PR is `OPEN`, report that no Greptile review is present yet, continue processing any human review feedback, and, if the user asked to keep watching, schedule a follow-up.
    - If the PR is not `OPEN`, report that automatic review may not run. Do not post `@greptileai review` from this skill.
 
 6. Inspect unresolved actionable feedback.
-   - Use GraphQL review threads when thread resolution state matters:
+   - Use GraphQL review threads when thread resolution state or the reviewer author matters:
      ```bash
      gh api graphql -f query='
      query($owner: String!, $repo: String!, $pr: Int!) {
@@ -95,7 +96,7 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
                line
                comments(first: 10) {
                  nodes {
-                   author { login }
+                   author { login __typename }
                    body
                    path
                    line
@@ -107,19 +108,21 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
        }
      }' -f owner='<OWNER>' -f repo='<REPO>' -F pr=<PR_NUMBER>
      ```
-   - Use `gh pr view <PR_NUMBER> --comments` for top-level Greptile summary comments, confidence notes, concerns, recommendations, and P2 items.
+   - Use `gh pr view <PR_NUMBER> --comments` for top-level Greptile summary comments, confidence notes, concerns, recommendations, P2 items, and human top-level comments.
+   - Treat a thread as Greptile when its author is `greptile-apps[bot]` or `greptile-apps`, as human when its author `__typename` is `User`, and as excluded when its author is Devin. Do not read excluded content.
 
-7. Judge each Greptile comment before editing.
-   - Fix only comments that are technically correct and improve the code.
+7. Judge each in-scope comment before editing.
+   - Apply the same technical judgment to Greptile and human comments: fix only comments that are technically correct and improve the code.
    - Skip comments that are stale, incorrect, overreaching, or inconsistent with project intent.
    - Ask the user when the tradeoff is real or the desired behavior is unclear.
    - Treat `greptile.summary_p2` from the status script as improvement candidates, not automatic requirements.
+   - A human `CHANGES_REQUESTED` decision is a signal to inspect its associated review body and threads, not a reason to make unrelated changes. If the requested behavior remains unclear after reading the review, ask the user.
 
 8. Run a self-critical review loop before finalizing fixes.
-   - Build a checklist from Greptile inline comments, Greptile summary concerns, P2 items, nearby code risks, existing tests, and project style.
+   - Build a checklist from Greptile and human inline comments, review bodies, Greptile summary concerns, P2 items, nearby code risks, existing tests, and project style.
    - Do about 10 local review passes. In each pass, look for a concrete remaining bug, regression risk, missed test, or overfitted fix.
    - Fix issues found during those passes, then rerun relevant local checks.
-   - Do not call Greptile again during this loop.
+   - Do not call Greptile again during this loop, and do not invent a new review request for human reviewers.
 
 9. Implement fixes locally.
    - Keep edits scoped to the review feedback and the self-review issues it exposes.
@@ -128,10 +131,10 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - Commit with a normal project-style message. Do not add generated-by trailers.
    - Push after local checks pass when the PR branch needs the fixes.
 
-10. Reply to and resolve Greptile threads yourself.
+10. Reply to the relevant review threads.
    - For each fixed Greptile review thread, reply with a short summary of the fix and the verification performed.
-   - Use GraphQL `addPullRequestReviewThreadReply`, then `resolveReviewThread`.
-   - Resolve only after verifying the code no longer has the issue. For skipped comments, resolve only when the rationale is clearly correct; otherwise ask the user.
+   - For each fixed human review thread, reply with a short summary of the fix and the verification performed. Use `gh pr comment <PR_NUMBER> --body '<REPLY>'` for a top-level human review when there is no thread to reply to.
+   - Use GraphQL `addPullRequestReviewThreadReply` for inline threads. Resolve only Greptile threads, and only after verifying the code no longer has the issue. Never auto-resolve a human thread; leave it for the human reviewer. For skipped comments, explain the rationale in a reply when useful, and ask the user rather than resolving when the rationale is uncertain.
 
    ```bash
    gh api graphql -f query='
@@ -153,21 +156,21 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    ```
 
 11. Report status.
-    Include Greptile confidence / unresolved count, what was fixed, what was skipped, what was pushed, which threads were replied to and resolved, and whether another human check is needed. Explicitly say that Devin was intentionally ignored and no paid Greptile re-review was requested.
+    Include Greptile confidence / unresolved count, human review decisions and actionable comment status, what was fixed, what was skipped, what was pushed, which Greptile threads were replied to and resolved, which human comments were replied to and left for reviewer confirmation, and whether another human check is needed. Explicitly say that Devin was intentionally ignored and no paid Greptile re-review was requested.
 
 ## Polling and Follow-Up
 
 Do one full check immediately.
 
-If Greptile has not reviewed yet, unresolved Greptile feedback remains, or the user asked to keep watching, use Codex automations when available.
+If Greptile has not reviewed yet, actionable Greptile or human feedback remains, or the user asked to keep watching, use Codex automations when available.
 
 Use `automation_update` rather than Claude-style `CronCreate` commands:
 
 - Prefer `kind=heartbeat` with `destination=thread` when the same Codex thread should wake up and continue the review loop.
 - Use a 5-minute heartbeat schedule for normal review polling: `FREQ=MINUTELY;INTERVAL=5`.
-- Use a self-contained prompt such as: `Continue auto-review-fix for <PR URL>. Check existing Greptile feedback, address actionable comments, reply to and resolve fixed threads, and stop the heartbeat when no actionable Greptile feedback remains. Do not request a Greptile re-review and ignore Devin.`
+- Use a self-contained prompt such as: `Continue auto-review-fix for <PR URL>. Check existing Greptile and human review feedback, address actionable comments, reply to fixed human threads without resolving them, reply to and resolve fixed Greptile threads, and stop the heartbeat when no actionable in-scope feedback remains. Do not request a Greptile re-review and ignore Devin.`
 - Avoid duplicate schedules for the same PR. Inspect existing automations first when the tool supports it.
-- Delete or pause the automation when no actionable Greptile feedback remains.
+- Delete or pause the automation when no actionable in-scope feedback remains. A human thread that has been fixed and replied to but is awaiting reviewer confirmation is not actionable.
 
 Use `kind=cron` only when the user explicitly wants a detached workspace job instead of continuing this thread.
 
@@ -180,4 +183,5 @@ If automation tools are not available, do not invent `CronCreate`-style commands
 - Do not post `@greptileai review`, use Greptile re-trigger links, or hide old review-request comments.
 - Do not inspect, wait for, fix, or resolve Devin review output in this skill.
 - Do not post review-thread replies or GraphQL mutations until the relevant code has been verified.
+- Human review comments are in scope. Reply after fixing and verifying them, but leave human threads unresolved unless the user explicitly asks for a different action.
 - Prefer `gh` for thread-aware state because flat comment views do not preserve review-thread resolution.
