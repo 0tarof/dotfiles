@@ -11,7 +11,12 @@ version = 1
 name = "gh-stack"
 repository = "https://github.com/github/gh-stack.git"
 path = "skills/gh-stack"
+# Renovate updates `ref` above via the regex manager in renovate.json5.
+# `rev` is the commit SHA that `ref` pointed to when last reviewed; it must be
+# updated by a human after reviewing the upstream diff. agent-skills-sync fails
+# loudly if `ref` and `rev` disagree (i.e. the tag moved without review).
 # renovate: datasource=github-releases depName=github/gh-stack versioning=semver
 ref = "v0.1.0"
+rev = "a1b4a3d4d0bcde9ec3a78ab99b2d63af121857a9"
 targets = ["agents", "claude"]
 license = "MIT"

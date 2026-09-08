@@ -28,6 +28,8 @@
     },
     {
       // agent-skills.toml の upstream skill ref
+      // `rev` (the pinned commit SHA) is intentionally NOT auto-bumped here;
+      // a human must review the upstream diff and update it manually.
       "customType": "regex",
       "fileMatch": ["^agent-skills\\.toml$"],
       "matchStrings": [

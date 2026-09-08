@@ -18,7 +18,9 @@ uvx = true
 credential_command = "gh auth token"
 
 [plugins]
-mysql = "https://github.com/iroddis/asdf-mysql"
+# Pinned to HEAD's commit sha (2026-09-08) so plugin install/update doesn't
+# silently execute whatever unreviewed commit is on the tip of the branch.
+mysql = "https://github.com/iroddis/asdf-mysql#8031228971ee42f96ca4cd0d9250e76424691858"
 
 [tools]
 # Runtimes (project-local overrides expected)

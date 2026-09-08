@@ -13,6 +13,7 @@ let
     assert skill.name != "." && skill.name != "..";
     assert !(lib.hasPrefix "/" skill.path) && !(lib.hasInfix ".." skill.path);
     assert lib.all (target: builtins.elem target supportedTargets) skill.targets;
+    assert builtins.match "^[0-9a-f]{40}$" skill.rev != null;
     skill;
 
   skills = map validateSkill rawSkills;
@@ -23,6 +24,7 @@ let
         ${lib.escapeShellArg skill.name} \
         ${lib.escapeShellArg skill.repository} \
         ${lib.escapeShellArg skill.ref} \
+        ${lib.escapeShellArg skill.rev} \
         ${lib.escapeShellArg skill.path} \
         ${lib.escapeShellArg target}
     '') skill.targets
@@ -64,11 +66,12 @@ let
         local name="$1"
         local repository="$2"
         local ref="$3"
-        local skill_path="$4"
-        local target_kind="$5"
+        local rev="$4"
+        local skill_path="$5"
+        local target_kind="$6"
         local cache_dir="$cache_root/$name"
         local marker="$cache_dir/.dotfiles-source"
-        local expected_marker="$repository#$ref"
+        local expected_marker="$repository#$ref@$rev"
         local target_root
         local target
 
@@ -88,6 +91,15 @@ let
           git init --quiet "$checkout"
           git -C "$checkout" remote add origin "$repository"
           git -C "$checkout" fetch --depth 1 origin "$ref"
+
+          local actual
+          actual="$(git -C "$checkout" rev-parse FETCH_HEAD^{commit})"
+          if [[ "$actual" != "$rev" ]]; then
+            echo "agent skill $name: ref '$ref' resolved to $actual, expected rev $rev (pinned in agent-skills.toml)." >&2
+            echo "agent skill $name: review the upstream diff between $rev and $actual, then update rev in agent-skills.toml if it's safe." >&2
+            return 1
+          fi
+
           git -C "$checkout" checkout --detach --quiet FETCH_HEAD
 
           if [[ ! -f "$checkout/$skill_path/SKILL.md" ]]; then
