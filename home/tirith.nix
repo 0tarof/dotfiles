@@ -28,7 +28,11 @@ let
 
     policy:
       warn_action: "forward"
-      fail_mode: "open"
+      # "closed": 相関できないレスポンス（タイムアウト後の遅延応答など）は転送せず拒否する。
+      # リクエスト側の抽出・ワーカー・登録・解析の失敗はこの設定に関わらず常に拒否される
+      # ため、影響するのはこの一部の応答経路のみ。上流の同梱デフォルト設定も
+      # fail_mode: closed を採用しており、通常運用を壊す変更ではない。
+      fail_mode: "closed"
       timeout_ms: 10000
       max_message_bytes: 1048576
   '';

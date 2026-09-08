@@ -107,6 +107,10 @@ in
 
       helm_unittest_source="https://github.com/helm-unittest/helm-unittest.git"
       helm_unittest_version="1.1.1"
+      # tag v1.1.1 が指すコミット。可変なタグ名ではなくこの SHA を --version に渡し、
+      # インストール後に checkout 先が一致するか検証することでタグの差し替えを防ぐ。
+      # 取得コマンド: git ls-remote "$helm_unittest_source" 'refs/tags/*1.1.1*'
+      helm_unittest_commit="9cf59a78dbb89f3e3c70c62d2570cd7e96b97845"
 
       run_helm() {
           mise exec -- helm "$@"
@@ -135,7 +139,18 @@ in
           echo "Installing helm-unittest plugin $helm_unittest_version..."
       fi
 
-      run_helm plugin install "$helm_unittest_source" --version "$helm_unittest_version" --verify=false
+      # --verify=false: helm-unittest はタグ付き署名(.prov)を公開していないため、
+      # 通常の署名検証（tgz + .prov + keyring）が使えない。git ソースからの
+      # インストールなので、代わりにコミット SHA 固定 + checkout 後の rev-parse
+      # 比較で改ざん・タグ差し替えを検知する。
+      run_helm plugin install "$helm_unittest_source" --version "$helm_unittest_commit" --verify=false
+
+      plugin_dir="$(run_helm env HELM_PLUGINS)/helm-unittest.git"
+      installed_commit="$(git -C "$plugin_dir" rev-parse HEAD 2>/dev/null || true)"
+      if [[ "$installed_commit" != "$helm_unittest_commit" ]]; then
+          echo "error: helm-unittest checked out $installed_commit, expected $helm_unittest_commit" >&2
+          exit 1
+      fi
     '';
   };
 
@@ -205,13 +220,15 @@ in
           grep "$1\s*=" "$CONFIG_FILE" | grep -v '^#' | sed 's/.*"\(.*\)".*/\1/' | head -1
       }
 
-      # gh (Keychain) から実行時にトークンを取り、そのコマンドの寿命だけ環境変数で渡す。
-      # ファイルにも永続環境にも残さない。nix は GITHUB_TOKEN を読まず access-tokens
-      # しか見ないので、nix 向けには NIX_CONFIG 経由で渡す。これが無いと github: input
-      # の解決が未認証 API 扱いになり、共有 IP ではレート制限で 403 になる。
-      run_with_aqua_github_token() {
-          if [[ -n "''${AQUA_GITHUB_TOKEN:-}" && -n "''${GITHUB_TOKEN:-}" \
-                && -n "''${MISE_GITHUB_TOKEN:-}" && "''${NIX_CONFIG:-}" == *access-tokens* ]]; then
+      # gh (Keychain) から実行時にトークンを取り、そのコマンドの寿命だけ NIX_CONFIG
+      # 経由で渡す。ファイルにも永続環境にも残さない。nix は GITHUB_TOKEN を読まず
+      # access-tokens しか見ないので、これが無いと github: input の解決が未認証 API
+      # 扱いになり、共有 IP ではレート制限で 403 になる。
+      # mise には渡さない: mise は settings.github.credential_command ("gh auth token",
+      # ~/.config/mise/config.toml) で自前にトークンを取得でき、GITHUB_TOKEN 等の env
+      # は子プロセス（asdf/npm/cargo のビルドスクリプト等）にまで見えてしまうため。
+      run_with_nix_github_token() {
+          if [[ "''${NIX_CONFIG:-}" == *access-tokens* ]]; then
               "$@"
               return
           fi
@@ -226,11 +243,7 @@ in
                       nix_config="''${NIX_CONFIG}"$'\n'"$nix_config"
                   fi
 
-                  AQUA_GITHUB_TOKEN="''${AQUA_GITHUB_TOKEN:-$token}" \
-                      GITHUB_TOKEN="''${GITHUB_TOKEN:-$token}" \
-                      MISE_GITHUB_TOKEN="''${MISE_GITHUB_TOKEN:-$token}" \
-                      NIX_CONFIG="$nix_config" \
-                      "$@"
+                  NIX_CONFIG="$nix_config" "$@"
                   return
               fi
           fi
@@ -245,10 +258,10 @@ in
           # 黙って no-op になることがある。
           if (( ''${#FLAKE_INPUTS[@]} > 0 )); then
               echo "Updating flake inputs: ''${FLAKE_INPUTS[*]}"
-              (cd "$DOTFILES_DIR" && run_with_aqua_github_token nix flake update --refresh "''${FLAKE_INPUTS[@]}")
+              (cd "$DOTFILES_DIR" && run_with_nix_github_token nix flake update --refresh "''${FLAKE_INPUTS[@]}")
           else
               echo "Updating all flake inputs..."
-              (cd "$DOTFILES_DIR" && run_with_aqua_github_token nix flake update --refresh)
+              (cd "$DOTFILES_DIR" && run_with_nix_github_token nix flake update --refresh)
           fi
 
           if git -C "$DOTFILES_DIR" diff --quiet -- flake.lock; then
@@ -286,10 +299,10 @@ in
           # git flake after making several commits in quick succession.
           # The wrapper supplies access-tokens so github: inputs are not resolved
           # against the rate-limited unauthenticated API.
-          run_with_aqua_github_token nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
+          run_with_nix_github_token nix flake metadata --refresh "$DOTFILES_DIR" > /dev/null
           # Materialize the resolved flake and all locked inputs in the shared
           # store so the root-side rebuild does not need the user's SSH agent.
-          run_with_aqua_github_token nix flake archive --json "$DOTFILES_DIR" > /dev/null
+          run_with_nix_github_token nix flake archive --json "$DOTFILES_DIR" > /dev/null
 
           if command -v darwin-rebuild &> /dev/null; then
               sudo HOME="$HOME" SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}" DOTFILES_DIR="$DOTFILES_DIR" NIX_SYSTEM="$NIX_SYSTEM" NIX_USERNAME="$NIX_USERNAME" NIX_HOSTNAME="$NIX_HOSTNAME" \
@@ -312,8 +325,10 @@ in
             brew upgrade -v
       fi
 
+      # mise は settings.github.credential_command で自前にトークンを取得するので
+      # ここでは env を渡さない（渡すとプラグイン/ビルドスクリプトにも見える）。
       echo "Installing mise tools..."
-      run_with_aqua_github_token mise install
+      mise install
 
       echo "Installing lefthook git hooks..."
       if command -v lefthook &> /dev/null && [[ -f "$DOTFILES_DIR/lefthook.yml" ]]; then
