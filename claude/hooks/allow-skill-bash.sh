@@ -29,6 +29,12 @@ case "$first_word" in
     ;;
 esac
 
+# gh api は read/write の判定が必要なので allow-gh-api-read.sh / ask-graphql-mutation.sh に委ねる。
+# ここで `Bash(gh api repos/*)` 等を前方一致で許可すると -f/-X による書き込みまで通ってしまう。
+if printf '%s' "$command" | grep -qE '^[[:space:]]*gh[[:space:]]+api([[:space:]]|$)'; then
+  exit 0
+fi
+
 SKILLS_DIR="$HOME/.claude/skills"
 [ -d "$SKILLS_DIR" ] || exit 0
 
