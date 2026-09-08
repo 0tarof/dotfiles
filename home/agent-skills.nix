@@ -93,7 +93,7 @@ let
           git -C "$checkout" fetch --depth 1 origin "$ref"
 
           local actual
-          actual="$(git -C "$checkout" rev-parse FETCH_HEAD^{commit})"
+          actual="$(git -C "$checkout" rev-parse 'FETCH_HEAD^{commit}')"
           if [[ "$actual" != "$rev" ]]; then
             echo "agent skill $name: ref '$ref' resolved to $actual, expected rev $rev (pinned in agent-skills.toml)." >&2
             echo "agent skill $name: review the upstream diff between $rev and $actual, then update rev in agent-skills.toml if it's safe." >&2
