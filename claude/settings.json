@@ -76,6 +76,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "$HOME/.claude/hooks/block-settings-edit.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "$HOME/.claude/hooks/block-edit-go-generated.sh",
             "timeout": 5
           },
