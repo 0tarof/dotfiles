@@ -5,42 +5,70 @@ on:
     paths:
       - 'bootstrap.sh'
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   update-checksum:
     runs-on: ubuntu-latest
-    # Only run on Renovate PRs
-    if: startsWith(github.head_ref, 'renovate/')
-    
+    permissions:
+      contents: write
+    # Only run on same-repo Renovate PRs (no forks)
+    if: |
+      startsWith(github.head_ref, 'renovate/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract version and update checksum
+          persist-credentials: true
+
+      - name: Verify installer against release asset and update checksum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Extract current version from bootstrap.sh
+          set -euo pipefail
+
           VERSION=$(grep 'NIX_INSTALLER_VERSION=' bootstrap.sh | head -1 | sed 's/.*"\(v[0-9.]*\)".*/\1/')
           echo "Detected version: $VERSION"
-          
-          # Download installer and calculate checksum
-          curl -sSfL "https://install.determinate.systems/nix/tag/${VERSION}" -o installer
-          NEW_SHA256=$(shasum -a 256 installer | cut -d' ' -f1)
-          rm installer
-          
-          echo "New checksum: $NEW_SHA256"
-          
-          # Update checksum in bootstrap.sh
-          sed -i "s/^readonly NIX_INSTALLER_SHA256=\".*\"/readonly NIX_INSTALLER_SHA256=\"${NEW_SHA256}\"/" bootstrap.sh
-      
+
+          # Served script: what bootstrap.sh would actually fetch at install time
+          curl -sSfL "https://install.determinate.systems/nix/tag/${VERSION}" -o /tmp/served-installer.sh
+          SERVED_SHA256=$(shasum -a 256 /tmp/served-installer.sh | cut -d' ' -f1)
+
+          # Independent source: the same script published as a GitHub release asset,
+          # fetched via the GitHub API/CDN rather than install.determinate.systems.
+          gh release download "$VERSION" \
+            --repo DeterminateSystems/nix-installer \
+            --pattern 'nix-installer.sh' \
+            --output /tmp/release-installer.sh \
+            --clobber
+          RELEASE_SHA256=$(shasum -a 256 /tmp/release-installer.sh | cut -d' ' -f1)
+
+          {
+            echo "### Nix installer checksum verification"
+            echo ""
+            echo "| source | sha256 |"
+            echo "|---|---|"
+            echo "| served (install.determinate.systems) | \`${SERVED_SHA256}\` |"
+            echo "| release asset (GitHub, independent) | \`${RELEASE_SHA256}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$SERVED_SHA256" != "$RELEASE_SHA256" ]; then
+            echo "::error::Served installer checksum does not match the independently fetched GitHub release asset. Refusing to update bootstrap.sh." >&2
+            exit 1
+          fi
+
+          echo "Verified: served installer matches release asset ($SERVED_SHA256)"
+
+          sed -i "s/^readonly NIX_INSTALLER_SHA256=\".*\"/readonly NIX_INSTALLER_SHA256=\"${SERVED_SHA256}\"/" bootstrap.sh
+
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           if ! git diff --quiet; then
             git add bootstrap.sh
             git commit -m "chore: update nix-installer checksum"
