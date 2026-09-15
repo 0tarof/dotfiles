@@ -40,5 +40,5 @@ ast-grep = "0.45.1"
 # Language-ecosystem CLIs (npm / cargo)
 "npm:agent-browser" = "0.31.1"
 "npm:difit" = "5.0.8"
-"cargo:keifu" = "0.5.0"
+"cargo:keifu" = "0.6.0"
 "cargo:filetree" = "0.3.5"
