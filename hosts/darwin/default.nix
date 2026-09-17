@@ -39,6 +39,7 @@
       "auth0"             # Auth0 CLI (newer than locked nixpkgs)
       "aws-sam-cli"       # AWS SAM CLI (macOS-specific build)
       "container"          # Apple Container runtime
+      "gh"                # GitHub CLI (newer than locked nixpkgs)
       "html2markdown"     # Not in nixpkgs
       "mise"              # Runtime version manager
       "newrelic-cli"      # New Relic CLI

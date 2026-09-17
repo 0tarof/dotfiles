@@ -12,7 +12,7 @@ in
     # Version control & Git tools
     git
     git-lfs
-    gh
+    # gh  # locked nixpkgs lags several releases; Homebrew tracks upstream
     ghq
     git-filter-repo
     delta
