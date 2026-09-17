@@ -20,3 +20,66 @@ ref = "v0.1.0"
 rev = "a1b4a3d4d0bcde9ec3a78ab99b2d63af121857a9"
 targets = ["agents", "claude"]
 license = "MIT"
+
+# ponytail: 6 skills in one repo, one entry per skill directory.
+# rev = commit for tag v4.10.0 (git ls-remote refs/tags/v4.10.0).
+
+[[skill]]
+name = "ponytail"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
+
+[[skill]]
+name = "ponytail-audit"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail-audit"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
+
+[[skill]]
+name = "ponytail-debt"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail-debt"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
+
+[[skill]]
+name = "ponytail-gain"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail-gain"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
+
+[[skill]]
+name = "ponytail-help"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail-help"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
+
+[[skill]]
+name = "ponytail-review"
+repository = "https://github.com/DietrichGebert/ponytail.git"
+path = "skills/ponytail-review"
+# renovate: datasource=github-releases depName=DietrichGebert/ponytail versioning=semver
+ref = "v4.10.0"
+rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
+targets = ["agents", "claude"]
+license = "MIT"
