@@ -1,4 +1,4 @@
-# Global Codex Instructions
+# Global Agent Instructions
 
 ## Pull Request Creation
 
@@ -40,7 +40,19 @@ Do not read whole files while locating code. Find line numbers first, then read 
 2. Text: `rg -n <pattern>`, with at most `-C 3` when surrounding context is needed.
 3. Structure by shape: `ast-grep run -p '<pattern>' -l <lang>` when searching for a code shape
    rather than an identifier. `$NAME` and `$$$` are metavariables.
-4. Read: use the line numbers from the steps above with `sed -n 'A,Bp'` to read only that range.
+4. Read: use the line numbers from the steps above to read only that range, with your file
+   reader's line offset and limit or with `sed -n 'A,Bp'`.
 
 Read a file in full only when the steps above fail to locate the code, or when rewriting the
 whole file.
+
+## Code Comments
+
+Keep code comments concise. Do not comment on things that are obvious from
+reading the code.
+
+- Express *what* the code does through the code itself; reserve comments for
+  *why* it does it.
+- If a variable or function name already conveys intent, a comment restating it
+  is unnecessary.
+- Avoid redundant preambles and repetition; keep comments to the minimum needed.
