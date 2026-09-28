@@ -176,6 +176,12 @@
             "type": "command",
             "command": "$HOME/.claude/hooks/block-secretsmanager-read.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/block-git-merge-base.sh",
+            "if": "Bash(git *)",
+            "timeout": 5
           }
         ]
       }

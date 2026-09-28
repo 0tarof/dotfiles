@@ -174,6 +174,40 @@ in
     source = ../cursor/commands;
     recursive = true;
   };
+
+  # Cursor はグローバルなルールをファイルから読まないので、PR ブランチへの base
+  # merge は Claude と同じ hook スクリプトで止める。hooks.json は tirith も追記する
+  # ため、ファイルごと置かずに自分のエントリだけ差し替える。
+  home.activation.setupCursorGitMergeHook = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      hooks_json="$HOME/.cursor/hooks.json"
+      merge_hook="$HOME/.claude/hooks/block-git-merge-base.sh"
+      mkdir -p "$HOME/.cursor"
+      if [[ ! -e "$hooks_json" ]]; then
+        echo '{"version": 1, "hooks": {}}' > "$hooks_json"
+      fi
+      if ${pkgs.jq}/bin/jq -e 'type == "object"' "$hooks_json" >/dev/null 2>&1; then
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$hooks_json.tmp.XXXXXX")"
+        if ${pkgs.jq}/bin/jq --arg command "$merge_hook" '
+          .version = 1
+          | .hooks = (.hooks // {})
+          | .hooks.beforeShellExecution = (
+              (.hooks.beforeShellExecution // []
+                | if type == "array" then . else [] end
+                | map(select((.command // "") | contains("block-git-merge-base") | not)))
+              + [{"command": $command, "type": "command", "timeout": 5}]
+            )
+        ' "$hooks_json" > "$tmp"; then
+          mv "$tmp" "$hooks_json"
+        else
+          rm -f "$tmp"
+          echo "cursor: could not merge hooks.json; leaving it unchanged" >&2
+        fi
+      else
+        echo "cursor: hooks.json is not a JSON object; leaving it unchanged" >&2
+      fi
+    fi
+  '';
   
   # ==========================================================================
   # Bin scripts (except nix-rebuild which is defined in scripts.nix)
