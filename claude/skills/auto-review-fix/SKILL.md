@@ -11,7 +11,7 @@ allowed-tools:
   - Bash(git branch *)
   - Bash(git rev-parse *)
   - Bash(git fetch *)
-  - Bash(git merge *)
+  - Bash(git rebase *)
   - Bash(git merge-base *)
   - Bash(git status *)
   - Bash(git diff *)
@@ -58,23 +58,25 @@ PR番号がわからない場合はユーザーに確認する。
 
 ### 2. PRブランチを最新のデフォルトブランチに同期
 
-Greptileのコメントを読む前に、同梱スクリプトでPRブランチを最新のデフォルトブランチと同期する。PRのbaseがデフォルトブランチでない場合は、デフォルトブランチを勝手にmergeしない。
+Greptileのコメントを読む前に、同梱スクリプトでPRブランチを最新のデフォルトブランチに同期する。同期はrebaseで行い、デフォルトブランチをmergeしない。長命なPRブランチにmerge commitが入ると、GitHub上のdiffとレビュー履歴が追いにくくなるため。PRのbaseがデフォルトブランチでない場合は、デフォルトブランチを勝手に取り込まない。
 
 ```bash
 ${CLAUDE_SKILL_DIR}/sync_pr_branch.py prepare [--pr <PR番号>]
 ```
 
-スクリプトがデフォルトブランチの特定、PRのhead/base/state検証、最新baseのfetch、merge開始までの機械的処理を行う。`SYNC_NOT_NEEDED`なら通常のレビュー確認へ進み、`MERGE_COMPLETED`なら同期に伴うテストを実行する。終了コード2の`CONFLICTS_NEED_RESOLUTION`は想定された引き継ぎなので失敗扱いにしない。
+スクリプトがデフォルトブランチの特定、PRのhead/base/state検証、最新baseのfetch、rebase開始までの機械的処理を行う。`SYNC_NOT_NEEDED`なら通常のレビュー確認へ進み、`REBASE_COMPLETED`なら同期に伴うテストを実行する。終了コード2の`CONFLICTS_NEED_RESOLUTION`と`RESUME_REBASE`は想定された引き継ぎなので失敗扱いにしない。
 
-競合がある場合だけ、報告されたパスを意味を確認して個別に解消する。`ours`/`theirs`の一括適用は禁止する。バイナリ競合、仕様判断が必要な競合、古いまたは不明な`MERGE_HEAD`、dirtyなworktree、rebase/cherry-pick中の場合は停止する。ブランチ切り替え、stash、reset、clean、破棄、ユーザー変更の上書きはしない。
+競合がある場合だけ、報告されたパスを意味を確認して個別に解消する。`ours`/`theirs`の一括適用は禁止する。バイナリ競合、仕様判断が必要な競合、古いまたは不明なrebase対象、dirtyなworktree、cherry-pick中の場合は停止する。`git rebase --abort`、ブランチ切り替え、stash、reset、clean、破棄、ユーザー変更の上書きはしない。
 
-解消後に関連テストを実行し、次のスクリプトで検証、必要なstage、merge commit、pushを行う。
+解消後に関連テストを実行し、次のスクリプトで検証、必要なstage、rebaseの継続、pushを行う。
 
 ```bash
 ${CLAUDE_SKILL_DIR}/sync_pr_branch.py finish [--pr <PR番号>]
 ```
 
-`finish`はconflict pathだけをstageし、`MERGE_HEAD`がある場合だけmerge commitを作成する。auto-merge commit、fast-forward、no-opの後に余計なcommitは作らない。同期処理について手動でstage、commit、force pushしてはならない。
+`finish`はconflict pathだけをstageし、`git rebase --continue`で次のコミットへ進む。rebaseはコミットを1つずつ再生するため、次のコミットでも競合しうる。`finish`が再び終了コード2で`CONFLICTS_NEED_RESOLUTION`を返したら、そのパスを解消して`finish`を繰り返す。`SYNC_FINISHED`が出るまでがひとつの同期処理。
+
+pushは`--force-with-lease --force-if-includes`で行う。rebaseはブランチを書き換えるためforceが必要だが、他者がPRブランチを進めていた場合このpushは拒否される。拒否されたら上書きせず、ユーザーに報告する。同期処理について手動でstage、commit、force pushしてはならない。
 
 ### 3. Greptileと人間のレビュー状態の確認
 
