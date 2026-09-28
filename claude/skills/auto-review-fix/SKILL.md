@@ -5,6 +5,7 @@ allowed-tools:
   - Bash(gh repo view *)
   - Bash(gh pr view *)
   - Bash(gh pr comment *)
+  - Bash(gh pr checks *)
   - Bash(gh api graphql *)
   - Bash(*check_bot_review_status.py *)
   - Bash(*sync_pr_branch.py *)
@@ -150,6 +151,8 @@ GreptileのトップレベルSummaryコメントと人間のトップレベル�
 
 スレッドは、authorがGreptileならGreptile、人間のGitHub `User`なら人間、Devinなら除外対象として扱う。除外対象の本文は読まない。
 
+Resolve済みのスレッドは対応済みとみなし、対象にしない。再対応が必要ならレビュアーがUnresolveする前提で扱い、こちらから蒸し返さない。
+
 ### 7. 指摘への対応方針
 
 Greptileや人間の指摘を鵜呑みにしない。
@@ -186,6 +189,8 @@ git push
 
 `git add .` や `git add -A` は使わない。コミットメッセージに生成AI由来のtrailerは付けない。
 
+pushしたら `gh pr checks <PR番号>` でCIの状態を確認する。失敗していればレビュー対応とは分けてユーザーに報告する。
+
 ### 10. レビュースレッドへ返信
 
 修正・検証が終わったGreptileスレッドには、修正内容と確認内容を短く返信し、その後でResolveする。人間のレビューコメントには同じく修正内容と確認内容を返信するが、人間のスレッドは自動Resolveしない。スレッドのない人間のトップレベルレビューには、必要に応じて `gh pr comment <PR番号> --body '<返信内容>'` で返信する。
@@ -220,6 +225,7 @@ ResolveしてよいのはGreptileスレッドだけで、コード上の問題�
 - スキップした指摘と理由
 - 実行したチェック
 - pushしたかどうか
+- push後のCIの状態
 - 返信・ResolveしたGreptileスレッド
 - 返信した人間のレビューコメントと、Resolveせず残したスレッド
 - Devinは意図的に見ていないこと

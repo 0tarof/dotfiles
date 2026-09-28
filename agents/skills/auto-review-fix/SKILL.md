@@ -55,14 +55,16 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - If `gh` cannot resolve the PR, ask the user for the repository and PR number.
 
 2. Synchronize the PR branch with the latest default branch before reading review comments.
+   - Rebase onto the default branch; never merge it into the PR branch. A merge commit on a long-lived PR branch makes the GitHub diff and review history hard to follow.
    - Run the bundled script outside the sandbox so `gh` can use the existing credential store:
      ```bash
      <skill-dir>/sync_pr_branch.py prepare [--pr <PR_NUMBER>]
      ```
-   - The script discovers the default branch, validates the PR head/base/state, fetches the latest remote base, and either reports `SYNC_NOT_NEEDED`, completes a clean merge, or returns exit status 2 with `CONFLICTS_NEED_RESOLUTION`.
-   - Treat exit status 2 as an expected handoff, not a failed workflow. Inspect and resolve the reported paths semantically; do not use blanket `ours`/`theirs` resolution. Stop for binary conflicts, unresolved product decisions, stale `MERGE_HEAD`, dirty worktrees, or an in-progress rebase/cherry-pick.
-   - After resolving conflicts, run relevant tests and then run `<skill-dir>/sync_pr_branch.py finish [--pr <PR_NUMBER>]`. The script verifies that no unmerged paths or conflict markers remain, stages only conflict paths, creates a merge commit only when `MERGE_HEAD` exists, and pushes without force. Do not manually stage or commit the base synchronization.
-   - When the script reports `MERGE_COMPLETED`, run the synchronization tests and then run `finish`; when it reports `SYNC_NOT_NEEDED`, continue without a synchronization commit.
+   - The script discovers the default branch, validates the PR head/base/state, fetches the latest remote base, and either reports `SYNC_NOT_NEEDED`, completes a clean rebase with `REBASE_COMPLETED`, or returns exit status 2 with `CONFLICTS_NEED_RESOLUTION` or `RESUME_REBASE`.
+   - Treat exit status 2 as an expected handoff, not a failed workflow. Inspect and resolve the reported paths semantically; do not use blanket `ours`/`theirs` resolution. Stop for binary conflicts, unresolved product decisions, a rebase that targets a stale or unknown base commit, dirty worktrees, or an in-progress cherry-pick. Never run `git rebase --abort`.
+   - After resolving conflicts, run relevant tests and then run `<skill-dir>/sync_pr_branch.py finish [--pr <PR_NUMBER>]`. The script verifies that no unmerged paths or conflict markers remain, stages only conflict paths, and continues the rebase. A rebase replays one commit at a time, so `finish` can return exit status 2 with `CONFLICTS_NEED_RESOLUTION` again for the next commit; resolve those paths and rerun `finish` until it reports `SYNC_FINISHED`. Do not manually stage, commit, or continue the base synchronization.
+   - `finish` pushes with `--force-with-lease --force-if-includes`. The rebase rewrites the branch, so the push has to be forced, but it is rejected if anyone else advanced the PR branch. If it is rejected, do not overwrite the remote; report to the user.
+   - When the script reports `REBASE_COMPLETED`, run the synchronization tests and then run `finish`; when it reports `SYNC_NOT_NEEDED`, continue without a synchronization push.
 
 3. Read current Greptile and human review state.
    ```bash
@@ -110,6 +112,7 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
      ```
    - Use `gh pr view <PR_NUMBER> --comments` for top-level Greptile summary comments, confidence notes, concerns, recommendations, P2 items, and human top-level comments.
    - Treat a thread as Greptile when its author is `greptile-apps[bot]` or `greptile-apps`, as human when its author `__typename` is `User`, and as excluded when its author is Devin. Do not read excluded content.
+   - Treat resolved threads as already handled and leave them out of scope. If a resolved thread needs more work, the reviewer is expected to unresolve it; do not reopen it yourself.
 
 7. Judge each in-scope comment before editing.
    - Apply the same technical judgment to Greptile and human comments: fix only comments that are technically correct and improve the code.
@@ -130,6 +133,7 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - Use explicit `git add <path>` only; never use broad staging commands.
    - Commit with a normal project-style message. Do not add generated-by trailers.
    - Push after local checks pass when the PR branch needs the fixes.
+   - After pushing, check CI with `gh pr checks <PR_NUMBER>`. Report failures to the user separately from the review response.
 
 10. Reply to the relevant review threads.
    - For each fixed Greptile review thread, reply with a short summary of the fix and the verification performed.
@@ -156,7 +160,7 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    ```
 
 11. Report status.
-    Include Greptile confidence / unresolved count, human review decisions and actionable comment status, what was fixed, what was skipped, what was pushed, which Greptile threads were replied to and resolved, which human comments were replied to and left for reviewer confirmation, and whether another human check is needed. Explicitly say that Devin was intentionally ignored and no paid Greptile re-review was requested.
+    Include Greptile confidence / unresolved count, human review decisions and actionable comment status, what was fixed, what was skipped, what was pushed, CI status after the push, which Greptile threads were replied to and resolved, which human comments were replied to and left for reviewer confirmation, and whether another human check is needed. Explicitly say that Devin was intentionally ignored and no paid Greptile re-review was requested.
 
 ## Polling and Follow-Up
 
@@ -179,7 +183,7 @@ If automation tools are not available, do not invent `CronCreate`-style commands
 ## Safety
 
 - `git add .` and `git add -A` are forbidden.
-- Do not use broad Git operations or force push unless the user explicitly asks.
+- Do not use broad Git operations or force push unless the user explicitly asks. The one exception is the `--force-with-lease --force-if-includes` push that `sync_pr_branch.py finish` performs after a rebase.
 - Do not post `@greptileai review`, use Greptile re-trigger links, or hide old review-request comments.
 - Do not inspect, wait for, fix, or resolve Devin review output in this skill.
 - Do not post review-thread replies or GraphQL mutations until the relevant code has been verified.
