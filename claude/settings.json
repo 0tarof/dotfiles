@@ -186,7 +186,6 @@
     "code-simplifier@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
-    "github@plugins-ajainc": true,
     "skill-creator@claude-plugins-official": true,
     "codex@openai-codex": true,
     "ponytail@ponytail": true
