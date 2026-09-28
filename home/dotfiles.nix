@@ -145,6 +145,27 @@ in
       fi
     fi
   '';
+
+  # enabledPlugins をユーザー設定に書いても、Claude Code はプラグイン本体を
+  # ダウンロードしない（自動インストールされるのは managed settings だけ）。
+  # 有効にしたのに未インストールのものだけ入れる。失敗しても rebuild は止めない。
+  home.activation.installClaudePlugins = lib.hm.dag.entryAfter [ "installClaudeCode" "mergeClaudeSettings" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      claude_bin="$HOME/.local/bin/claude"
+      installed="$HOME/.claude/plugins/installed_plugins.json"
+      if [[ -x "$claude_bin" ]]; then
+        ${pkgs.jq}/bin/jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' ${../claude/settings.json} \
+          | while IFS= read -r plugin; do
+              if ${pkgs.jq}/bin/jq -e --arg p "$plugin" '.plugins | has($p)' "$installed" >/dev/null 2>&1; then
+                continue
+              fi
+              echo "claude: installing plugin $plugin"
+              "$claude_bin" plugin install "$plugin" </dev/null \
+                || echo "claude: could not install plugin $plugin; continuing" >&2
+            done
+      fi
+    fi
+  '';
   
   # ==========================================================================
   # Cursor configuration
