@@ -2,7 +2,47 @@
 
 ## Pull Request Creation
 
-- When creating a pull request, check `${REPO_ROOT}/.github/PULL_REQUEST_TEMPLATE.md` first if it exists, and draft the pull request body according to that template.
+When creating a pull request, check the repository's pull request template and
+write the body following its structure.
+
+### Where to look
+
+Check these in order and use the first one that exists:
+
+1. `.github/PULL_REQUEST_TEMPLATE.md`
+2. `.github/pull_request_template.md`
+3. The `.md` files under `.github/PULL_REQUEST_TEMPLATE/` (if there are several,
+   pick the one closest to the change)
+4. `docs/pull_request_template.md`
+
+### How to fill it in
+
+- Keep the template's sections (headings, checklists, comments) as they are.
+- Treat `<!-- ... -->` HTML comments as instructions and leave them out of the
+  body, unless the template says to keep them.
+- Check only the checklist items you actually did; leave the rest unchecked.
+- Adding information the template does not ask for is fine, but do not drop or
+  rewrite existing sections.
+- Only when no template exists, write the body with `## Summary` and
+  `## Test plan` sections.
+
+### Implementation notes
+
+- Build the body passed to `gh pr create --body` by reading the template and
+  filling in the change.
+- Include every section even when the template is long.
+
+## Staging Files
+
+Do not use `git add -A`, `git add .`, or `git add --all`.
+
+Bulk staging can pull in files you did not mean to commit, such as secrets,
+build artifacts, or changes outside the current scope. Always stage explicit
+paths:
+
+```bash
+git add path/to/file1 path/to/file2
+```
 
 ## Git Commit History
 

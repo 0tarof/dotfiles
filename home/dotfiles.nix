@@ -90,11 +90,6 @@ in
     recursive = true;
   };
   
-  home.file.".claude/rules" = {
-    source = ../claude/rules;
-    recursive = true;
-  };
-  
   home.file.".claude/hooks" = {
     source = ../claude/hooks;
     recursive = true;
