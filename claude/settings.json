@@ -208,6 +208,5 @@
   "verbose": true,
   "switchModelsOnFlag": false,
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": false,
   "useAutoModeDuringPlan": false
 }
