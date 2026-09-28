@@ -69,6 +69,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -211,5 +212,10 @@
   "switchModelsOnFlag": false,
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": false,
-  "useAutoModeDuringPlan": false
+  "useAutoModeDuringPlan": false,
+  "modelSettings": {
+    "claude-sonnet-5": {
+      "effortLevel": "xhigh"
+    }
+  }
 }
