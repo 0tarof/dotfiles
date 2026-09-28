@@ -102,8 +102,54 @@ in
 
   home.file.".claude/CLAUDE.md".source = ../claude/CLAUDE.md;
 
-  # Claude Code からの設定変更を許容
-  home.file.".claude/settings.json".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/claude/settings.json";
+  # リポジトリの settings.json は管理するキーだけを持ち、Claude Code が実行時に書く
+  # model や autoMode はローカルの実ファイルにだけ残す。symlink で直結すると実行時の
+  # 変更がすべて公開リポジトリの diff になり、自動生成された環境情報まで流れ込むため。
+  # hooks と deny/ask はリポジトリの値で上書きし、allow だけはローカルの追加分を残す。
+  home.activation.mergeClaudeSettings = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+    if [[ -z "''${DRY_RUN:-}" ]]; then
+      settings="$HOME/.claude/settings.json"
+      managed=${../claude/settings.json}
+      mkdir -p "$HOME/.claude"
+
+      # 旧構成の symlink は、中身を実ファイルとして引き継いでから外す。
+      # linkGeneration より前に実ファイルにしておけば、Home Manager の古いリンクの
+      # 掃除対象にならない。
+      if [[ -L "$settings" ]]; then
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$settings.tmp.XXXXXX")"
+        if ${pkgs.coreutils}/bin/cp -L "$settings" "$tmp" 2>/dev/null; then
+          mv "$tmp" "$settings"
+        else
+          rm -f "$tmp" "$settings"
+        fi
+      fi
+
+      if [[ ! -e "$settings" ]]; then
+        ${pkgs.coreutils}/bin/install -m600 "$managed" "$settings"
+      elif ${pkgs.jq}/bin/jq -e 'type == "object"' "$settings" >/dev/null 2>&1; then
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$settings.tmp.XXXXXX")"
+        if ${pkgs.jq}/bin/jq -s '
+          .[0] as $live
+          | .[1] as $managed
+          | ($live * $managed)
+          | .hooks = $managed.hooks
+          | .permissions.deny = ($managed.permissions.deny // [])
+          | .permissions.ask = ($managed.permissions.ask // [])
+          | .permissions.allow = (
+              ($managed.permissions.allow // []) + ($live.permissions.allow // [])
+              | reduce .[] as $rule ([]; if any(.[]; . == $rule) then . else . + [$rule] end)
+            )
+        ' "$settings" "$managed" > "$tmp"; then
+          mv "$tmp" "$settings"
+        else
+          rm -f "$tmp"
+          echo "claude: could not merge settings.json; leaving it unchanged" >&2
+        fi
+      else
+        echo "claude: settings.json is not a JSON object; leaving it unchanged" >&2
+      fi
+    fi
+  '';
   
   # ==========================================================================
   # Cursor configuration
