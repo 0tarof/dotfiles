@@ -1,7 +1,7 @@
 # ==========================================================================
 # Codex configuration
 # ==========================================================================
-{ lib, ... }:
+{ config, lib, ... }:
 
 let
   # Global Codex skills managed by dotfiles live in agents/skills and are
@@ -27,6 +27,24 @@ in
     ".codex/AGENTS.md" = {
       source = ../codex/AGENTS.md;
       force = true;
+    };
+
+    # Claude と同じ hook スクリプトで、PR ブランチへの base merge を止める。
+    # Codex の hook は入力も deny の返し方も Claude と同じ形式。
+    # 初回と定義が変わったときは、Codex の /hooks で trust する必要がある。
+    ".codex/hooks.json".text = builtins.toJSON {
+      hooks.PreToolUse = [
+        {
+          matcher = "Bash";
+          hooks = [
+            {
+              type = "command";
+              command = "${config.home.homeDirectory}/.claude/hooks/block-git-merge-base.sh";
+              statusMessage = "Checking for base branch merges";
+            }
+          ];
+        }
+      ];
     };
   };
 
