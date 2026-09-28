@@ -31,6 +31,11 @@
 [pull]
 	rebase = true
 
+# PR ブランチは merge ではなく rebase で追従させるので、同じ競合を何度も解き直す
+# 場面が増える。一度解いた解き方を記録して再利用させる。
+[rerere]
+	enabled = true
+
 [alias]
 	st = status
 	co = checkout
