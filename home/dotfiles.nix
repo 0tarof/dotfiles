@@ -91,6 +91,11 @@ in
     recursive = true;
   };
 
+  home.file.".claude/skills/sibling-repo" = {
+    source = ../agents/skills/sibling-repo;
+    recursive = true;
+  };
+
   home.file.".claude/skills/review-knowledge-collect" = lib.mkIf hasReviewKnowledgeSkill {
     source = reviewKnowledgeSkillPath;
     recursive = true;
