@@ -13,7 +13,7 @@ shopt -s nullglob
 #   sibling-repo.sh log <repo> [n]           - git log --oneline, default 10
 #   sibling-repo.sh branch <repo>            - git branch -a
 #   sibling-repo.sh fetch <repo>             - fetch the default branch
-#   sibling-repo.sh pull <repo>              - pull the default branch
+#   sibling-repo.sh sync <repo>              - fast-forward the default branch to origin (alias: pull)
 #   sibling-repo.sh ls <repo> [path]         - list files
 
 ensure_git_repo() {
@@ -68,9 +68,12 @@ resolve_repo_path() {
 
 get_default_branch() {
   local repo_path="$1"
-  git -C "$repo_path" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null |
-    sed 's@^refs/remotes/origin/@@' ||
+  local ref
+  if ref=$(git -C "$repo_path" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null); then
+    echo "${ref#origin/}"
+  else
     echo "main"
+  fi
 }
 
 list_repos() {
@@ -92,7 +95,7 @@ list_repos() {
 
 usage() {
   cat >&2 <<'EOF'
-Usage: sibling-repo.sh {main|siblings-dir|list|path|status|log|branch|fetch|pull|ls} [args...]
+Usage: sibling-repo.sh {main|siblings-dir|list|path|status|log|branch|fetch|sync|pull|ls} [args...]
 EOF
 }
 
@@ -137,12 +140,20 @@ case "$CMD" in
     git -C "$repo_path" fetch origin "$default_branch"
     echo "Done."
     ;;
-  pull)
-    repo="${1:?Usage: sibling-repo.sh pull <repo>}"
+  sync | pull)
+    repo="${1:?Usage: sibling-repo.sh sync <repo>}"
     repo_path=$(resolve_repo_path "$(resolve_siblings_dir)" "$repo")
     default_branch=$(get_default_branch "$repo_path")
-    echo "Pulling $repo ($default_branch)..."
-    git -C "$repo_path" pull origin "$default_branch"
+    current_branch=$(git -C "$repo_path" branch --show-current)
+    echo "Syncing $repo ($default_branch) with origin..."
+    # Fast-forward only: never merge into a feature branch or discard local commits.
+    if [[ "$current_branch" == "$default_branch" ]]; then
+      git -C "$repo_path" fetch origin "$default_branch"
+      git -C "$repo_path" merge --ff-only "origin/$default_branch"
+    else
+      git -C "$repo_path" fetch origin "$default_branch:$default_branch"
+      echo "Updated local $default_branch; current branch '${current_branch:-detached}' left unchanged."
+    fi
     echo "Done."
     ;;
   ls)

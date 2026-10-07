@@ -1,6 +1,6 @@
 ---
 name: sibling-repo
-description: Access and inspect sibling Git repositories located next to the main worktree of the current repository, even when running inside a linked worktree. Use when the user says "しぶりん", "兄弟リポ", "隣のリポ", "sibling repo", "他のリポ", "別リポ", "隣のプロジェクト", "関連リポ", asks to view code in another local repo (e.g. 「〇〇リポ見て」), inspect a related repo's AGENTS.md/CLAUDE.md/README, check sibling repo Git status/log/branches, fetch/pull a sibling repo, or create an issue in it. "しぶりん" is the nickname for sibling repo. Use it proactively when a sibling repo name comes up in context.
+description: Access and inspect sibling Git repositories located next to the main worktree of the current repository, even when running inside a linked worktree. Use when the user says "しぶりん", "兄弟リポ", "隣のリポ", "sibling repo", "他のリポ", "別リポ", "隣のプロジェクト", "関連リポ", asks to view code in another local repo (e.g. 「〇〇リポ見て」), inspect a related repo's AGENTS.md/CLAUDE.md/README, check sibling repo Git status/log/branches, fetch/sync a sibling repo with the latest origin default branch (「最新にして」「同期して」), or create an issue in it. "しぶりん" is the nickname for sibling repo. Use it proactively when a sibling repo name comes up in context.
 allowed-tools:
   - Bash(*sibling-repo.sh *)
   - Bash(gh issue *)
@@ -56,7 +56,7 @@ Prefer the helper for path resolution and Git status commands because it keeps t
 
 # Git network operations
 <script> fetch <repo>
-<script> pull <repo>
+<script> sync <repo>   # fast-forward the default branch to origin (alias: pull)
 
 # List files in a sibling repo
 <script> ls <repo> [subpath]
@@ -78,7 +78,7 @@ Prefer the helper for path resolution and Git status commands because it keeps t
 
 5. If the user asks for Git state, use `<script> status <repo>`, `<script> log <repo> 10`, and `<script> branch <repo>`.
 
-6. If the user asks to fetch or pull a sibling repo, first check status and confirm the operation will not trample local work. Then run `<script> fetch <repo>` or `<script> pull <repo>`.
+6. If the user asks to fetch, pull, or sync a sibling repo, run `<script> sync <repo>`. It only fast-forwards: on the default branch it updates the worktree, and on another branch it updates the local default branch ref and leaves the checked-out branch alone. If it fails because local commits diverge or local changes conflict, report it and ask the user; never reset, stash, or merge.
 
 7. If the user asks to create a GitHub issue in a sibling repo, draft the issue title/body first and ask for confirmation before running `gh issue create --repo <owner>/<repo>`.
 
@@ -86,6 +86,6 @@ Prefer the helper for path resolution and Git status commands because it keeps t
 
 - Do not run destructive Git commands in sibling repos.
 - Do not run `git reset --hard`, branch deletion, force push, or broad cleanup commands.
-- Ask before `fetch` or `pull` when a sibling repo has local changes.
+- Do not switch branches, stash, or reset a sibling repo to make `sync` succeed.
 - Ask before creating GitHub issues or making remote writes.
 - If repo name resolution fails, show the available sibling repo list from the helper.
