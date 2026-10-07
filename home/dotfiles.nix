@@ -85,6 +85,12 @@ in
     recursive = true;
   };
 
+  # Shared with Codex; see home/codex.nix.
+  home.file.".claude/skills/auto-review-fix" = {
+    source = ../agents/skills/auto-review-fix;
+    recursive = true;
+  };
+
   home.file.".claude/skills/review-knowledge-collect" = lib.mkIf hasReviewKnowledgeSkill {
     source = reviewKnowledgeSkillPath;
     recursive = true;

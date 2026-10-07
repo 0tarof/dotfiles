@@ -1,6 +1,34 @@
 ---
 name: auto-review-fix
-description: Inspect and address existing Greptile and human PR review feedback, synchronize the PR branch with the latest origin default branch, and verify the result without requesting paid re-reviews. Use when the user asks to handle PR review feedback, check review status, fix review comments, resolve PR conflicts, or continue an auto-review-fix loop after opening a PR.
+description: Inspect and address existing Greptile and human PR review feedback, synchronize the PR branch with the latest origin default branch, and verify the result without requesting paid re-reviews. Devin reviews are ignored. Use when the user asks to handle PR review feedback, check review status, fix review comments, resolve PR conflicts, or continue an auto-review-fix loop after opening a PR (e.g. 「レビュー対応して」「レビュー待って」「PRのレビュー見て」「レビュー修正」).
+allowed-tools:
+  - Bash(gh repo view *)
+  - Bash(gh pr view *)
+  - Bash(gh pr comment *)
+  - Bash(gh pr checks *)
+  - Bash(gh api graphql *)
+  - Bash(*check_bot_review_status.py *)
+  - Bash(*sync_pr_branch.py *)
+  - Bash(git branch *)
+  - Bash(git rev-parse *)
+  - Bash(git fetch *)
+  - Bash(git rebase *)
+  - Bash(git merge-base *)
+  - Bash(git status *)
+  - Bash(git diff *)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(git push *)
+  - Read
+  - Grep
+  - Glob
+  - Edit
+  - Write
+  - AskUserQuestion
+  - CronCreate
+  - CronList
+  - CronDelete
+user-invocable: true
 ---
 
 # Auto Review Fix
@@ -26,7 +54,7 @@ Use the scripts bundled in this skill directory:
 - `check_bot_review_status.py`: machine-readable Greptile-only review status
 - `sync_pr_branch.py`: mechanically validate and synchronize the current PR branch with the latest default branch
 
-When running them, resolve the path relative to this skill directory. If using the repository source directly, the path is:
+When running them, resolve `<skill-dir>` to this skill directory. In Claude Code, use `${CLAUDE_SKILL_DIR}`. If using the repository source directly, the path is:
 
 ```bash
 agents/skills/auto-review-fix/check_bot_review_status.py <PR_NUMBER>
@@ -118,12 +146,12 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
    - Apply the same technical judgment to Greptile and human comments: fix only comments that are technically correct and improve the code.
    - Skip comments that are stale, incorrect, overreaching, or inconsistent with project intent.
    - Ask the user when the tradeoff is real or the desired behavior is unclear.
-   - Treat `greptile.summary_p2` from the status script as improvement candidates, not automatic requirements.
+   - Treat P2 items (including `greptile.summary_p2` from the status script) as optional suggestions, not requirements. Decline a P2 when its cost exceeds its value: extra tests for trivial or already-covered logic, defensive checks for inputs that cannot occur, new abstractions or config for a single use, or refactors beyond the PR's scope. Decide yourself without asking the user, reply to the thread with a one-line rationale, and resolve it if it is a Greptile thread. Do not add a test just because a P2 asks for one.
    - A human `CHANGES_REQUESTED` decision is a signal to inspect its associated review body and threads, not a reason to make unrelated changes. If the requested behavior remains unclear after reading the review, ask the user.
 
 8. Run a self-critical review loop before finalizing fixes.
    - Build a checklist from Greptile and human inline comments, review bodies, Greptile summary concerns, P2 items, nearby code risks, existing tests, and project style.
-   - Do about 10 local review passes. In each pass, look for a concrete remaining bug, regression risk, missed test, or overfitted fix.
+   - Do about 10 local review passes. In each pass, look for a concrete remaining bug, regression risk, missed test, or overfitted fix. Over-engineering counts as a defect too: drop tests, guards, or abstractions that were added only to satisfy a P2 and do not protect real behavior.
    - Fix issues found during those passes, then rerun relevant local checks.
    - Do not call Greptile again during this loop, and do not invent a new review request for human reviewers.
 
@@ -166,9 +194,11 @@ Do not work around this by running `gh auth token` or copying the main GitHub to
 
 Do one full check immediately.
 
-If Greptile has not reviewed yet, actionable Greptile or human feedback remains, or the user asked to keep watching, use Codex automations when available.
+If Greptile has not reviewed yet, actionable Greptile or human feedback remains, or the user asked to keep watching, schedule a follow-up with the tool the current agent provides.
 
-Use `automation_update` rather than Claude-style `CronCreate` commands:
+In Claude Code, use `CronCreate` with cron `*/5 * * * *`, prompt `/auto-review-fix`, and `recurs: true`. Check `CronList` first to avoid duplicate schedules, and `CronDelete` the schedule when no actionable in-scope feedback remains.
+
+In Codex, use `automation_update` rather than `CronCreate`:
 
 - Prefer `kind=heartbeat` with `destination=thread` when the same Codex thread should wake up and continue the review loop.
 - Use a 5-minute heartbeat schedule for normal review polling: `FREQ=MINUTELY;INTERVAL=5`.
@@ -178,7 +208,7 @@ Use `automation_update` rather than Claude-style `CronCreate` commands:
 
 Use `kind=cron` only when the user explicitly wants a detached workspace job instead of continuing this thread.
 
-If automation tools are not available, do not invent `CronCreate`-style commands. Report the current state and tell the user what needs to be checked next.
+If neither tool is available, do not invent scheduling commands. Report the current state and tell the user what needs to be checked next.
 
 ## Safety
 
