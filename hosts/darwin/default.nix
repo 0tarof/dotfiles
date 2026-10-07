@@ -17,10 +17,10 @@
     # Install Homebrew if not present
     onActivation = {
       autoUpdate = false;
-      # nix-darwin generates --force-cleanup which Homebrew 6.x removed.
-      # Disable its cleanup and pass the correct flags via extraFlags.
+      # nix-darwin passes --force-cleanup, and Homebrew 7 also disabled
+      # `brew bundle --cleanup`. Cleanup runs as `brew bundle cleanup` in
+      # postActivation below instead.
       cleanup = "none";
-      extraFlags = [ "--cleanup" "--force" "--zap" ];
       upgrade = false;
     };
 
@@ -150,4 +150,15 @@
   programs.ssh.knownHosts."github.com".publicKey =
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
 
+  # Uninstall (and zap) Homebrew packages not in the Brewfile, run as the
+  # Homebrew user the same way nix-darwin runs `brew bundle`.
+  system.activationScripts.postActivation.text = ''
+    if [ -f "${config.homebrew.prefix}/bin/brew" ]; then
+      echo >&2 "Homebrew bundle cleanup..."
+      PATH="${config.homebrew.prefix}/bin:$PATH" \
+      sudo --preserve-env=PATH --user=${lib.escapeShellArg config.homebrew.user} --set-home \
+        env HOMEBREW_NO_AUTO_UPDATE=1 \
+        brew bundle cleanup --force --zap --file=${pkgs.writeText "Brewfile" config.homebrew.brewfile}
+    fi
+  '';
 }
