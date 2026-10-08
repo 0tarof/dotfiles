@@ -96,3 +96,15 @@ reading the code.
 - If a variable or function name already conveys intent, a comment restating it
   is unnecessary.
 - Avoid redundant preambles and repetition; keep comments to the minimum needed.
+
+## Sandbox Failures
+
+The sandbox blocks network access and reading credentials, so commands such as
+`gh`, `git push`, or cloud CLIs often fail inside it. When that happens:
+
+1. Retry the same command with sandbox escalation (run it outside the sandbox).
+2. If escalation is denied or still fails, stop and report the error.
+
+Do not fall back to Chrome, the browser plugin, Computer Use, or other web
+access to work around a failed command. Opening the web adds risk the user did
+not ask for. Use those tools only when the user explicitly asks for them.
