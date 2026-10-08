@@ -248,10 +248,12 @@ in
     if [[ -z "''${DRY_RUN:-}" ]]; then
       codex_bin=""
       for candidate in \
+        "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex" \
         "/Applications/ChatGPT.app/Contents/Resources/codex" \
         "/Applications/Codex.app/Contents/Resources/codex" \
         "$HOME/.local/share/mise/installs/npm-openai-codex/latest/bin/codex" \
-        "$HOME/.local/share/mise/shims/codex"; do
+        "$HOME/.local/share/mise/shims/codex" \
+        "/opt/homebrew/bin/codex"; do
         if [[ -x "$candidate" ]]; then
           codex_bin="$candidate"
           break
@@ -263,7 +265,7 @@ in
       fi
 
       if [[ -n "$codex_bin" ]]; then
-        export PATH="/Applications/ChatGPT.app/Contents/Resources:$HOME/.local/share/mise/shims:$HOME/.local/share/mise/installs/node/latest/bin:$PATH"
+        export PATH="/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin:/Applications/ChatGPT.app/Contents/Resources:$HOME/.local/share/mise/shims:$HOME/.local/share/mise/installs/node/latest/bin:$PATH"
         export CODEX_HOME="''${CODEX_HOME:-$HOME/.codex}"
         mkdir -p "$CODEX_HOME"
 
