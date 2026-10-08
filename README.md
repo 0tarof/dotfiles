@@ -1,6 +1,6 @@
 # Dotfiles
 
-個人用の設定ファイル管理リポジトリ（Nix + nix-darwin + Home Manager）
+個人用の設定ファイルを Nix、nix-darwin、Home Manager で管理するリポジトリです。
 
 ## インストール
 
@@ -10,62 +10,61 @@ cd ~/projects/github.com/0tarof/dotfiles
 ./bootstrap.sh
 ```
 
-## 設定の更新
+## 設定の反映
+
+設定ファイルを変更したら `nix-rebuild` で反映します。
+Nix flake は Git が追跡していないファイルを読まないため、新しく追加したファイルは先に `git add` してください。
 
 ```bash
-# 設定ファイルを変更後、反映
 nix-rebuild
 ```
 
-## 環境別設定の使い方
+## 環境固有の設定（overlay）
 
-会社PCなど、環境固有の設定を使いたい場合は`overlay/`ディレクトリを利用できます。
+会社 PC だけで使う設定などは、このリポジトリに入れず `overlay/` ディレクトリに置きます。
+`overlay/` は `.gitignore` の対象なので、個人リポジトリには push されません。
 
-### 例：会社用設定の追加
+### 例：会社用の設定を追加する
 
-1. 会社のdotfilesリポジトリをoverlay/にクローン
-```bash
-cd ~/projects/github.com/0tarof/dotfiles
-git clone https://github.com/COMPANY/dotfiles.git overlay
-```
+1. 会社の dotfiles リポジトリを `overlay/` にクローンします。
 
-2. overlay/nix/home.nix に環境固有のHome Manager設定を配置
-```nix
-{ config, lib, pkgs, ... }:
-{
-  home.packages = with pkgs; [
-    # 会社固有のパッケージ
-  ];
-}
-```
+   ```bash
+   cd ~/projects/github.com/0tarof/dotfiles
+   git clone https://github.com/COMPANY/dotfiles.git overlay
+   ```
 
-この設定は自動的に読み込まれます。
-`overlay/`ディレクトリは.gitignoreに含まれているため、個人リポジトリにはpushされません。
+2. `overlay/nix/home.nix` に Home Manager の設定を置きます。macOS のシステム設定は `overlay/nix/darwin.nix` に置きます。
 
-## 構成
+   ```nix
+   { config, lib, pkgs, ... }:
+   {
+     home.packages = with pkgs; [
+       # 会社固有のパッケージ
+     ];
+   }
+   ```
 
-### Nix設定
-- `flake.nix` - Nix flake設定
-- `home/default.nix` - Home Manager設定（ユーザーパッケージ、dotfiles）
-- `hosts/darwin/default.nix` - macOS固有設定（Homebrew含む）
+どちらのファイルも、存在すれば `nix-rebuild` 時に読み込まれます。
+overlay の設定は基本設定を置き換えるのではなく、Nix のモジュールとして基本設定に統合されます。
+そのため `home.packages` のようなリストは連結されます。
+一方、文字列や真偽値のような単一の値を両方で定義すると衝突してエラーになるので、overlay 側の値を優先したいときは `lib.mkForce` を付けます。
 
-### その他
-- `.gitconfig` - Git設定（基本設定）
-- `bootstrap.sh` - 初期セットアップスクリプト
-- `overlay/` - 環境固有の設定（gitignore対象）
+## 主なファイル
 
-## 管理方法
+- `flake.nix`：flake の入口。macOS では nix-darwin、Linux では Home Manager 単体の構成を定義します
+- `home/default.nix`：Home Manager の設定（ユーザーパッケージ、dotfiles の配置）
+- `hosts/darwin/default.nix`：macOS 固有の設定（Homebrew を含む）
+- `.gitconfig`：Git の基本設定
+- `bootstrap.sh`：初期セットアップのスクリプト
+- `overlay/`：環境固有の設定（Git の管理対象外）
 
-| 項目 | 管理方法 |
+## 何をどこで管理するか
+
+| 対象 | 管理方法 |
 |------|----------|
-| ランタイム (Node / Go / Python など) | `mise`（グローバルはパッチ固定、プロジェクトで上書き） |
-| CLI ツール | `home.packages` (Nix)。無い・古い・版ピン必須だけ mise / Brew |
-| GUI アプリ | `homebrew.casks` (nix-darwin) |
-| Zsh 設定 | `programs.zsh` (Home Manager) |
-| dotfiles | `home.file` (Home Manager) |
-| macOS 設定 | nix-darwin |
-
-## 設定の優先順位
-
-1. 基本設定（このリポジトリの設定）
-2. overlay/内の設定（存在する場合、基本設定を上書き）
+| ランタイム（Node、Go、Python など） | `mise`。グローバルの既定はパッチ版まで固定し、プロジェクトごとに上書きする |
+| CLI ツール | `home.packages`（Nix）。nixpkgs に無いもの、版が古いもの、版を個別に固定したいものだけ mise か Homebrew |
+| GUI アプリ | `homebrew.casks`（nix-darwin） |
+| Zsh の設定 | `programs.zsh`（Home Manager） |
+| dotfiles | `home.file`（Home Manager） |
+| macOS の設定 | nix-darwin |
