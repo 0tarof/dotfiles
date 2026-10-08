@@ -119,6 +119,8 @@ let
         mkdir -p "$target"
         cp -R "$cache_dir/$skill_path/." "$target/"
         chmod -R u+w "$target"
+        # A skill at the repository root (path ".") would otherwise ship the checkout metadata.
+        rm -rf "$target/.git" "$target/.dotfiles-source"
       }
 
       ${syncCommands}
