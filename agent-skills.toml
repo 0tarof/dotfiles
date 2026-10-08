@@ -83,3 +83,15 @@ ref = "v4.10.0"
 rev = "1d95ff7d39de12d87014ea40d4e22201bddc501b"
 targets = ["agents"]
 license = "MIT"
+
+# Origin of the derived japanese-tech-writing skills (hikimay, hasez, WhiteVMW).
+# Gists have no releases, so ref pins the commit itself; a gist edit then needs
+# a manual review and bump instead of failing the sync.
+[[skill]]
+name = "japanese-tech-writing"
+repository = "https://gist.github.com/fd287c3133457c4fd8f5601d34aa817d.git"
+path = "."
+ref = "8f2d57610a73efc97d743c9b0b0ecb1002e09fa4"
+rev = "8f2d57610a73efc97d743c9b0b0ecb1002e09fa4"
+targets = ["agents", "claude"]
+license = "Unlicense"
