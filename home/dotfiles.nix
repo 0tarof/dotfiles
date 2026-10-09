@@ -91,6 +91,11 @@ in
     recursive = true;
   };
 
+  home.file.".claude/skills/cowardly-review" = {
+    source = ../agents/skills/cowardly-review;
+    recursive = true;
+  };
+
   home.file.".claude/skills/sibling-repo" = {
     source = ../agents/skills/sibling-repo;
     recursive = true;
