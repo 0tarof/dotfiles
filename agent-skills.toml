@@ -105,3 +105,13 @@ ref = "v1.4.224"
 rev = "2bb20586ebc39d605e16d95f57420e20a16e7485"
 targets = ["agents", "claude"]
 license = "MIT"
+
+[[skill]]
+name = "orca-cli"
+repository = "https://github.com/stablyai/orca.git"
+path = "skills/orca-cli"
+# renovate: datasource=github-releases depName=stablyai/orca versioning=semver
+ref = "v1.4.224"
+rev = "2bb20586ebc39d605e16d95f57420e20a16e7485"
+targets = ["agents", "claude"]
+license = "MIT"
