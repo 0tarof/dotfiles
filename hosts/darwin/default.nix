@@ -32,6 +32,7 @@
       { name = "dlvhdr/formulae"; trusted = true; }
       { name = "manaflow-ai/cmux"; trusted = true; }
       { name = "steipete/tap"; trusted = true; }
+      { name = "stablyai/orca"; trusted = true; }
     ];
 
     # Brews - Nix に無いもの / macOS 固有のみ（CLI は原則 home.packages）
@@ -89,6 +90,7 @@
       "notion"
       "obs"
       "omnidisksweeper"
+      "stablyai/orca/orca"
       "postman"
       "sequel-ace"
       "session-manager-plugin"
