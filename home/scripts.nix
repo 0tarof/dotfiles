@@ -357,7 +357,8 @@ in
     if [[ -z "''${DRY_RUN:-}" ]] && [[ "$(uname)" == "Darwin" ]]; then
       container=/opt/homebrew/bin/container
       if [[ -x "$container" ]]; then
-        "$container" system kernel set --recommended 2>/dev/null || true
+        # apiserver が応答しないと永久に待つため timeout を付ける
+        ${pkgs.coreutils}/bin/timeout 60 "$container" system kernel set --recommended 2>/dev/null || true
       fi
     fi
   '';
