@@ -4,6 +4,7 @@
 { lib, pkgs, ... }:
 
 let
+  direnvHook = pkgs.runCommand "direnv-hook.zsh" { } "${pkgs.direnv}/bin/direnv hook zsh > $out";
   antidotePlugins = [
     "romkatv/powerlevel10k"
     "zsh-users/zsh-completions"
@@ -66,6 +67,9 @@ in
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;  # use nix-shell キャッシュで高速化
+    # The hook script is static per direnv version; source a build-time copy
+    # instead of spawning direnv on every shell start.
+    enableZshIntegration = false;
   };
 
   # ==========================================================================
@@ -369,6 +373,7 @@ in
         # Load overlay configuration if exists
         [[ -f ~/.config/zsh/overlay/.zshrc ]] && source ~/.config/zsh/overlay/.zshrc
       ''
+      (lib.mkAfter "source ${direnvHook}")
     ];
   };
 }
