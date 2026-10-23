@@ -173,9 +173,12 @@ in
           export PATH="$HOME/.local/share/mise/shims:$PATH"
       fi
 
-      # Ensure Nix paths are in PATH (mise may have overridden them)
+      # Keep Nix paths ahead of the rest, but mise shims ahead of Nix so the
+      # versions a project pins (e.g. pnpm via packageManager) win; tools mise
+      # does not pin fall through to the Nix copy.
       typeset -U path PATH
       path=(
+          $HOME/.local/share/mise/shims(N-/)
           /etc/profiles/per-user/$USER/bin
           /run/current-system/sw/bin
           /nix/var/nix/profiles/default/bin
