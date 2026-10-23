@@ -6,6 +6,7 @@
 let
   direnvHook = pkgs.runCommand "direnv-hook.zsh" { } "${pkgs.direnv}/bin/direnv hook zsh > $out";
   antidotePlugins = [
+    "romkatv/zsh-defer"
     "romkatv/powerlevel10k"
     "zsh-users/zsh-completions"
     "zsh-users/zsh-syntax-highlighting"
@@ -165,14 +166,10 @@ in
           export DOCKER_HOST="unix://$HOME/.docker/run/docker.sock"
       fi
 
-      # Full mise activation reads project config and may print trust warnings.
-      # Non-TTY shells only need the shims on PATH, which is all
-      # `mise activate zsh --shims` emits, so skip spawning mise for them.
-      if [[ -o interactive && -t 0 && -t 1 ]]; then
-          if command -v mise &> /dev/null; then
-              eval "$(mise activate zsh --quiet)"
-          fi
-      elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
+      # Shims on PATH are all non-interactive shells need (it is what
+      # `mise activate zsh --shims` emits), so skip spawning mise for them.
+      # Interactive shells run the full activation from .zshrc via zsh-defer.
+      if [[ -d "$HOME/.local/share/mise/shims" ]]; then
           export PATH="$HOME/.local/share/mise/shims:$PATH"
       fi
 
@@ -277,6 +274,12 @@ in
       
       # After compinit
       ''
+        # Full mise activation reads project config and may print trust
+        # warnings; run it after the first prompt so its spawns do not delay it.
+        if __dotfiles_zsh_has_prompt_tty && (( $+functions[zsh-defer] )) && command -v mise &> /dev/null; then
+          zsh-defer -c 'eval "$(mise activate zsh --quiet)"'
+        fi
+
         # Performance optimizations
         setopt PROMPT_SUBST
         setopt NO_BEEP
