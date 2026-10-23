@@ -74,6 +74,9 @@ in
   programs.zsh = {
     enable = true;
     # dotDir is not set - use default ~/.zshrc, ~/.zshenv, etc.
+    # -C skips the compaudit scan and dump regeneration on every shell start;
+    # delete ~/.zcompdump after adding completion sources.
+    completionInit = "autoload -U compinit && compinit -C";
     
     # History settings
     history = {

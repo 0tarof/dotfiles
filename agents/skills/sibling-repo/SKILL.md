@@ -32,7 +32,7 @@ Use the bundled helper script `scripts/sibling-repo.sh` in this skill directory:
 - Claude Code: `${CLAUDE_SKILL_DIR}/scripts/sibling-repo.sh`
 - Codex (installed by Home Manager): `$HOME/.agents/skills/sibling-repo/scripts/sibling-repo.sh`
 
-Always invoke it by its expanded absolute path, e.g. `/Users/me/.agents/skills/sibling-repo/scripts/sibling-repo.sh list`. Do not put it in a shell variable or start the command with `$HOME`, `$SCRIPT`, or `~`: tirith blocks commands whose executable is an unexpanded variable. `<script>` below stands for that absolute path.
+Always invoke it by its expanded absolute path, e.g. `/Users/me/.agents/skills/sibling-repo/scripts/sibling-repo.sh list`. Do not put it in a shell variable or start the command with `$HOME`, `$SCRIPT`, or `~`: command guards may block commands whose executable is an unexpanded variable. `<script>` below stands for that absolute path.
 
 Prefer the helper for path resolution and Git status commands because it keeps the main-worktree logic consistent.
 
