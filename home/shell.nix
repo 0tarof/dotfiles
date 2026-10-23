@@ -162,13 +162,14 @@ in
       fi
 
       # Full mise activation reads project config and may print trust warnings.
-      # Non-TTY shells only need quiet shims so command output stays clean.
-      if command -v mise &> /dev/null; then
-          if [[ -o interactive && -t 0 && -t 1 ]]; then
+      # Non-TTY shells only need the shims on PATH, which is all
+      # `mise activate zsh --shims` emits, so skip spawning mise for them.
+      if [[ -o interactive && -t 0 && -t 1 ]]; then
+          if command -v mise &> /dev/null; then
               eval "$(mise activate zsh --quiet)"
-          else
-              eval "$(mise activate zsh --shims --quiet)"
           fi
+      elif [[ -d "$HOME/.local/share/mise/shims" ]]; then
+          export PATH="$HOME/.local/share/mise/shims:$PATH"
       fi
 
       # Ensure Nix paths are in PATH (mise may have overridden them)
