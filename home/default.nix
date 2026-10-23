@@ -27,7 +27,6 @@ in
   # ==========================================================================
   imports = [
     ./shell.nix      # Zsh, Direnv
-    ./tirith.nix     # Shell and agent command guard
     ./packages.nix   # CLI tools
     ./gh.nix         # gh extensions
     ./agent-skills.nix # External agent skill sources

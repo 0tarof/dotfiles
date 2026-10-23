@@ -192,8 +192,8 @@ in
   };
 
   # Cursor はグローバルなルールをファイルから読まないので、PR ブランチへの base
-  # merge は Claude と同じ hook スクリプトで止める。hooks.json は tirith も追記する
-  # ため、ファイルごと置かずに自分のエントリだけ差し替える。
+  # merge は Claude と同じ hook スクリプトで止める。
+  # hooks.json は他のツールも書くので、ファイルごと置かずに自分のエントリだけ差し替える。
   home.activation.setupCursorGitMergeHook = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     if [[ -z "''${DRY_RUN:-}" ]]; then
       hooks_json="$HOME/.cursor/hooks.json"
