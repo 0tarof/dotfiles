@@ -61,7 +61,7 @@ Codex App の sandbox 内では macOS keyring に保存された `gh` の認証�
 - `flake.nix`: システム設定を定義する Nix flake
 - `home/default.nix`: Home Manager ユーザー設定
 - `hosts/darwin/default.nix`: macOS 固有のシステム設定（Homebrew を含む）
-- `overlay/nix/home.nix`: 環境固有の Home Manager 設定（存在する場合）
+- `overlay/nix/home.nix`: 環境固有の Home Manager 設定（存在する場合）。外部スキルは `agentSkills.skills` に追記する（プライベートなものは `optional = true`、フィールドは `agent-skills.toml` と同じ）
 
 ### Nix 設定
 - **nix-darwin**: macOS システム設定と Homebrew を管理

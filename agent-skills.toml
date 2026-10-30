@@ -4,6 +4,9 @@
 # from an upstream Git repository so the source, version, and target hosts stay
 # reviewable. `agent-skills-sync` checks out each pinned ref and copies only the
 # declared skill directory into the requested user-level skill locations.
+#
+# Environment-specific (e.g. private) skills do not go here: overlay/nix/home.nix
+# appends them to `agentSkills.skills` with the same fields plus `optional = true`.
 
 version = 1
 
