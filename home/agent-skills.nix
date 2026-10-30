@@ -140,10 +140,10 @@ let
       # warn and keep the copy that is already installed.
       run_sync() {
         local optional="$1"
-        local agent_state=unset
+        local agent_state="unset"
         shift
         if [[ "$optional" == true ]]; then
-          if [[ -n "''${SSH_AUTH_SOCK:-}" ]]; then agent_state=set; fi
+          if [[ -n "''${SSH_AUTH_SOCK:-}" ]]; then agent_state="set"; fi
           if ! sync_skill "$@"; then
             echo "agent skill $1: sync failed, keeping the installed copy (SSH_AUTH_SOCK is $agent_state)." >&2
           fi
